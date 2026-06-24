@@ -1,0 +1,15 @@
+# Besturingssysteem / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Lokale test-audio
+*.webm
+*.mp3
+*.m4a
+*.wav
+*.ogg
+*.opus
+*.flac
