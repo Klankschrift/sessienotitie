@@ -131,7 +131,3 @@ In het bijzonder:
   uit het vertrouwen op deze documentatie.
 - Mistral is een externe dienst met eigen voorwaarden; controleer die zelf en houd
   rekening met wijzigingen.
-
-> Een disclaimer beperkt aansprakelijkheid, maar sluit die naar Nederlands recht nooit
-> volledig uit (bijvoorbeeld bij opzet of bewuste roekeloosheid). Wil je als verspreider
-> zoveel mogelijk zekerheid, laat de tekst dan eenmalig nakijken door een jurist.
