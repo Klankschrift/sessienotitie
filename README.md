@@ -103,11 +103,26 @@ geboekt". Een paar dingen om te weten:
 4. Er verschijnt nu een lange tekenreeks. **Kopieer die meteen** — vaak kun je hem later
    niet meer volledig terugzien. Zie je hem kwijt te zijn, maak dan gewoon een nieuwe.
 
-### Stap 3 — Download het bestand naar je computer
+### Stap 3 — Open de app
+
+Er zijn twee manieren. **Online** is voor dagelijks gebruik het handigst; **downloaden**
+werkt volledig offline (op de verbinding met Mistral na). Bij beide gaan je audio en
+transcript **rechtstreeks** van jouw browser naar Mistral — nooit langs de pagina of een
+host.
+
+**Aanbevolen — online via `https://`:**
+
+Open **[klankschrift.github.io/sessienotitie](https://klankschrift.github.io/sessienotitie/)**
+in je browser. Op dit vaste `https://`-adres onthoudt je browser je **microfoontoestemming**
+en je **API-sleutel**, zodat je die maar één keer hoeft te geven en niet bij elke opname
+opnieuw. Er wordt alleen het kale HTML-bestand geserveerd; alle aanvragen gaan rechtstreeks
+naar Mistral.
+
+> Maak er een **bladwijzer** van, dan open je de app voortaan met één klik.
+
+**Alternatief — download het bestand (offline):**
 
 Je hebt maar één bestand nodig: **`index.html`**. Je hoeft niets te installeren.
-
-**Downloaden van GitHub (de makkelijkste manier):**
 
 1. Open op de projectpagina het bestand **`index.html`** (klik op de bestandsnaam).
 2. Klik rechtsboven het bestand op de knop **Download raw file** — het download-icoon
@@ -124,14 +139,9 @@ Je hebt maar één bestand nodig: **`index.html`**. Je hoeft niets te installere
 **Openen:** dubbelklik op het gedownloade `index.html`. Het opent in je standaardbrowser en
 werkt meteen. Je hebt geen internet nodig behalve voor de verbinding met Mistral zelf.
 
-> **Handig voor dagelijks gebruik:** sleep het geopende tabblad naar je bladwijzerbalk of
-> maak een snelkoppeling op je bureaublad, zodat je het voortaan met één klik opent. Omdat
-> je sleutel in de browser bewaard blijft, hoef je die niet opnieuw in te voeren.
-
-**Voor gevorderden (optioneel):** je kunt `index.html` ook op een statische host zetten
-(bijv. **GitHub Pages**) en via een `https://`-adres openen. Ook dan gaan je audio en
-transcript nooit langs die host — alleen het kale HTML-bestand wordt geserveerd; de
-aanvragen gaan rechtstreeks van jouw browser naar Mistral.
+> **Let op bij de lokale versie:** omdat je een bestand op je eigen computer opent, onthoudt
+> de browser je **microfoontoestemming niet** — die moet je bij elke keer opnemen opnieuw
+> geven. Wil je dat niet, gebruik dan de online versie hierboven.
 
 > Voor toegang tot de microfoon eist de browser een "veilige context": een lokaal geopend
 > bestand voldoet daaraan, net als een `https://`-adres. Een gewone `http://`-host zonder
