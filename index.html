@@ -898,6 +898,23 @@ function mistralFoutmelding(status) {
   return `Mistral antwoordde met status ${status}.`;
 }
 
+// Haalt een leesbare fouttekst uit een Mistral-foutobject. Het bericht kan
+// een string zijn, maar ook een geneste structuur (message/error/detail),
+// waarbij detail een array van {msg}-objecten kan zijn.
+function foutTekstUit(e) {
+  if (e == null) return '';
+  if (typeof e === 'string') return e;
+  if (Array.isArray(e)) return e.map(foutTekstUit).filter(Boolean).join('; ');
+  if (typeof e === 'object') {
+    if (e.msg) return foutTekstUit(e.msg);
+    if (e.message) return foutTekstUit(e.message);
+    if (e.error) return foutTekstUit(e.error);
+    if (e.detail) return foutTekstUit(e.detail);
+    try { return JSON.stringify(e); } catch { return String(e); }
+  }
+  return String(e);
+}
+
 // ── Uitvoerformaat ────────────────────────────────────────────
 const FORMAT_NOTES = {
   plat: 'Wordt als platte tekst naar het klembord gekopieerd.',
@@ -1097,7 +1114,7 @@ async function transcribeer(blob, bestandsnaam = 'opname.webm') {
     form.append('language', 'nl');
     // Sprekerherkenning (diarisatie): Voxtral labelt wie wanneer spreekt.
     form.append('diarize', 'true');
-    form.append('timestamp_granularities[0]', 'segment');
+    form.append('timestamp_granularities', 'segment');
     const resp = await fetch(MISTRAL_TRANSCRIBE_URL, {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + key },
@@ -1106,7 +1123,7 @@ async function transcribeer(blob, bestandsnaam = 'opname.webm') {
     if (!resp.ok) {
       let msg = mistralFoutmelding(resp.status);
       if (resp.status !== 401 && resp.status !== 429) {
-        try { const e = await resp.json(); msg = e.message || e.error?.message || msg; } catch {}
+        try { const e = await resp.json(); msg = foutTekstUit(e) || msg; } catch {}
       }
       throw new Error(msg);
     }
@@ -1173,7 +1190,7 @@ async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '',
     if (!resp.ok) {
       let msg = mistralFoutmelding(resp.status);
       if (resp.status !== 401 && resp.status !== 429) {
-        try { const e = await resp.json(); msg = e.message || e.error?.message || msg; } catch {}
+        try { const e = await resp.json(); msg = foutTekstUit(e) || msg; } catch {}
       }
       throw new Error(msg);
     }
