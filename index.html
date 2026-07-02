@@ -379,6 +379,7 @@
         <label>Microfoon</label>
         <select id="micSelect"><option value="">Bezig met laden...</option></select>
         <div class="field-note" id="micNote">Microfoons worden geladen...</div>
+        <div class="field-note">🎙️ Tip: een losse (USB-, dasspeld-)microfoon of goede headset geeft duidelijk betere resultaten dan de ingebouwde laptopmicrofoon — en dus een nauwkeuriger verslag.</div>
       </div>
     </div>
 
@@ -549,7 +550,7 @@ Een goed verslag geeft niet álles weer wat er gezegd is, maar wat er klinisch t
 ## Nauwkeurigheid
 - Baseer je uitsluitend op wat in het transcript staat. Voeg geen diagnoses, interpretaties of adviezen toe die niet uit het gesprek blijken.
 - Een gevolgtrekking mag alleen als de basis daarvoor aantoonbaar in het transcript staat; formuleer die dan voorzichtig ("Dit lijkt samen te hangen met...", "In het gesprek komt naar voren dat...").
-- Het transcript bevat geen sprekerslabels; leid uit de context af wat er gebeurt. Is iets onduidelijk, noteer dan: [onduidelijk in transcript]. Markeringen als [herhalingsfout in transcript] zijn automatisch door de transcriptie ingevoegd — negeer ze.
+- Het transcript kan sprekerslabels bevatten (Spreker 1, Spreker 2, ...). Die zijn automatisch toegekend en niet altijd foutloos: gebruik ze als hulpmiddel om beurten en rollen te onderscheiden, maar bepaal uit de context wie de behandelaar en wie de cliënt is, en corrigeer waar het label duidelijk niet klopt. Ontbreken de labels, leid dan volledig uit de context af wat er gebeurt. Is iets onduidelijk, noteer dan: [onduidelijk in transcript]. Markeringen als [herhalingsfout in transcript] zijn automatisch door de transcriptie ingevoegd — negeer ze.
 
 ## Opmaak
 - Gebruik Markdown: ## voor hoofdsecties, ### voor subkopjes binnen een sectie. Gebruik nooit vetgedrukte tekst (**tekst**) als vervanging voor een kopje.
@@ -673,6 +674,39 @@ function bouwGebruikerPrompt(transcript, gesprekType, geslacht, customPrompt, vo
   return `Maak een professioneel dossierverslag van het onderstaande transcript van een ${gesprekType}.\n`
     + `${geslachtInstructie}${extraInstructie}${overwegingenReminder}${kernReminder}${voorinfoBlok}\n\n`
     + `TRANSCRIPT:\n${transcript}`;
+}
+
+// ── Transcript opbouwen met sprekerslabels (diarisatie) ───────
+// Voxtral geeft bij diarisatie een `segments`-array terug, elk met een
+// sprekerskenmerk (`speaker` of `speaker_id`) en `text`. We bundelen
+// opeenvolgende segmenten van dezelfde spreker tot "Spreker N: ...".
+// Ontbreken de segmenten, dan vallen we terug op de platte `text`.
+function bouwTranscript(data) {
+  const segmenten = (Array.isArray(data.segments) ? data.segments : [])
+    .filter(s => s && typeof s.text === 'string' && s.text.trim());
+  if (!segmenten.length) return verwijderHerhalingen((data.text || '').trim());
+
+  const sprekerNr = new Map();
+  const labelVoor = id => {
+    if (id == null) return 'Spreker';
+    if (!sprekerNr.has(id)) sprekerNr.set(id, sprekerNr.size + 1);
+    return 'Spreker ' + sprekerNr.get(id);
+  };
+
+  const regels = [];
+  let vorigId, buffer = '';
+  const flush = () => {
+    if (buffer.trim()) regels.push(labelVoor(vorigId) + ': ' + verwijderHerhalingen(buffer.trim()));
+    buffer = '';
+  };
+  for (const seg of segmenten) {
+    const id = seg.speaker ?? seg.speaker_id ?? null;
+    if (buffer && id !== vorigId) flush();
+    vorigId = id;
+    buffer += (buffer ? ' ' : '') + seg.text.trim();
+  }
+  flush();
+  return regels.join('\n');
 }
 
 // ── Herhalingsloops uit transcript verwijderen ────────────────
@@ -1061,6 +1095,9 @@ async function transcribeer(blob, bestandsnaam = 'opname.webm') {
     form.append('file', blob, bestandsnaam);
     form.append('model', TRANSCRIBE_MODEL);
     form.append('language', 'nl');
+    // Sprekerherkenning (diarisatie): Voxtral labelt wie wanneer spreekt.
+    form.append('diarize', 'true');
+    form.append('timestamp_granularities[0]', 'segment');
     const resp = await fetch(MISTRAL_TRANSCRIBE_URL, {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + key },
@@ -1074,8 +1111,8 @@ async function transcribeer(blob, bestandsnaam = 'opname.webm') {
       throw new Error(msg);
     }
     const data = await resp.json();
-    if (!data.text?.trim()) throw new Error('Leeg transcript ontvangen');
-    huidigTranscript = verwijderHerhalingen(data.text);
+    huidigTranscript = bouwTranscript(data);
+    if (!huidigTranscript.trim()) throw new Error('Leeg transcript ontvangen');
     transcriptBox.textContent = huidigTranscript;
     transcriptBox.classList.add('filled');
     transcriptSpinner.classList.add('hidden');

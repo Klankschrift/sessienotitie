@@ -20,7 +20,7 @@ Het hele programma is één bestand: `index.html`.
 > **alleen als je bij Mistral _Zero Data Retention_ (ZDR) hebt aangevraagd en het aanstaat**.
 > Zonder ZDR bewaart Mistral je gegevens standaard ongeveer 30 dagen — dat is voor
 > gezondheidsgegevens niet acceptabel. Hoe je ZDR aanvraagt, staat bij
-> [Stap 2](#stap-2--account-betaling-en-zero-data-retention).
+> [Stap 1](#stap-1--account-betaling-en-zero-data-retention).
 >
 > En zelfs **mét** ZDR ben je er niet automatisch: ZDR is *noodzakelijk maar niet
 > voldoende* voor NEN 7510. Of je aan de norm voldoet, hangt ook af van hoe je de rest
@@ -34,7 +34,8 @@ Het hele programma is één bestand: `index.html`.
 - **Opnemen** via de microfoon, of **scherm + audio** delen voor online gesprekken
   (beide kanten van het gesprek worden dan opgenomen).
 - **Audiobestand uploaden** in plaats van live opnemen.
-- **Transcriptie** via Mistral **Voxtral** en het **verslag** via het beste Mistral-
+- **Transcriptie** via Mistral **Voxtral**, met automatische **sprekerherkenning**
+  (diarisatie) die aangeeft wie wanneer spreekt, en het **verslag** via het beste Mistral-
   taalmodel (`mistral-large-latest`), met een ingebouwde klinische systeemprompt die
   thematisch en feitelijk schrijft. De app kiest deze modellen automatisch — je hoeft
   niets in te stellen.
@@ -50,7 +51,14 @@ Geen zorgen als je niet technisch bent — hieronder staat het stap voor stap. J
 niets te installeren en geen code te begrijpen. Je doet dit één keer; daarna kun je de
 app gewoon gebruiken.
 
-### Stap 1 — Wat is een API-sleutel, en waarom heb je die nodig?
+> 🎙️ **Belangrijk vooraf — gebruik een goede microfoon.** De kwaliteit van het verslag
+> staat of valt met de kwaliteit van de opname. Een losse (USB- of dasspeld-)microfoon of
+> een goede headset geeft duidelijk betere resultaten dan de **ingebouwde
+> laptopmicrofoon**. Die laatste werkt wél, maar staat vaak verder weg en vangt meer
+> omgevingsgeluid op, waardoor de transcriptie — en dus het verslag — minder nauwkeurig
+> wordt. Zorg ook voor een rustige ruimte zonder achtergrondgeluid.
+
+### Inleiding — Wat is een API-sleutel, en waarom heb je die nodig?
 
 Deze app heeft zelf geen "verstand": het werkelijke transcriberen en schrijven gebeurt
 bij **Mistral**, een Europees AI-bedrijf. Om namens jou met Mistral te mogen praten, heeft
@@ -68,7 +76,7 @@ geboekt". Een paar dingen om te weten:
   anders heen gestuurd dan naar Mistral). Op een gedeelde of openbare computer kun je hem
   beter na gebruik wissen met de knop **Wissen**.
 
-### Stap 2 — Account, betaling en Zero Data Retention
+### Stap 1 — Account, betaling en Zero Data Retention
 
 1. Maak een account aan op **[console.mistral.ai](https://console.mistral.ai)**.
 2. Voeg een **betaalmethode** toe. Het gebruik wordt per seconde audio en per stuk tekst
@@ -85,7 +93,7 @@ geboekt". Een paar dingen om te weten:
    - Krijg je ZDR (nog) niet? Lees dan eerst goed [PRIVACY.md](PRIVACY.md) en oefen met
      niet-herleidbare oefengesprekken.
 
-### Stap 3 — Een API-sleutel aanmaken
+### Stap 2 — Een API-sleutel aanmaken
 
 1. Log in op [console.mistral.ai](https://console.mistral.ai).
 2. Ga in het menu naar **API Keys** (rechtstreeks:
@@ -95,7 +103,7 @@ geboekt". Een paar dingen om te weten:
 4. Er verschijnt nu een lange tekenreeks. **Kopieer die meteen** — vaak kun je hem later
    niet meer volledig terugzien. Zie je hem kwijt te zijn, maak dan gewoon een nieuwe.
 
-### Stap 4 — Download het bestand naar je computer
+### Stap 3 — Download het bestand naar je computer
 
 Je hebt maar één bestand nodig: **`index.html`**. Je hoeft niets te installeren.
 
@@ -129,13 +137,13 @@ aanvragen gaan rechtstreeks van jouw browser naar Mistral.
 > bestand voldoet daaraan, net als een `https://`-adres. Een gewone `http://`-host zonder
 > slotje werkt niet voor opnemen.
 
-### Stap 5 — Sleutel invoeren in de app
+### Stap 4 — Sleutel invoeren in de app
 
 Plak je gekopieerde sleutel in het paneel **Mistral API-sleutel** en klik op **Opslaan**.
 De app onthoudt hem in deze browser tot je op **Wissen** klikt. Je hoeft hem dus niet elke
 keer opnieuw in te voeren (behalve in een privé/incognito-venster).
 
-### Stap 6 — Gebruiken
+### Stap 5 — Gebruiken
 
 1. Kies het **type gesprek** (intake of behandel) en eventueel het geslacht van de cliënt.
 2. Klik op de ronde knop om op te nemen — of upload een bestaand audiobestand.
@@ -192,7 +200,7 @@ NEN 7510, AVG, eigen risico) staat in **[PRIVACY.md](PRIVACY.md)**.
 
 - Eén zelfstandig `index.html`-bestand: HTML, CSS en JavaScript inline. Geen build, geen
   dependencies, geen server.
-- Spraakherkenning: `POST https://api.mistral.ai/v1/audio/transcriptions` (`voxtral-mini-latest`).
+- Spraakherkenning met sprekerherkenning (diarisatie): `POST https://api.mistral.ai/v1/audio/transcriptions` (`voxtral-mini-latest`, met `diarize`). Het transcript wordt per spreker gelabeld ("Spreker 1", "Spreker 2", …).
 - Verslag: `POST https://api.mistral.ai/v1/chat/completions` (streaming).
 - De Mistral API stuurt CORS-headers mee, waardoor de browser rechtstreeks mag aanroepen.
 
