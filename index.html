@@ -949,24 +949,15 @@ function updateGeslachtBadge() {
 }
 
 // ── Microfoons laden ──────────────────────────────────────────
-// Vult de keuzelijst met microfoons zonder zelf om toestemming te vragen.
-// Op een vers geopend bestand (en altijd op file://) zijn de labels nog leeg
-// — dan tonen we alleen de standaardmicrofoon. Zodra toestemming is gegeven
-// (bij het opnemen, of blijvend op een https-adres) verschijnen de echte
-// namen vanzelf, en kun je vooraf een andere microfoon kiezen.
 async function laadMicrofoons() {
-  const vorigeKeuze = micSelect.value;
   try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    stream.getTracks().forEach(t => t.stop());
     const devices = await navigator.mediaDevices.enumerateDevices();
-    const mics = devices
-      .filter(d => d.kind === 'audioinput')
-      .filter((mic, index, arr) => arr.map(m => m.groupId).indexOf(mic.groupId) === index);
-    if (!mics.some(m => m.label)) {
-      // Nog geen toestemming: de echte namen zijn onbekend. Standaardmicrofoon volstaat.
-      micSelect.innerHTML = '<option value="">Standaardmicrofoon</option>';
-      micNote.textContent = 'De browser vraagt toestemming zodra je gaat opnemen.';
-      return;
-    }
+    const allesMics = devices.filter(d => d.kind === 'audioinput');
+    const mics = allesMics.filter((mic, index, arr) =>
+      arr.map(m => m.groupId).indexOf(mic.groupId) === index
+    );
     micSelect.innerHTML = '';
     mics.forEach((mic, i) => {
       const opt = document.createElement('option');
@@ -974,11 +965,10 @@ async function laadMicrofoons() {
       opt.textContent = mic.label || `Microfoon ${i + 1}`;
       micSelect.appendChild(opt);
     });
-    if (vorigeKeuze && [...micSelect.options].some(o => o.value === vorigeKeuze)) micSelect.value = vorigeKeuze;
     micNote.textContent = `${mics.length} microfoon${mics.length !== 1 ? 's' : ''} gevonden`;
   } catch {
-    micSelect.innerHTML = '<option value="">Standaardmicrofoon</option>';
-    micNote.textContent = 'Microfoons konden niet worden geladen.';
+    micSelect.innerHTML = '<option value="">Toegang geweigerd</option>';
+    micNote.textContent = 'Geef microfoontoestemming in de browser';
   }
 }
 
@@ -1021,7 +1011,6 @@ async function startRecording() {
         micStream = await navigator.mediaDevices.getUserMedia({ audio: micConstraints });
         const track = micStream.getAudioTracks()[0];
         console.log('Actieve microfoon (scherm+mic modus):', track.label);
-        laadMicrofoons();
       } catch (e) {
         micStream = null;
       }
@@ -1045,7 +1034,6 @@ async function startRecording() {
       stream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
       const track = stream.getAudioTracks()[0];
       console.log('Actieve microfoon:', track.label);
-      laadMicrofoons();
     }
 
     mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
