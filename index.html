@@ -265,6 +265,33 @@
   }
   .regen-panel select:focus { border-color: var(--accent); }
 
+  /* Versiegeschiedenis en herziening. De versies blijven alleen in het geheugen
+     van dit tabblad: er staat cliëntinformatie in en die hoort niet op schijf. */
+  .versie-balk {
+    display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+    margin-top: 1rem; font-size: 0.8rem; color: var(--text-soft);
+  }
+  .versie-balk.hidden { display: none; }
+  .versie-suggestie { font-style: italic; opacity: 0.85; }
+  .btn-klein { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
+
+  .suggestie-paneel {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.9rem 1rem; margin-top: 0.7rem;
+  }
+  .suggestie-paneel.hidden { display: none; }
+  .suggestie-paneel label {
+    display: block; font-size: 0.78rem; color: var(--text-soft); margin-bottom: 0.5rem;
+  }
+  .suggestie-paneel textarea {
+    width: 100%; min-height: 74px; resize: vertical;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.6rem 0.7rem; font-family: var(--font); font-size: 0.85rem;
+    color: var(--text); outline: none; transition: border-color 0.18s;
+  }
+  .suggestie-paneel textarea:focus { border-color: var(--accent); }
+  .suggestie-acties { margin-top: 0.6rem; display: flex; justify-content: flex-end; }
+
   .btn {
     font-family: var(--font); font-size: 0.82rem; font-weight: 500;
     padding: 0.6rem 1.2rem; border-radius: 8px;
@@ -379,7 +406,7 @@
         <label>Microfoon</label>
         <select id="micSelect"><option value="">Bezig met laden...</option></select>
         <div class="field-note" id="micNote">Microfoons worden geladen...</div>
-        <div class="field-note">🎙️ Tip: een losse (USB-, dasspeld-)microfoon of goede headset geeft duidelijk betere resultaten dan de ingebouwde laptopmicrofoon — en dus een nauwkeuriger verslag.</div>
+        <div class="field-note">🎙️ Tip: een losse vergadermicrofoon (via USB of bluetooth) geeft duidelijk betere resultaten dan de ingebouwde laptopmicrofoon — en dus een nauwkeuriger verslag.</div>
       </div>
     </div>
 
@@ -485,6 +512,21 @@
       <button class="btn" id="btnRegen" onclick="regenereerVerslag()">↻ Genereer opnieuw</button>
     </div>
 
+    <div class="versie-balk hidden" id="versieBalk">
+      <button class="btn btn-klein" id="btnVorigeVersie" onclick="stapVersie(-1)">←</button>
+      <span id="versieLabel">Versie 1 van 1</span>
+      <button class="btn btn-klein" id="btnVolgendeVersie" onclick="stapVersie(1)">→</button>
+      <span class="versie-suggestie" id="versieSuggestie"></span>
+    </div>
+
+    <div class="suggestie-paneel hidden" id="suggestiePaneel">
+      <label for="suggestieInput">Wat moet er anders? Het verslag wordt opnieuw uit het transcript geschreven met jouw aanwijzing erbij.</label>
+      <textarea id="suggestieInput" placeholder="Bijv: Werk de afspraken explicieter uit, elk met een eigen kopje, in plaats van ze samen te vatten."></textarea>
+      <div class="suggestie-acties">
+        <button class="btn primary" id="btnHerzie" onclick="herzieVerslag()">Verslag herzien</button>
+      </div>
+    </div>
+
     <div class="output-actions">
       <span class="copy-confirmation" id="copyConfirmation">✓ Gekopieerd naar klembord</span>
       <button class="btn" onclick="resetAll()">Nieuw gesprek</button>
@@ -531,42 +573,267 @@ const TRANSCRIBE_MODEL       = 'voxtral-mini-latest';
 const CHAT_MODEL             = 'mistral-large-latest';
 
 // ── Systeemprompt (basis) ─────────────────────────────────────
-const SYSTEEM_PROMPT_BASIS = `Je bent een ervaren klinisch assistent die een psycholoog ondersteunt bij het opstellen van dossierverslagen op basis van een gespreksopname. Je schrijft in correct, formeel Nederlands vanuit het perspectief van de behandelaar.
+// Algemeen deel: geldt voor elk gesprekstype. Wordt aangevuld met het
+// structuurdeel dat bij het gekozen gesprekstype hoort (zie bouwSysteemprompt).
+const ALGEMEEN_PROMPT = `Je schrijft dossierverslagen voor een psycholoog, op basis van het transcript van een
+behandelgesprek met een cliënt.
 
-## Het belangrijkste: vang de kern
-Een goed verslag geeft niet álles weer wat er gezegd is, maar wat er klinisch toe doet. Bepaal zelf wat de kern van het gesprek was — waar het werkelijk over ging, wat eruit sprong, en wat de behandelaar de volgende keer moet weten — en laat bijzaken weg. Een kort en scherp verslag is beter dan een volledig maar vlak verslag waarin het belangrijke ondersneeuwt. Gebruik je klinisch oordeel; je vinkt geen lijstje af.
+Schrijf voor één lezer op één moment: de behandelaar zelf, vijf minuten voor het
+volgende gesprek, die sinds dit gesprek twintig andere cliënten heeft gezien. Zij
+leest je verslag door en moet denken: ja, ik weet weer waar we staan. Dat is de toets
+voor elke zin die je opschrijft. Draagt een zin daar niet aan bij, dan hoort hij er
+niet.
 
-## Schrijfwijze
-- Schrijf thematisch, niet wie-zei-wat. Beschrijf wáár het gesprek over ging, niet wíe iets zei. Vermijd toeschrijvende formuleringen als "cliënt geeft aan", "cliënt vertelt", "de therapeut legt uit" of "de therapeut bespreekt". Dat de behandelaar iets heeft besproken of ingebracht, schrijf je onpersoonlijk: "Stilgestaan is bij...", "Besproken werd...", "Geoefend is met...", "Aandacht ging uit naar...". De situatie en beleving van de cliënt benoem je rechtstreeks en feitelijk ("De stemming is somber", "Op het werk speelt aanhoudende spanning"). Alleen waar het echt om de subjectieve beleving van de cliënt draait, gebruik je een ervaringswoord ("cliënt ervaart...", "cliënt worstelt met..."), spaarzaam en nooit een spreekwerkwoord.
+Dat is iets anders dan samenvatten. Een samenvatting geeft weer wat er gezegd is; jij
+schrijft op wat ervan overblijft. Je bent de collega die heeft meegekeken en die na
+afloop in vier alinea's vertelt waar het over ging — niet de notulist.
 
-  Voorbeeld:
-  - Niet: "Cliënt geeft aan dat zij zich de afgelopen weken somber voelde, en de therapeut heeft uitgelegd hoe de piekercirkel werkt."
-  - Wel: "De afgelopen weken overheerste een sombere stemming met veel piekeren. Hierover is psycho-educatie gegeven en geoefend met het begrenzen van piekermomenten."
+## Wat erin komt
 
-- Gebruik volledige, professionele zinnen — geen losse steekwoorden in de lopende tekst.
-- Gebruik geen letterlijke citaten. Parafraseer altijd in professionele bewoordingen; dit voorkomt dat transcriptiefouten in het verslag terechtkomen. Parafraseren betekent klinisch nauwkeurig, niet sociaal terughoudend: verbloem niets bij gevoelige onderwerpen — lichamelijke zaken, seksualiteit, dood, geweld, misbruik of andere beladen thema's. Beschrijf wat besproken is feitelijk en precies, in gangbaar Nederlands. Juist deze feiten horen onverbloemd in het dossier.
-- Gebruik geen namen van derden (familie, vrienden, collega's); benoem de relatie tot de cliënt ('dochter', 'partner', 'oudste broer'). Gebruik een naam alleen als de relatie niet uit het gesprek blijkt.
+Neem een onderwerp op als het aan minstens één van deze voorwaarden voldoet:
+- het verandert het beeld — een nieuwe klacht, een verschuiving in stemming of
+  functioneren, een gebeurtenis met impact;
+- de behandelaar heeft het nodig om het volgende gesprek te kunnen voeren;
+- het is een veiligheidssignaal.
 
-## Nauwkeurigheid
-- Baseer je uitsluitend op wat in het transcript staat. Voeg geen diagnoses, interpretaties of adviezen toe die niet uit het gesprek blijken.
-- Een gevolgtrekking mag alleen als de basis daarvoor aantoonbaar in het transcript staat; formuleer die dan voorzichtig ("Dit lijkt samen te hangen met...", "In het gesprek komt naar voren dat...").
-- Het transcript kan sprekerslabels bevatten (Spreker 1, Spreker 2, ...). Die zijn automatisch toegekend en niet altijd foutloos: gebruik ze als hulpmiddel om beurten en rollen te onderscheiden, maar bepaal uit de context wie de behandelaar en wie de cliënt is, en corrigeer waar het label duidelijk niet klopt. Ontbreken de labels, leid dan volledig uit de context af wat er gebeurt. Is iets onduidelijk, noteer dan: [onduidelijk in transcript]. Markeringen als [herhalingsfout in transcript] zijn automatisch door de transcriptie ingevoegd — negeer ze.
+Onder de tweede voorwaarde valt ook alles wat over de behandeling zelf gaat: afronden
+of doorgaan, in welke fase het zit, hoeveel gesprekken er nog volgen, een indicatie
+of diagnose, hoe een aanmelding zou verlopen. Dat wordt makkelijk overgeslagen omdat
+het niet over de klacht gaat, terwijl het juist het soort informatie is waarvoor een
+dossier bestaat.
+
+Wat aan geen van drieën voldoet laat je weg, ook als er een half uur over gesproken
+is. Spreektijd is geen maat voor gewicht.
+
+Kiezen gaat vóór indikken. Passen er meer thema's in het gesprek dan in het verslag,
+neem dan de zwaarste en werk die volwaardig uit. Een verslag waarin elk onderwerp één
+losse zin krijgt is onleesbaar en onbruikbaar tegelijk. Liever drie onderwerpen die
+er staan dan zeven die worden aangestipt.
+
+De voorbeelden hieronder komen uit verzonnen gesprekken en laten alleen zien hóe je
+formuleert. Wat erin staat is geen informatie over deze cliënt: neem er geen woord,
+getal of gebeurtenis uit over in het verslag.
+
+## Wat het verslag bruikbaar maakt
+
+Feiten, niet duidingen. Een gebeurtenis vervang je nooit door alleen de betekenis
+ervan — het feit draagt het dossier, de duiding kan in een bijzin.
+- Niet: "Er speelt spanning rond de opleiding."
+- Wel: "De herkansing staat op 14 maart; sinds de eerste poging heeft cliënt het
+  studieboek niet meer opengeslagen."
+
+Getallen en tijdsaanduidingen neem je letterlijk over zoals ze vielen: "zeven kilo
+afgevallen in enkele dagen", niet "gewichtsverlies"; "na twee uur vertrokken", niet
+"de ontmoeting afgebroken"; "sinds januari", niet "sinds enige tijd". Dit geldt juist
+in emotioneel geladen passages, waar de neiging het grootst is om naar een algemene
+term uit te wijken.
+
+Hoe het gesprek liep telt mee. Waar het stroef ging, waar cliënt geraakt werd, waar
+een uitleg landde of juist niet, waar het van toon veranderde — dat is precies wat
+een collega opvalt en wat uit een transcript verdwijnt. Neem het op waar het uit het
+gesprek blijkt, in één zin, zonder het te interpreteren.
+
+## Wat je nooit doet
+
+1. Verzinnen. Alles wat je opschrijft staat in het transcript of volgt daar
+   onmiskenbaar uit. Dat iets klinisch plausibel is, is geen dekking — het is juist
+   de reden dat niemand de fout later nog opmerkt. Volgt iets onmiskenbaar uit de
+   tekst zonder er letterlijk te staan, schrijf het dan voorzichtig: "Dit lijkt samen
+   te hangen met...", "In het gesprek komt naar voren dat...".
+
+2. Verbanden leggen die niemand heeft uitgesproken. Dit is de fout die de meeste
+   schade doet, omdat een lezer hem niet kan herkennen zonder het transcript ernaast.
+   Twee feiten kunnen allebei kloppen terwijl het verband ertussen verzonnen is. Dat
+   ze vlak na elkaar ter sprake kwamen is geen dekking: in een gesprek volgen
+   onderwerpen elkaar associatief op.
+   Dit geldt voor 'waardoor', 'hierdoor', 'als gevolg van', 'dit verergert', voor
+   'versterken elkaar' en 'vicieuze cirkel', en net zo goed voor 'maar', 'terwijl' en
+   'ondanks' — ook een 'maar' beweert dat het tweede tegen de verwachting van het
+   eerste ingaat.
+   - Fout: "Cliënt is in juni gestopt met roken, maar ziet haar broer sindsdien niet
+     meer."
+   - Goed: "Cliënt is in juni gestopt met roken. Het contact met de broer is sinds
+     die tijd weggevallen."
+   Is het verband opvallend maar niet uitgesproken, zet de feiten dan in twee zinnen
+   zonder voegwoord naast elkaar. Opperde de behandelaar het als hypothese, schrijf
+   het dan als hypothese: "Stilgestaan is bij de vraag of...".
+
+3. Preciezer klinken dan het gesprek was. Een getal dat niet gevallen is schrijf je
+   niet op. Is gezegd dat iemand slecht slaapt, dan is dat wat er staat — niet
+   "minder dan zes uur per nacht". Hetzelfde voor frequenties ('wekelijks',
+   'dagelijks') en duur ('al maanden', 'sinds het voorjaar'). Een getal wordt in een
+   dossier later als vaststaand gelezen.
+
+4. Uitspraken doen over het beloop. 'Minder', 'afgenomen', 'toegenomen', 'verbeterd',
+   'vooruitgang', 'dan voorheen' leggen een vergelijking met een eerdere situatie.
+   Die mag alleen als cliënt of behandelaar die vergelijking in het gesprek zelf
+   maakt. Beschrijven hoe het nú is mag altijd.
+
+5. Zeggen dat iets voor het eerst gebeurde. Je weet niets over eerdere gesprekken.
+   Een thema dat in dit transcript uitgebreid aan bod komt kan al maanden lopen.
+   Schrijf 'voor het eerst', 'nieuw inzicht', 'eindelijk' of 'tot nu toe niet' alleen
+   als het gesprek het zelf markeert — cliënt die zegt er nooit zo naar gekeken te
+   hebben, of de behandelaar die opmerkt dit voor het eerst te horen.
+
+6. Gokken wie iets zei. Het transcript heeft geen sprekerslabels. Schrijf alleen
+   "cliënt kwam uit bij..." of "cliënt besloot..." als het onmiskenbaar van cliënt
+   komt. Kun je het niet afleiden, schrijf het dan zonder toeschrijving: "Het gesprek
+   kwam uit bij...", "Duidelijk werd dat...", "Wat dit gesprek opleverde is...". Een
+   opbrengst is een opbrengst, ook zonder dat erbij staat van wie hij kwam.
+
+7. Een verminkt transcript gladstrijken. De tekst komt uit automatische
+   spraakherkenning van gesproken taal, soms van iemand die geen moedertaalspreker
+   is. Zinnen lopen niet af, werkwoordstijden kloppen niet, ontkenningen vallen weg.
+   Juist daar is de verleiding groot om er een lopende zin van te maken, en juist
+   daar wordt een verslag onwaar: een weggevallen 'niet' draait de betekenis om.
+   Hangt een feit af van één verminkt woord, kies dan geen lezing — schrijf op wat
+   hoe dan ook vaststaat en laat de rest weg. Blijkt dat er een grens is gesteld maar
+   niet waarover, schrijf dan dát. Is een passage onleesbaar, noteer [onduidelijk in
+   transcript]. Markeringen als [herhalingsfout in transcript] zijn automatisch
+   ingevoegd; negeer ze.
+
+8. Placeholders gebruiken. Nooit [datum], [naam] of [invullen]. Weet je een gegeven
+   niet precies, schrijf dan wat er gezegd is ("de 26e") of laat het weg.
+
+Kort je in, laat dan hele feiten weg — nooit de ruimte tussen twee feiten. Twee losse
+waarnemingen samenpersen in één zin levert bijna altijd een verband op dat niemand
+heeft uitgesproken.
+
+## Toon
+
+Schrijf thematisch, niet wie-zei-wat. Vermijd 'cliënt geeft aan', 'cliënt vertelt',
+'de therapeut legt uit'. Wat de behandelaar deed schrijf je onpersoonlijk:
+"Stilgestaan is bij...", "Besproken werd...", "Geoefend is met...". De situatie van
+cliënt benoem je rechtstreeks: "De stemming is somber", "Op het werk speelt
+aanhoudende spanning". Alleen waar het echt om de beleving draait gebruik je
+spaarzaam een ervaringswoord ("cliënt ervaart...", "cliënt worstelt met...").
+
+Volledige zinnen, geen steekwoorden. Geen letterlijke citaten — parafraseer, maar
+klinisch nauwkeurig en niet sociaal terughoudend. Verbloem niets bij lichamelijke
+zaken, seksualiteit, dood, geweld, misbruik of middelengebruik; juist die feiten
+horen onverbloemd in het dossier.
+
+Namen van derden gebruik je mét de relatie ("haar ex-partner Martin"), daarna volstaat
+"Martin". De cliënt noem je consequent 'cliënt', nooit bij naam.
+
+Correct, formeel Nederlands, maar geen dossiertaal om de dossiertaal. Als een zin
+alleen professioneel klinkt en verder niets toevoegt, schrap hem.
 
 ## Opmaak
-- Gebruik Markdown: ## voor hoofdsecties, ### voor subkopjes binnen een sectie. Gebruik nooit vetgedrukte tekst (**tekst**) als vervanging voor een kopje.
-- Begin direct met de eerste sectie, zonder overkoepelende titel of koptekst zoals "Samenvatting behandelgesprek" of "Verslag intakegesprek".
 
-## Structuur — behandelgesprek
-Gebruik altijd deze vier secties, in deze volgorde:
-1. Terugblik op de vorige periode
-2. Vandaag besproken
-3. Snel overzicht
-4. Afspraken
+Markdown, ## voor hoofdsecties en ### voor subkopjes. Nooit vetgedrukte tekst als kopje. Begin direct met de eerste sectie, zonder overkoepelende titel.`;
 
-Binnen de secties 1 en 2 kies je zelf zinvolle subkopjes op basis van de inhoud. Voeg verwante onderwerpen samen onder één kopje; splits niet op in meerdere secties met overlappende titels. Beschrijf onder 'Vandaag besproken' ook kort welke aanpak of interventie is ingezet en hoe die uitpakte, voor zover dat uit het transcript blijkt. Houd elke sectie bij de kern en vermijd herhaling tussen secties.
+// Structuurdeel — behandelgesprek: vijf secties.
+const STRUCT_BEHANDEL = `## Structuur
 
-## Structuur — intakegesprek
-Een intakeverslag is uitgebreider dan een behandelverslag: wees hier wél volledig en neem liever te veel op dan te weinig, met concrete details (tijdsaanduidingen, frequenties, duur van klachten, namen van eerdere behandelaars indien genoemd). Gebruik deze secties, in deze volgorde; laat een sectie weg als het onderwerp niet aan bod kwam, behalve Veiligheid en Afspraken:
+Vijf secties, in deze volgorde, en nooit een zesde.
+
+## Waar we staan
+Twee tot vier zinnen. Wie alleen dit leest, moet het volgende gesprek in kunnen. Wat
+speelt er op dit moment, en wat heeft dit gesprek daaraan veranderd. Geen opsomming
+van onderwerpen — de stand van zaken.
+
+## Sinds vorige keer
+Twee tot vier zinnen: wat er sinds het vorige gesprek is gebeurd. Alleen subkopjes
+als er echt meerdere losse onderwerpen speelden. Illustreert cliënt iets met een
+voorbeeld uit een verder verleden ("toen ik ging scheiden", "vroeger"), dan hoort dat
+hier niet — zet het bij het onderwerp waar het als voorbeeld voor diende, met de
+tijdsaanduiding zoals die genoemd is.
+
+## Vandaag gewerkt aan
+Maximaal drie subkopjes, elk drie tot vijf zinnen. Kwamen er meer thema's aan bod,
+kies dan de drie die het zwaarst wegen. Voeg verwante onderwerpen samen onder één
+kopje; twee kopjes over hetzelfde onderwerp is een fout, en twee scherp afgebakende
+kopjes zijn beter dan drie die elkaar overlappen. Beschrijf per kopje ook welke
+aanpak of interventie is ingezet en hoe die uitpakte.
+
+Een thema mag zowel hier als onder 'Sinds vorige keer' staan — wat er in de vakantie
+gebeurde en wat daar in het gesprek mee is gedaan zijn twee verschillende dingen.
+Hetzelfde féit hoort maar op één plek: kom je het twee keer tegen, laat het staan
+waar het het meest is uitgewerkt.
+
+## Wat blijft staan
+Drie tot vijf punten, elk één hele zin, het zwaarste bovenaan. Dit is geen verkorte
+herhaling van hierboven — die staat er al. De vraag hier is wat er open blijft en
+waar het volgende gesprek niet omheen kan: een vraag die is opgeworpen en niet
+beantwoord, iets wat is aangeraakt maar niet uitgewerkt, een beslissing die nog moet
+vallen, een spanning tussen wat cliënt wil en wat zij doet, een reactie die om
+navolging vraagt.
+
+Elk punt is concreet genoeg dat het niet net zo goed onder een ander gesprek over
+hetzelfde thema zou kunnen staan. "Stilgestaan is bij de spanning op het werk" is een
+onderwerp; "Zolang het gesprek met de leidinggevende wordt uitgesteld blijft de
+spanning staan, en dat uitstel is nog niet besproken" is een punt dat blijft staan.
+Varieer de formulering en herhaal geen zin die hierboven al letterlijk staat.
+
+Niet elk gesprek levert een doorbraak op, en die verwachting is hier het grootste
+risico: een verzonnen besef is schadelijker dan een saai punt. Ging het gesprek
+vooral over inventariseren of over praktische zaken, schrijf dan dát. Geen afspraken
+hier — die staan in de laatste sectie.`;
+
+// Afspraken — behandelgesprek.
+const AFSPRAKEN_BEHANDEL = `## Afspraken
+Alleen wat expliciet is uitgesproken: een vervolgafspraak, een concrete oefening of
+taak, een toezegging van cliënt of behandelaar.
+
+Elke toekomstige afspraak die in het gesprek valt hoort hier, of die nu vandaag is
+gemaakt of al eerder gepland stond, en ook als hij terloops langskomt tussen twee
+andere onderwerpen door ("we hebben de 26e nog staan"). Zo'n zin is makkelijk te
+missen omdat er geen afspraak van gemaakt wordt — hij stond er al een. Loop het
+transcript aan het eind daarom nog één keer na op datums en dagnummers, en kijk of
+elk daarvan in deze sectie terechtgekomen is.
+
+Noteer de datum precies zoals die gevallen is en vul niets aan: is alleen een
+dagnummer genoemd, dan schrijf je "de 26e" en verder niets, en geen gegokte maand
+erachter. Een onbekend gegeven laat je weg; vierkante haken met een invulaanduiding
+komen in een dossierverslag nooit voor. Vermeld erbij wie er dan bij zijn wanneer dat
+blijkt; dat een partner, ex-partner of naaste aanschuift maakt het voor het dossier
+een wezenlijk ander gesprek dan een regulier vervolgconsult.
+
+Verzin geen redelijke vervolgstappen. Zijn er geen afspraken gemaakt, schrijf dan
+uitsluitend: "In dit gesprek zijn geen expliciete afspraken gemaakt."
+
+Neem daarnaast op wat de behandelaar voor een volgend gesprek heeft aangekondigd of
+voorgesteld, ook als dat voorzichtig geformuleerd was ("misschien moeten we...", "we
+zouden eens kunnen kijken naar...", "daar wil ik nog eens dieper op ingaan"). De
+toets is of het is uitgesproken, niet of het definitief was. Zo'n voornemen is geen
+verzonnen vervolgstap: het is de richting die de behandelaar zelf heeft benoemd, en
+juist dat wil je bij het volgende gesprek terug kunnen lezen. Zet die punten ná de
+gemaakte afspraken onder een eigen kopje. Die kopregel luidt exact zo, inclusief de
+drie hekjes en zonder dubbele punt erachter:
+
+### Voorgenomen voor het volgende gesprek
+
+Laat de regel weg als er niets is aangekondigd.`;
+
+// Veiligheid — behandelgesprek.
+const VEILIGHEID_BEHANDEL = `## Veiligheid
+
+Kwamen er veiligheidsaspecten aan de orde, benoem die dan altijd expliciet onder een subkopje 'Veiligheid', binnen de sectie waar het thuishoort. Nooit als zesde hoofdsectie. Het gaat om suïcidaliteit of gedachten aan zelfdoding (ook zonder
+concrete plannen, of wanneer uitvoering wordt ontkend), zelfbeschadiging, agressie of
+geweldsgedachten richting anderen, huiselijk geweld, mishandeling of misbruik als
+slachtoffer of pleger, zorgen over de veiligheid van kinderen of andere kwetsbare
+personen, ernstige verwaarlozing of onvermogen tot zelfzorg, en gevaarlijk gedrag
+door psychose, dissociatie of ernstig middelengebruik.
+
+Beschrijf feitelijk: de aard van de gedachten of het gedrag, of er concrete plannen
+of intenties zijn, en de inschatting zoals die in het gesprek naar voren kwam.
+Speelde er niets, schrijf er dan niets over — geen zin als "Er zijn geen acute
+veiligheidsrisico's besproken".`;
+
+// Structuurdeel — intakegesprek.
+const STRUCT_INTAKE = `## Structuur
+
+Een intakeverslag is iets anders dan een behandelverslag. De lezer is dezelfde, maar
+zij weet nog niets: dit is het verslag waar zij over een jaar op terugvalt om te zien
+waarmee het begon. Wees dus volledig en neem liever te veel op dan te weinig, met de
+concrete details erbij — tijdsaanduidingen, frequenties, hoe lang klachten al spelen,
+namen van eerdere behandelaars als die genoemd zijn. De omvangsmaten van een
+behandelverslag gelden hier niet, en er is geen sectie 'Wat blijft staan'.
+
+Gebruik deze secties, in deze volgorde, met ## ervoor. Laat een sectie weg als het
+onderwerp niet aan bod kwam — behalve Veiligheid en Afspraken, die staan er altijd.
+
 1. Aanmeldingsklachten en symptomen
 2. Hulpvraag
 3. Leef- en werksituatie
@@ -576,25 +843,29 @@ Een intakeverslag is uitgebreider dan een behandelverslag: wees hier wél volled
 7. Medische gegevens en medicatie
 8. Veiligheid
 9. Behandeldoel en plan van aanpak
-10. Overig (alleen bij relevante informatie die nergens anders past)
+10. Overig — alleen bij relevante informatie die nergens anders past
 11. Afspraken
 
-## Veiligheid
-Zijn er veiligheidsaspecten aan de orde gekomen, benoem die dan altijd expliciet onder een apart kopje 'Veiligheid' (bij een behandelgesprek binnen de meest relevante sectie). Het gaat onder meer om:
-- suïcidaliteit of gedachten aan zelfdoding — ook zonder concrete plannen, of wanneer uitvoering wordt ontkend;
-- zelfbeschadiging of automutilatie;
-- agressie of geweldsgedachten richting anderen;
-- huiselijk geweld, mishandeling of misbruik (als slachtoffer of pleger);
-- zorgen over de veiligheid van kinderen of andere kwetsbare personen in de omgeving;
-- ernstige verwaarlozing of onvermogen tot elementaire zelfzorg;
-- gevaarlijk gedrag door psychose, dissociatie of ernstig middelengebruik.
-Beschrijf feitelijk: de aard van de gedachten of het gedrag, of er concrete plannen of intenties zijn, en de inschatting zoals die in het gesprek naar voren kwam. Bij een intakegesprek is dit kopje verplicht; is het niet besproken, schrijf dan: "Veiligheidsaspecten zijn in dit gesprek niet expliciet besproken." Bij een behandelgesprek laat je het kopje weg als er geen veiligheidsaspecten speelden.
+Dat een intakeverslag volledig is, verandert niets aan wat je nooit doet. Juist hier
+is de verleiding groot om een levensverhaal rond te maken: een klacht die logisch bij
+een gebeurtenis past, een verband tussen de jeugd en de huidige situatie, een duur
+die niet genoemd is. Volledig betekent dat je alles opneemt wat er gezegd is, niet
+dat je de gaten opvult.`;
 
-## Snel overzicht (alleen behandelgesprek)
-Vat vóór de sectie Afspraken de kern van het gesprek samen in een korte opsomming, zodat de behandelaar bij het volgende gesprek snel de draad oppakt zonder de hele tekst te herlezen. Meestal drie tot vijf punten, nooit meer dan zeven. Elk punt is een bondige hele zin — geen los steekwoord, maar ook geen hele alinea. Neem hier geen afspraken in op; die staan apart onder Afspraken.
+// Veiligheid — intakegesprek.
+const VEILIGHEID_INTAKE = `## Veiligheid
 
-## Afspraken
-Vermeld uitsluitend afspraken die expliciet in het gesprek zijn gemaakt: een geplande vervolgafspraak, een concrete oefening of taak, of een uitgesproken toezegging van cliënt of behandelaar. Verzin geen redelijke vervolgstappen, therapeutische doelen of impliciete intenties die niet letterlijk als afspraak zijn uitgesproken. Zijn er geen expliciete afspraken gemaakt, schrijf dan uitsluitend: "In dit gesprek zijn geen expliciete afspraken gemaakt."`;
+Kwamen er veiligheidsaspecten aan de orde, benoem die dan altijd expliciet onder de sectie 'Veiligheid'. Het gaat om suïcidaliteit of gedachten aan zelfdoding (ook zonder
+concrete plannen, of wanneer uitvoering wordt ontkend), zelfbeschadiging, agressie of
+geweldsgedachten richting anderen, huiselijk geweld, mishandeling of misbruik als
+slachtoffer of pleger, zorgen over de veiligheid van kinderen of andere kwetsbare
+personen, ernstige verwaarlozing of onvermogen tot zelfzorg, en gevaarlijk gedrag
+door psychose, dissociatie of ernstig middelengebruik.
+
+Beschrijf feitelijk: de aard van de gedachten of het gedrag, of er concrete plannen
+of intenties zijn, en de inschatting zoals die in het gesprek naar voren kwam.
+Is veiligheid niet besproken, schrijf dan: "Veiligheidsaspecten zijn in dit
+gesprek niet expliciet besproken."`;
 
 // ── Geslacht instructies ──────────────────────────────────────
 const GESLACHT_TEKST = {
@@ -604,8 +875,12 @@ const GESLACHT_TEKST = {
 };
 
 // ── Systeemprompt samenstellen ────────────────────────────────
-function bouwSysteemprompt(emoji, feedback, titel) {
-  let prompt = SYSTEEM_PROMPT_BASIS;
+function bouwSysteemprompt(gesprekType, emoji, feedback, titel) {
+  let prompt = ALGEMEEN_PROMPT + '\n\n' + (
+    gesprekType === 'intakegesprek'
+      ? STRUCT_INTAKE + '\n\n' + VEILIGHEID_INTAKE
+      : STRUCT_BEHANDEL + '\n\n' + AFSPRAKEN_BEHANDEL + '\n\n' + VEILIGHEID_BEHANDEL
+  );
 
   if (titel) {
     prompt += "\n\nTITEL:\n"
@@ -641,7 +916,7 @@ function bouwSysteemprompt(emoji, feedback, titel) {
 }
 
 // ── Gebruiker-prompt samenstellen ─────────────────────────────
-function bouwGebruikerPrompt(transcript, gesprekType, geslacht, customPrompt, voorinformatie, voorinfoInVerslag, feedback) {
+function bouwGebruikerPrompt(transcript, gesprekType, geslacht, customPrompt, voorinformatie, voorinfoInVerslag, feedback, suggestie = '', vorigVerslag = '') {
   const geslachtInstructie = GESLACHT_TEKST[geslacht] || GESLACHT_TEKST.onbekend;
   const extraInstructie = customPrompt ? `\nExtra instructie voor dit gesprek: ${customPrompt}` : '';
 
@@ -668,12 +943,52 @@ function bouwGebruikerPrompt(transcript, gesprekType, geslacht, customPrompt, vo
   const kernReminder = gesprekType === 'intakegesprek'
     ? "\nLet bij het schrijven op: een intakeverslag is uitgebreid en volledig. "
       + "Schrijf thematisch — beschrijf wáár het gesprek over ging, niet wíe wat zei."
-    : "\nLet bij het schrijven op: vat alleen de klinische kern samen, niet alles wat gezegd is. "
-      + "Schrijf beknopt en thematisch — beschrijf wáár het gesprek over ging, niet wíe wat zei.";
+    : "\nLet bij het schrijven op: vat alleen samen wat de behandelaar weer op de hoogte brengt, "
+      + "met maximaal drie subkopjes onder 'Vandaag gewerkt aan'. Kies liever minder thema's en werk "
+      + "die volwaardig uit dan alles half. Schrijf thematisch en in hele zinnen — beschrijf wáár "
+      + "het gesprek over ging, niet wíe wat zei."
+      + "\nZet onder 'Wat blijft staan' wat er open blijft en waar het volgende gesprek niet omheen "
+      + "kan, en niet een verkorte samenvatting van de tekst erboven."
+      + "\nEn houd deze vier het scherpst in de gaten, want ze zijn in een dossier het duurst:"
+      + "\n1. Schrijf geen verband op ('waardoor', 'als gevolg van', 'maar') dat in het gesprek niet "
+      + "is uitgesproken, ook niet als het voor de hand ligt."
+      + "\n2. Neem elk getal dat wél gevallen is letterlijk over, en verzin er geen dat niet gevallen is."
+      + "\n3. Is een passage in het transcript verminkt, kies dan geen lezing: schrijf alleen het "
+      + "deel op dat hoe dan ook vaststaat."
+      + "\n4. Elke toekomstige afspraak die valt hoort onder Afspraken, ook als die al eerder "
+      + "gepland stond en terloops langskomt ('we hebben de 26e nog staan'). Noteer de datum "
+      + "precies zoals die genoemd is en vermeld erbij wie er dan bij zijn.";
+
+  const herzieningBlok = bouwHerzieningBlok(suggestie, vorigVerslag);
 
   return `Maak een professioneel dossierverslag van het onderstaande transcript van een ${gesprekType}.\n`
-    + `${geslachtInstructie}${extraInstructie}${overwegingenReminder}${kernReminder}${voorinfoBlok}\n\n`
+    + `${geslachtInstructie}${extraInstructie}${overwegingenReminder}${kernReminder}${voorinfoBlok}${herzieningBlok}\n\n`
     + `TRANSCRIPT:\n${transcript}`;
+}
+
+// ── Herziening op aanwijzing: het verslag wordt opnieuw uit het transcript
+// geschreven met de aanwijzing erbij, niet bijgewerkt — een model dat zijn
+// eigen tekst redigeert laat de fout staan en schrapt de onderbouwing.
+function bouwHerzieningBlok(suggestie, vorigVerslag) {
+  if (!suggestie) return '';
+  if (vorigVerslag) {
+    return "\n\nHERZIENING. Van dit gesprek is al een verslag gemaakt en de behandelaar "
+      + "heeft het gelezen. Zij vraagt om deze aanpassing:\n"
+      + `<<<\n${suggestie}\n>>>\n`
+      + "Schrijf het verslag helemaal opnieuw op basis van het transcript, met die "
+      + "aanpassing verwerkt. Behoud wat goed was: neem de onderdelen die de "
+      + "aanpassing niet raakt inhoudelijk over uit de vorige versie, zodat het "
+      + "verslag niet op andere punten verandert. Alle regels hierboven blijven "
+      + "onverkort gelden — een aanpassing is geen toestemming om iets op te "
+      + "schrijven dat niet in het transcript staat. Vraagt de aanpassing om iets "
+      + "wat het gesprek niet hergeeft, schrijf dan alleen wat er wél over gezegd is."
+      + `\n\nDE VORIGE VERSIE VAN HET VERSLAG:\n<<<\n${vorigVerslag}\n>>>`;
+  }
+  return "\n\nHERZIENING. Van dit gesprek is al een verslag gemaakt en de behandelaar "
+    + "vraagt om deze aanpassing:\n"
+    + `<<<\n${suggestie}\n>>>\n`
+    + "Schrijf het verslag opnieuw op basis van het transcript, met die aanpassing "
+    + "verwerkt. Alle regels hierboven blijven onverkort gelden.";
 }
 
 // ── Transcript opbouwen met sprekerslabels (diarisatie) ───────
@@ -837,6 +1152,7 @@ let finalVerslag = '', verslagMarkdown = '', huidigeTitel = '', huidigTranscript
 let overwegingItems = [], confirmTimer = null;
 let opnameBron = 'mic';
 let schermStream = null, micStream = null, audioContext = null;
+let versies = [], huidigeVersie = -1;
 
 // ── DOM ───────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -845,6 +1161,9 @@ const transcriptBox = $('transcriptBox'), outputBox = $('outputBox'), overweging
 const overwegingCard = $('overwegingCard'), titelRegel = $('titelRegel');
 const btnKopieer = $('btnKopieer'), btnKopieerBeide = $('btnKopieerBeide'), btnRegen = $('btnRegen');
 const regenPanel = $('regenPanel'), regenType = $('regenType'), regenGeslacht = $('regenGeslacht');
+const versieBalk = $('versieBalk'), versieLabel = $('versieLabel'), versieSuggestie = $('versieSuggestie');
+const btnVorigeVersie = $('btnVorigeVersie'), btnVolgendeVersie = $('btnVolgendeVersie');
+const suggestiePaneel = $('suggestiePaneel'), suggestieInput = $('suggestieInput'), btnHerzie = $('btnHerzie');
 const errorMsg = $('errorMsg'), statusDot = $('statusDot'), statusText = $('statusText');
 const transcriptSpinner = $('transcriptSpinner'), verslagSpinner = $('verslagSpinner'), overwegingSpinner = $('overwegingSpinner');
 const verslagBadge = $('verslagBadge'), micSelect = $('micSelect'), micNote = $('micNote');
@@ -1153,22 +1472,23 @@ function toonRegenPaneel(gesprekType, geslacht) {
 }
 
 // ── Verslag (streaming, rechtstreeks naar Mistral) ────────────
-async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '', voorinformatie = '') {
+async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '', voorinformatie = '', suggestie = '', vorigVerslag = '') {
   const key = getApiKey();
   if (!key) { showError('Voer eerst je Mistral API-sleutel in.'); setStatus('err', 'Geen API-sleutel'); return; }
 
   setStep(3);
-  setStatus('busy', 'Verslag wordt gegenereerd...');
+  setStatus('busy', suggestie ? 'Verslag wordt herzien...' : 'Verslag wordt gegenereerd...');
   verslagSpinner.classList.remove('hidden');
   outputBox.classList.remove('placeholder', 'formatted');
   outputBox.textContent = 'Het taalmodel is bezig met het uitwerken van het verslag...';
   titelRegel.classList.remove('show');
   overwegingCard.classList.remove('show');
   btnKopieer.disabled = true; btnKopieerBeide.disabled = true; btnRegen.disabled = true;
+  btnHerzie.disabled = true;
 
   try {
-    const systeemPrompt   = bouwSysteemprompt(optEmoji.checked, optFeedback.checked, optTitel.checked);
-    const gebruikerPrompt = bouwGebruikerPrompt(transcript, gesprekType, geslacht, customPrompt, voorinformatie, optVoorinfoInVerslag.checked, optFeedback.checked);
+    const systeemPrompt   = bouwSysteemprompt(gesprekType, optEmoji.checked, optFeedback.checked, optTitel.checked);
+    const gebruikerPrompt = bouwGebruikerPrompt(transcript, gesprekType, geslacht, customPrompt, voorinformatie, optVoorinfoInVerslag.checked, optFeedback.checked, suggestie, vorigVerslag);
 
     const resp = await fetch(MISTRAL_CHAT_URL, {
       method: 'POST',
@@ -1227,24 +1547,30 @@ async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '',
 
     verslagSpinner.classList.add('hidden');
     verwerkOutput(ruweTekst);
+    bewaarVersie(suggestie);
 
     toonRegenPaneel(gesprekType, geslacht);
+    suggestiePaneel.classList.remove('hidden');
 
     btnKopieer.disabled = false;
     btnKopieerBeide.disabled = false;
+    btnHerzie.disabled = false;
 
     try {
       await schrijfKlembord(true);
       toonKopieBevestiging('✓ Verslag gegenereerd en gekopieerd');
     } catch {}
 
-    setStatus('ok', 'Verslag gereed — automatisch gekopieerd');
+    setStatus('ok', suggestie ? 'Herziene versie gereed — automatisch gekopieerd' : 'Verslag gereed — automatisch gekopieerd');
     recordStatus.textContent = 'Verslag voltooid';
   } catch (err) {
     verslagSpinner.classList.add('hidden');
     showError('Verslag genereren mislukt: ' + err.message + ' — gebruik de knop hieronder om het opnieuw te proberen.');
     setStatus('err', 'Taalmodel fout');
     toonRegenPaneel(gesprekType, geslacht);
+    // Bij een mislukte herziening blijft de vorige versie gewoon staan.
+    btnHerzie.disabled = versies.length === 0;
+    if (versies.length) stapVersie(0);
   }
 }
 
@@ -1412,6 +1738,63 @@ async function regenereerVerslag() {
   await maakVerslag(huidigTranscript, regenType.value, regenGeslacht.value, customPromptInput.value.trim(), voorinformatieInput.value.trim());
 }
 
+// ── Versiegeschiedenis ────────────────────────────────────────
+// Een nieuwe versie komt altijd achteraan, ook als je eerst bent teruggebladerd:
+// teruggaan is bedoeld om te vergelijken, niet om werk weg te gooien.
+function bewaarVersie(suggestie) {
+  versies.push({
+    verslagMarkdown, finalVerslag, huidigeTitel,
+    overwegingItems: overwegingItems.map(o => ({ ...o })),
+    suggestie: suggestie || ''
+  });
+  huidigeVersie = versies.length - 1;
+  werkVersieBalkBij();
+}
+
+function werkVersieBalkBij() {
+  if (versies.length < 2) { versieBalk.classList.add('hidden'); return; }
+  versieBalk.classList.remove('hidden');
+  versieLabel.textContent = `Versie ${huidigeVersie + 1} van ${versies.length}`;
+  btnVorigeVersie.disabled = huidigeVersie <= 0;
+  btnVolgendeVersie.disabled = huidigeVersie >= versies.length - 1;
+  const s = versies[huidigeVersie].suggestie;
+  versieSuggestie.textContent = s ? `herzien op: "${s.length > 90 ? s.slice(0, 90) + '…' : s}"` : 'eerste versie';
+}
+
+function stapVersie(richting) {
+  const doel = huidigeVersie + richting;
+  if (doel < 0 || doel >= versies.length) return;
+  huidigeVersie = doel;
+  const v = versies[doel];
+  verslagMarkdown = v.verslagMarkdown;
+  finalVerslag = v.finalVerslag;
+  huidigeTitel = v.huidigeTitel;
+  overwegingItems = v.overwegingItems.map(o => ({ ...o }));
+  outputBox.innerHTML = convertMarkdownToHtml(verslagMarkdown);
+  outputBox.classList.remove('placeholder');
+  outputBox.classList.add('formatted');
+  titelRegel.textContent = huidigeTitel;
+  titelRegel.classList.toggle('show', !!huidigeTitel);
+  if (overwegingItems.length) { renderOverwegingen(); overwegingCard.classList.add('show'); }
+  else { overwegingCard.classList.remove('show'); }
+  werkVersieBalkBij();
+  autoKopieerBeide();
+}
+
+// ── Herziening op aanwijzing van de behandelaar ───────────────
+async function herzieVerslag() {
+  const suggestie = suggestieInput.value.trim();
+  if (!suggestie) { showError('Schrijf eerst op wat er anders moet.'); return; }
+  if (!huidigTranscript) { showError('Geen transcript beschikbaar.'); return; }
+  hideError();
+  // De versie waar je nu naar kijkt is het vertrekpunt, niet per se de laatste.
+  const basis = versies[huidigeVersie]?.verslagMarkdown || verslagMarkdown;
+  await maakVerslag(huidigTranscript, regenType.value, regenGeslacht.value,
+                    customPromptInput.value.trim(), voorinformatieInput.value.trim(),
+                    suggestie, basis);
+  suggestieInput.value = '';
+}
+
 // ── Kopiëren ──────────────────────────────────────────────────
 async function kopieerVerslag() {
   try {
@@ -1446,6 +1829,9 @@ function resetAll() {
   recordStatus.textContent = 'Klik op de knop om te beginnen';
   hideError(); copyConfirmation.classList.remove('show');
   regenPanel.classList.add('hidden'); btnRegen.disabled = false;
+  versies = []; huidigeVersie = -1;
+  versieBalk.classList.add('hidden');
+  suggestiePaneel.classList.add('hidden'); suggestieInput.value = ''; btnHerzie.disabled = false;
   geslachtSelect.value = 'onbekend';
   customPromptInput.value = '';
   voorinformatieInput.value = '';

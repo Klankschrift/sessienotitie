@@ -52,8 +52,8 @@ niets te installeren en geen code te begrijpen. Je doet dit één keer; daarna k
 app gewoon gebruiken.
 
 > 🎙️ **Belangrijk vooraf — gebruik een goede microfoon.** De kwaliteit van het verslag
-> staat of valt met de kwaliteit van de opname. Een losse (USB- of dasspeld-)microfoon of
-> een goede headset geeft duidelijk betere resultaten dan de **ingebouwde
+> staat of valt met de kwaliteit van de opname. Een losse **vergadermicrofoon** (via USB
+> of bluetooth verbonden) geeft duidelijk betere resultaten dan de **ingebouwde
 > laptopmicrofoon**. Die laatste werkt wél, maar staat vaak verder weg en vangt meer
 > omgevingsgeluid op, waardoor de transcriptie — en dus het verslag — minder nauwkeurig
 > wordt. Zorg ook voor een rustige ruimte zonder achtergrondgeluid.
