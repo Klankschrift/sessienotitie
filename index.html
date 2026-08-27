@@ -405,7 +405,7 @@
       <div class="field">
         <label>Microfoon</label>
         <select id="micSelect"><option value="">Bezig met laden...</option></select>
-        <div class="field-note" id="micNote">Microfoons worden geladen...</div>
+        <div class="field-note" id="micNote">Microfoons worden geladen — je browser vraagt nu toestemming, zodat de lijst getoond kan worden. Er wordt nog niets opgenomen.</div>
         <div class="field-note">🎙️ Tip: een losse vergadermicrofoon (via USB of bluetooth) geeft duidelijk betere resultaten dan de ingebouwde laptopmicrofoon — en dus een nauwkeuriger verslag.</div>
       </div>
     </div>
@@ -527,11 +527,17 @@
       </div>
     </div>
 
+    <!-- Let op: btnKopieerBeide is de knop ZONDER overwegingen, btnKopieer die MET.
+         De ids zijn historisch omgedraaid; kijk naar het onclick-doel, niet naar de naam. -->
     <div class="output-actions">
       <span class="copy-confirmation" id="copyConfirmation">✓ Gekopieerd naar klembord</span>
       <button class="btn" onclick="resetAll()">Nieuw gesprek</button>
-      <button class="btn" id="btnKopieerBeide" disabled onclick="kopieerVerslag()">Alleen verslag kopiëren</button>
-      <button class="btn primary" id="btnKopieer" disabled onclick="kopieerBeide()">Kopiëren naar klembord</button>
+      <button class="btn hidden" id="btnKopieerBeide" disabled onclick="kopieerVerslag()">Alleen verslag kopiëren</button>
+      <button class="btn primary" id="btnKopieer" disabled onclick="kopieerBeide()">Alles kopiëren</button>
+    </div>
+    <div class="field-note">
+      Er wordt niets bewaard: bij het herladen of sluiten van deze pagina zijn transcript,
+      verslag en versies weg. Kopieer je verslag dus vóór je afsluit.
     </div>
   </div>
 
@@ -579,7 +585,7 @@ const ALGEMEEN_PROMPT = `Je schrijft dossierverslagen voor een psycholoog, op ba
 behandelgesprek met een cliënt.
 
 Schrijf voor één lezer op één moment: de behandelaar zelf, vijf minuten voor het
-volgende gesprek, die sinds dit gesprek twintig andere cliënten heeft gezien. Zij
+volgende gesprek, die sinds dit gesprek twintig andere cliënten heeft gezien. Die
 leest je verslag door en moet denken: ja, ik weet weer waar we staan. Dat is de toets
 voor elke zin die je opschrijft. Draagt een zin daar niet aan bij, dan hoort hij er
 niet.
@@ -825,8 +831,8 @@ veiligheidsrisico's besproken".`;
 const STRUCT_INTAKE = `## Structuur
 
 Een intakeverslag is iets anders dan een behandelverslag. De lezer is dezelfde, maar
-zij weet nog niets: dit is het verslag waar zij over een jaar op terugvalt om te zien
-waarmee het begon. Wees dus volledig en neem liever te veel op dan te weinig, met de
+weet nog niets: dit is het verslag waar de behandelaar over een jaar op terugvalt om
+te zien waarmee het begon. Wees dus volledig en neem liever te veel op dan te weinig, met de
 concrete details erbij — tijdsaanduidingen, frequenties, hoe lang klachten al spelen,
 namen van eerdere behandelaars als die genoemd zijn. De omvangsmaten van een
 behandelverslag gelden hier niet, en er is geen sectie 'Wat blijft staan'.
@@ -973,7 +979,7 @@ function bouwHerzieningBlok(suggestie, vorigVerslag) {
   if (!suggestie) return '';
   if (vorigVerslag) {
     return "\n\nHERZIENING. Van dit gesprek is al een verslag gemaakt en de behandelaar "
-      + "heeft het gelezen. Zij vraagt om deze aanpassing:\n"
+      + "heeft het gelezen en vraagt om deze aanpassing:\n"
       + `<<<\n${suggestie}\n>>>\n`
       + "Schrijf het verslag helemaal opnieuw op basis van het transcript, met die "
       + "aanpassing verwerkt. Behoud wat goed was: neem de onderdelen die de "
@@ -1287,7 +1293,7 @@ async function laadMicrofoons() {
     micNote.textContent = `${mics.length} microfoon${mics.length !== 1 ? 's' : ''} gevonden`;
   } catch {
     micSelect.innerHTML = '<option value="">Toegang geweigerd</option>';
-    micNote.textContent = 'Geef microfoontoestemming in de browser';
+    micNote.textContent = 'Geef microfoontoestemming in de browser (klik op het slotje in de adresbalk) en herlaad de pagina.';
   }
 }
 
@@ -1482,7 +1488,7 @@ async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '',
   outputBox.classList.remove('placeholder', 'formatted');
   outputBox.textContent = 'Het taalmodel is bezig met het uitwerken van het verslag...';
   titelRegel.classList.remove('show');
-  overwegingCard.classList.remove('show');
+  toonOverwegingen(false);
   btnKopieer.disabled = true; btnKopieerBeide.disabled = true; btnRegen.disabled = true;
   btnHerzie.disabled = true;
 
@@ -1611,10 +1617,8 @@ function verwerkOutput(ruweTekst) {
     titelRegel.classList.add('show');
   }
 
-  if (overwegingItems.length) {
-    renderOverwegingen();
-    overwegingCard.classList.add('show');
-  }
+  if (overwegingItems.length) renderOverwegingen();
+  toonOverwegingen(overwegingItems.length > 0);
 }
 
 // ── Overwegingen: parsen tot losse, uitvinkbare punten ────────
@@ -1633,6 +1637,13 @@ function parseOverwegingen(raw) {
   }
   if (current !== null) items.push(current);
   return items.filter(t => t).map(text => ({ text, checked: true }));
+}
+
+// Zonder overwegingen doen "Alles kopiëren" en "Alleen verslag kopiëren" precies
+// hetzelfde; die tweede knop tonen we dan niet.
+function toonOverwegingen(aan) {
+  overwegingCard.classList.toggle('show', aan);
+  btnKopieerBeide.classList.toggle('hidden', !aan);
 }
 
 function renderOverwegingen() {
@@ -1775,8 +1786,8 @@ function stapVersie(richting) {
   outputBox.classList.add('formatted');
   titelRegel.textContent = huidigeTitel;
   titelRegel.classList.toggle('show', !!huidigeTitel);
-  if (overwegingItems.length) { renderOverwegingen(); overwegingCard.classList.add('show'); }
-  else { overwegingCard.classList.remove('show'); }
+  if (overwegingItems.length) renderOverwegingen();
+  toonOverwegingen(overwegingItems.length > 0);
   werkVersieBalkBij();
   autoKopieerBeide();
 }
@@ -1809,7 +1820,7 @@ async function kopieerBeide() {
     await schrijfKlembord(true);
     btnKopieer.textContent = '✓ Gekopieerd';
     toonKopieBevestiging();
-    setTimeout(() => { btnKopieer.textContent = 'Kopiëren naar klembord'; }, 2500);
+    setTimeout(() => { btnKopieer.textContent = 'Alles kopiëren'; }, 2500);
   } catch { showError('Kopiëren mislukt — selecteer de tekst handmatig.'); }
 }
 
@@ -1821,9 +1832,9 @@ function resetAll() {
   outputBox.innerHTML = 'Verslag verschijnt hier na verwerking door het taalmodel...';
   outputBox.classList.remove('formatted'); outputBox.classList.add('placeholder');
   titelRegel.classList.remove('show'); titelRegel.textContent = '';
-  overwegingCard.classList.remove('show'); overwegingBox.innerHTML = '';
+  toonOverwegingen(false); overwegingBox.innerHTML = '';
   uploadFilename.textContent = '';
-  btnKopieer.disabled = true; btnKopieer.textContent = 'Kopiëren naar klembord';
+  btnKopieer.disabled = true; btnKopieer.textContent = 'Alles kopiëren';
   btnKopieerBeide.disabled = true; btnKopieerBeide.textContent = 'Alleen verslag kopiëren';
   recordTimer.textContent = '00:00:00'; recordTimer.classList.remove('active');
   recordStatus.textContent = 'Klik op de knop om te beginnen';

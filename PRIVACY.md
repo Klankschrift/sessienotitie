@@ -9,7 +9,8 @@ alarmerend, maar ook niet mooier dan het is.
 - Audio en transcript gaan **rechtstreeks van jouw browser naar Mistral**. Er zit geen
   tussenserver van de maker tussen; de maker en een eventuele host zien je gegevens niet.
 - Je **API-sleutel** blijft lokaal in je browser (`localStorage`) en wordt alleen
-  meegestuurd naar Mistral.
+  meegestuurd naar Mistral. Verder wordt er **niets** bewaard: opname, transcript, verslag
+  en versies verdwijnen zodra je het tabblad sluit of ververst.
 - Mistral verwerkt in de **EU** en is **ISO 27001**-gecertificeerd.
 - **Minimumvereiste: gebruik dit voor échte cliëntgegevens alleen als je _Zero Data
   Retention_ (ZDR) bij Mistral hebt aangevraagd en aanstaat.** Zonder ZDR bewaart Mistral
@@ -31,6 +32,28 @@ Alles draait in je eigen browser. Wanneer je opneemt of een bestand uploadt:
 Er is geen backend van deze applicatie. Ook als je `index.html` via een statische host
 (zoals GitHub Pages) opent, wordt alleen het kale HTML-bestand geserveerd; je audio,
 transcript en verslag passeren die host niet.
+
+### Wat wordt waar bewaard
+
+| Gegeven | Waar het staat | Hoe lang |
+|---|---|---|
+| **API-sleutel** | `localStorage` van deze browser | Tot je op **Wissen** klikt (of je browsergegevens opschoont) |
+| **Opname (audio)** | Alleen in het werkgeheugen van het tabblad | Tot je de pagina sluit of ververst — er wordt nooit een audiobestand op je schijf geschreven |
+| **Transcript, verslag, overwegingen, versiegeschiedenis** | Alleen in het werkgeheugen van het tabblad | Tot je de pagina sluit, ververst of op **Nieuw gesprek** klikt |
+| **Wat dan ook bij de maker of een host** | Nergens — er is geen server van deze applicatie | — |
+
+Er is dus geen "vorige sessie terughalen": alles behalve de API-sleutel is na het sluiten
+van het tabblad weg. Dat is de bedoeling — het betekent ook dat er geen cliëntgegevens op
+je computer blijven staan — maar het betekent wél dat je **je verslag moet kopiëren
+voordat je afsluit**.
+
+### Schermdeling neemt ook de cliënt op
+
+In de modus **Scherm + audio** wordt de audio van het gedeelde tabblad of venster (dus de
+stem van je gesprekspartner) gemengd met je eigen microfoon en als één opname naar Mistral
+gestuurd. Het videospoor wordt direct gestopt: er wordt geen beeld opgenomen of verstuurd.
+Dat je de ander opneemt, is een verwerking waarvan je hen op de hoogte moet stellen — zie
+[hieronder](#nen-7510-en-de-avg).
 
 ## Mistral: dataretentie en training
 
@@ -86,7 +109,10 @@ van de AVG. Dat betekent concreet dat je zelf:
   [Data Processing Addendum](https://legal.mistral.ai/terms/data-processing-addendum));
 - afweegt of cloudtranscriptie van gespreksopnamen past binnen je
   informatiebeveiligings- en privacybeleid;
-- cliënten **informeert** over deze verwerking en waar nodig **toestemming** vraagt;
+- cliënten **informeert** over deze verwerking en waar nodig **toestemming** vraagt — ook
+  over het feit dát er wordt opgenomen. Bij een online gesprek via **Scherm + audio** wordt
+  hun stem via de tabbladaudio meegenomen, dus geldt dat daar net zo goed. Controleer ook
+  de voorwaarden van het videoplatform dat je gebruikt;
 - **ZDR aanzet** (de minimumvereiste, zie hierboven), of — als dat niet kan — kiest voor
   **lokale transcriptie** (bijvoorbeeld een lokaal Whisper-model) zodat audio je computer
   niet verlaat;
