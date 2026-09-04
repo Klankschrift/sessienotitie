@@ -3,537 +3,1049 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
 <title>Sessienotitie</title>
+<!-- Eén bestand, geen bijlagen: het pictogram zit als data-URI in de pagina zelf.
+     Webfonts staan er bewust niet in — die zouden bij elk bezoek een adres bij
+     Google achterlaten; de systeemletters uit de fallback volstaan. -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjAiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiM0M2EyYmQiLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMWI1NDcwIi8+CiAgICA8L2xpbmVhckdyYWRpZW50PgogIDwvZGVmcz4KICA8cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgZmlsbD0iIzE2MzAzZCIgcng9IjM4Ii8+CiAgPGcgZmlsbD0idXJsKCNnKSI+CiAgICA8cmVjdCB4PSIyNCIgIHk9Ijg2IiB3aWR0aD0iMTQiIGhlaWdodD0iMjAiICByeD0iNyIvPgogICAgPHJlY3QgeD0iNDgiICB5PSI3MCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjUyIiAgcng9IjciLz4KICAgIDxyZWN0IHg9IjcyIiAgeT0iNDYiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxMDAiIHJ4PSI3Ii8+CiAgICA8cmVjdCB4PSI5NiIgIHk9IjI2IiB3aWR0aD0iMTQiIGhlaWdodD0iMTQwIiByeD0iNyIvPgogICAgPHJlY3QgeD0iMTIwIiB5PSI1MiIgd2lkdGg9IjE0IiBoZWlnaHQ9Ijg4IiAgcng9IjciLz4KICAgIDxyZWN0IHg9IjE0NCIgeT0iNzQiIHdpZHRoPSIxNCIgaGVpZ2h0PSI0NCIgIHJ4PSI3Ii8+CiAgICA8cmVjdCB4PSIxNjgiIHk9Ijg2IiB3aWR0aD0iMTQiIGhlaWdodD0iMjAiICByeD0iNyIvPgogIDwvZz4KPC9zdmc+Cg==">
+<script>
+  // Het thema meteen zetten, vóór de eerste verf, anders flitst een donkere
+  // opstelling eerst wit op.
+  (function () {
+    try {
+      var keuze = localStorage.getItem('sessienotitie.thema');
+      if (!keuze) keuze = matchMedia('(prefers-color-scheme: dark)').matches ? 'donker' : 'licht';
+      document.documentElement.setAttribute('data-thema', keuze);
+    } catch (e) { document.documentElement.setAttribute('data-thema', 'licht'); }
+  })();
+</script>
 <style>
+  /* ══ Ontwerptokens ═══════════════════════════════════════════
+     Eén set namen, twee waardenreeksen. Alles wat kleur heeft komt
+     hiervandaan, zodat licht en donker niet uit elkaar lopen. */
   :root {
-    --bg: #eef1f5;
+    color-scheme: light;
+    --bg: #eff2f6;
+    --bg-glans-1: rgba(47,111,143,0.16);
+    --bg-glans-2: rgba(126,101,168,0.10);
     --surface: #ffffff;
-    --surface2: #f4f6f9;
-    --border: #dde3ea;
-    --border-strong: #c6cfda;
-    --text: #1f2a37;
-    --text-soft: #475467;
-    --text-muted: #7a8696;
-    --accent: #2f6f8f;
-    --accent-strong: #235873;
-    --accent-light: #e6f0f5;
-    --danger: #c0392b;
-    --danger-light: #fbecea;
-    --warning: #b5701f;
-    --recording-pulse: #d6453d;
-    --overweging: #2f8f7d;
-    --overweging-light: #e8f5f1;
-    --radius: 12px;
-    --shadow: 0 1px 3px rgba(30,42,56,0.06), 0 8px 24px rgba(30,42,56,0.06);
+    --surface-2: #f5f7fa;
+    --surface-3: #eaeff4;
+    --border: rgba(16,35,55,0.10);
+    --border-strong: rgba(16,35,55,0.22);
+    --text: #101a24;
+    --text-soft: #47586a;
+    --text-muted: #7c8b9b;
+    --accent: #26708f;
+    --accent-2: #43a2bd;
+    --accent-strong: #1b5470;
+    --accent-soft: rgba(38,112,143,0.10);
+    --accent-rand: rgba(38,112,143,0.30);
+    --op-accent: #ffffff;
+    --danger: #b53c31;
+    --danger-soft: rgba(181,60,49,0.09);
+    --danger-rand: rgba(181,60,49,0.28);
+    --warn: #a06a12;
+    --ok: #1d8a72;
+    --ok-soft: rgba(29,138,114,0.10);
+    --ok-rand: rgba(29,138,114,0.28);
+    --rec: #d8453d;
+    --rec-soft: rgba(216,69,61,0.13);
+    --schaduw-1: 0 1px 2px rgba(12,26,42,0.05), 0 1px 3px rgba(12,26,42,0.04);
+    --schaduw-2: 0 1px 2px rgba(12,26,42,0.04), 0 14px 32px -16px rgba(12,26,42,0.22);
+    --schaduw-pop: 0 24px 60px -20px rgba(12,26,42,0.35);
+    --glans: inset 0 1px 0 rgba(255,255,255,0.7);
+    --r-xl: 20px; --r-lg: 15px; --r-md: 11px; --r-sm: 8px;
     --font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     --serif: 'DM Serif Display', Georgia, serif;
+    --vlot: 0.18s cubic-bezier(.4,0,.2,1);
+    --traag: 0.35s cubic-bezier(.4,0,.2,1);
   }
+
+  [data-thema="donker"] {
+    color-scheme: dark;
+    --bg: #0d1218;
+    --bg-glans-1: rgba(67,162,189,0.15);
+    --bg-glans-2: rgba(126,101,168,0.12);
+    --surface: #151c24;
+    --surface-2: #1a232d;
+    --surface-3: #212c38;
+    --border: rgba(255,255,255,0.09);
+    --border-strong: rgba(255,255,255,0.20);
+    --text: #e8eef5;
+    --text-soft: #aebbc9;
+    --text-muted: #7e8d9d;
+    --accent: #4fa8c8;
+    --accent-2: #6cc6dd;
+    --accent-strong: #8ed3e6;
+    --accent-soft: rgba(79,168,200,0.13);
+    --accent-rand: rgba(79,168,200,0.35);
+    --op-accent: #06131a;
+    --danger: #f0847a;
+    --danger-soft: rgba(240,132,122,0.11);
+    --danger-rand: rgba(240,132,122,0.30);
+    --warn: #e0a94b;
+    --ok: #4dc7a6;
+    --ok-soft: rgba(77,199,166,0.12);
+    --ok-rand: rgba(77,199,166,0.30);
+    --rec: #f2685f;
+    --rec-soft: rgba(242,104,95,0.16);
+    --schaduw-1: 0 1px 2px rgba(0,0,0,0.4);
+    --schaduw-2: 0 2px 4px rgba(0,0,0,0.3), 0 16px 36px -18px rgba(0,0,0,0.7);
+    --schaduw-pop: 0 26px 64px -20px rgba(0,0,0,0.8);
+    --glans: inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
 
   body {
     font-family: var(--font);
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    padding: 2.25rem 1.75rem;
-    line-height: 1.5;
+    line-height: 1.55;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* Twee zachte lichtvlekken achter de pagina: geeft diepte zonder dat er
+     iets te lezen valt dat afleidt. */
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(58rem 34rem at 12% -8%, var(--bg-glans-1), transparent 62%),
+      radial-gradient(46rem 30rem at 96% 4%, var(--bg-glans-2), transparent 60%);
   }
 
-  header {
-    max-width: 1180px; margin: 0 auto 1.75rem;
-    border-bottom: 1px solid var(--border); padding-bottom: 1.2rem;
-    display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;
-  }
-  header h1 {
-    font-family: var(--serif); font-size: 2rem; font-weight: 400;
-    letter-spacing: -0.01em; color: var(--accent-strong);
-  }
-  header span { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; }
-  header a.bron-link { font-size: 0.72rem; color: var(--text-muted); margin-left: auto; text-decoration: none; border-bottom: 1px dotted var(--text-muted); }
-  header a.bron-link:hover { color: var(--accent); border-color: var(--accent); }
+  ::selection { background: var(--accent-soft); color: var(--text); }
 
-  .layout { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; align-items: start; }
-  .sidebar { display: grid; gap: 1.25rem; position: sticky; top: 1.75rem; }
-  .main { display: grid; gap: 1.25rem; min-width: 0; }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* ── Kopbalk ─────────────────────────────────────────────── */
+  .topbar {
+    position: sticky; top: 0; z-index: 40;
+    backdrop-filter: saturate(1.6) blur(14px);
+    -webkit-backdrop-filter: saturate(1.6) blur(14px);
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner {
+    max-width: 1240px; margin: 0 auto; padding: 0.85rem 1.75rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .merk { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
+  .merk-teken {
+    width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+    background: linear-gradient(145deg, var(--accent-2), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px -4px var(--accent-rand), var(--glans);
+  }
+  .merk-teken svg { width: 19px; height: 19px; display: block; }
+  .merk h1 {
+    font-family: var(--serif); font-weight: 400; font-size: 1.42rem;
+    letter-spacing: -0.015em; color: var(--text); line-height: 1.1;
+  }
+  .merk .ondertitel {
+    font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.14em;
+    color: var(--text-muted); font-weight: 600;
+  }
+  .topbar-acties { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; }
+
+  .statuspil {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.34rem 0.8rem; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--border);
+    font-size: 0.75rem; color: var(--text-soft); font-weight: 500;
+    box-shadow: var(--schaduw-1); max-width: 22rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .dot-status {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    background: var(--border-strong); transition: background var(--vlot);
+  }
+  .dot-status.ok { background: var(--ok); box-shadow: 0 0 0 3px var(--ok-soft); }
+  .dot-status.err { background: var(--danger); box-shadow: 0 0 0 3px var(--danger-soft); }
+  .dot-status.busy { background: var(--warn); animation: kloppen 1.1s ease-in-out infinite; }
+  @keyframes kloppen { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  .icoonknop {
+    width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text-soft);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    text-decoration: none;
+    transition: all var(--vlot); box-shadow: var(--schaduw-1);
+  }
+  .icoonknop:hover { color: var(--accent); border-color: var(--accent-rand); transform: translateY(-1px); }
+  .icoonknop:active { transform: translateY(0); }
+  .icoonknop svg { width: 17px; height: 17px; }
+  /* Eén icoon tegelijk: de maan als het licht is, de zon als het donker is. */
+  .icoonknop .zon { display: none; }
+  .icoonknop .maan { display: block; }
+  [data-thema="donker"] .icoonknop .zon { display: block; }
+  [data-thema="donker"] .icoonknop .maan { display: none; }
+
+  /* ── Raamwerk ────────────────────────────────────────────── */
+  .layout {
+    max-width: 1240px; margin: 0 auto; padding: 1.6rem 1.75rem 4rem;
+    display: grid; grid-template-columns: 348px 1fr; gap: 1.5rem; align-items: start;
+  }
+  /* min-width: 0 houdt brede inhoud (lange apparaatnamen in een keuzelijst)
+     binnen de kolom in plaats van eroverheen te laten groeien. */
+  .sidebar { display: grid; gap: 1.1rem; position: sticky; top: 5.2rem; min-width: 0; }
+  .sidebar > * { min-width: 0; }
+  .main { display: grid; gap: 1.1rem; min-width: 0; }
+  .main > * { min-width: 0; }
 
   .card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 1.5rem;
-    box-shadow: var(--shadow);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-xl);
+    padding: 1.35rem;
+    box-shadow: var(--schaduw-2), var(--glans);
+    transition: border-color var(--traag);
   }
+  .card.rustig { padding: 1.1rem 1.35rem; }
 
   .card-label {
-    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600;
-    color: var(--text-muted); margin-bottom: 1.1rem; display: flex; align-items: center; gap: 0.6rem;
+    font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.11em; font-weight: 700;
+    color: var(--text-muted); margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.55rem;
+  }
+  .card-label svg { width: 14px; height: 14px; opacity: 0.75; flex-shrink: 0; }
+  .card-label .rechts { margin-left: auto; display: flex; align-items: center; gap: 0.4rem; }
+
+  /* ── Velden ──────────────────────────────────────────────── */
+  .config-grid { display: grid; grid-template-columns: 1fr; gap: 0.95rem; }
+  .field label, .field-titel, .upload-label, .prompt-area label {
+    display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em;
+    font-weight: 700; color: var(--text-soft); margin-bottom: 0.4rem;
   }
 
-  .config-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-
-  .field label,
-  .field-titel { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; color: var(--text-soft); margin-bottom: 0.4rem; }
-
+  select, textarea, input[type="text"] {
+    font-family: var(--font); color: var(--text);
+    background-color: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm); outline: none;
+    transition: border-color var(--vlot), box-shadow var(--vlot), background-color var(--vlot);
+  }
   select {
-    -webkit-appearance: none; appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a8696'/%3E%3C/svg%3E");
+    -webkit-appearance: none; appearance: none; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237c8b9b'/%3E%3C/svg%3E");
     background-repeat: no-repeat; background-position: right 0.8rem center;
-    cursor: pointer;
   }
-
-  .field select, textarea, .field input[type="text"], .field input[type="password"] {
-    width: 100%; background-color: var(--surface2); border: 1px solid var(--border);
-    border-radius: 8px; color: var(--text);
-    font-family: var(--font); outline: none; transition: border-color 0.18s, box-shadow 0.18s;
+  [data-thema="donker"] select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237e8d9d'/%3E%3C/svg%3E");
   }
-  .field select {
-    padding: 0.6rem 2rem 0.6rem 0.85rem; font-size: 0.88rem;
+  .field select, textarea { width: 100%; }
+  .field select { padding: 0.58rem 2rem 0.58rem 0.8rem; font-size: 0.87rem; }
+  select:hover, textarea:hover { border-color: var(--border-strong); }
+  select:focus, textarea:focus {
+    border-color: var(--accent); background-color: var(--surface);
+    box-shadow: 0 0 0 3.5px var(--accent-soft);
   }
-  .field input[type="text"], .field input[type="password"] {
-    padding: 0.6rem 0.85rem; font-size: 0.88rem;
-  }
-  .field select:focus, textarea:focus, .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(47,111,143,0.13); }
-  .field-note { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.4rem; }
+  .field-note { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.38rem; line-height: 1.45; }
   .field-note a { color: var(--accent); }
 
-  .key-row { display: flex; gap: 0.5rem; align-items: stretch; }
-  .key-row input { flex: 1; min-width: 0; }
-  .key-status { font-size: 0.72rem; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
-  .key-status .pip { width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); flex-shrink: 0; }
-  .key-status.ok .pip { background: var(--overweging); }
-  .key-status.ok { color: var(--overweging); }
-  .key-status.none { color: var(--text-muted); }
+  /* ── API-sleutel ─────────────────────────────────────────── */
+  /* Het eerste wat een nieuwe gebruiker moet doen, dus bovenaan de zijbalk. */
+  input[type="password"] {
+    font-family: var(--font); color: var(--text);
+    background-color: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm); outline: none;
+    transition: border-color var(--vlot), box-shadow var(--vlot), background-color var(--vlot);
+  }
+  input[type="password"]:hover { border-color: var(--border-strong); }
+  input[type="password"]:focus {
+    border-color: var(--accent); background-color: var(--surface);
+    box-shadow: 0 0 0 3.5px var(--accent-soft);
+  }
+  .sleutel-rij { display: flex; gap: 0.5rem; align-items: stretch; }
+  .sleutel-rij input { flex: 1; min-width: 0; padding: 0.58rem 0.8rem; font-size: 0.87rem; }
+  .sleutel-status {
+    font-size: 0.72rem; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.45rem;
+  }
+  .sleutel-status .pip {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); flex-shrink: 0;
+  }
+  .sleutel-status.ok { color: var(--ok); }
+  .sleutel-status.ok .pip { background: var(--ok); box-shadow: 0 0 0 3px var(--ok-soft); }
+  .sleutel-status.leeg { color: var(--text-muted); }
 
-  .opties { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.8rem; }
-  .optie-rij { display: flex; align-items: center; gap: 0.7rem; }
+  /* ── Privacy ─────────────────────────────────────────────── */
+  .privacy-note { font-size: 0.79rem; color: var(--text-soft); line-height: 1.65; }
+  .privacy-note a { color: var(--accent); }
+  .privacy-note strong { color: var(--text); }
+  textarea { padding: 0.7rem 0.9rem; font-size: 0.88rem; resize: vertical; line-height: 1.62; }
+  textarea::placeholder { color: var(--text-muted); opacity: 0.85; }
+  #customPrompt { min-height: 104px; }
+  #voorinformatie { min-height: 118px; }
+
+  /* ── Aanvinkvakjes ───────────────────────────────────────── */
+  .opties { display: flex; flex-direction: column; gap: 0.7rem; }
+  .optie-rij { display: flex; align-items: flex-start; gap: 0.65rem; }
   .optie-rij input[type="checkbox"] {
-    appearance: none; width: 18px; height: 18px; border: 1.5px solid var(--border-strong);
-    border-radius: 5px; background: var(--surface); cursor: pointer; flex-shrink: 0;
-    position: relative; transition: all 0.15s;
+    appearance: none; width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px;
+    border: 1.5px solid var(--border-strong); border-radius: 6px;
+    background: var(--surface); cursor: pointer; position: relative;
+    transition: background var(--vlot), border-color var(--vlot), transform 0.1s;
   }
+  .optie-rij input[type="checkbox"]:hover { border-color: var(--accent); }
+  .optie-rij input[type="checkbox"]:active { transform: scale(0.9); }
   .optie-rij input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
-  .optie-rij input[type="checkbox"]:checked::after { content: '✓'; position: absolute; color: white; font-size: 12px; top: -1px; left: 3px; }
-  .optie-rij label { font-size: 0.86rem; color: var(--text-soft); cursor: pointer; }
+  .optie-rij input[type="checkbox"]:checked::after {
+    content: ''; position: absolute; left: 5px; top: 1.5px;
+    width: 4px; height: 9px; border: solid var(--op-accent);
+    border-width: 0 2px 2px 0; transform: rotate(43deg);
+  }
+  .optie-rij label, .prompt-area .optie-rij label {
+    font-size: 0.845rem; color: var(--text-soft); cursor: pointer; line-height: 1.45;
+    text-transform: none; letter-spacing: normal; font-weight: 400; margin-bottom: 0;
+  }
 
-  .bron-keuze { display: flex; gap: 0.6rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+  /* ── Bronkeuze als segmentbalk ───────────────────────────── */
+  .bron-keuze {
+    display: flex; gap: 0.25rem; margin-bottom: 1.15rem; flex-wrap: wrap;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: var(--r-md); padding: 0.25rem;
+  }
   .bron-btn {
-    flex: 1; min-width: 130px; padding: 0.65rem 0.8rem; font-family: var(--font);
-    font-size: 0.78rem; font-weight: 500;
-    border: 1px solid var(--border); border-radius: 8px; background: var(--surface2);
-    color: var(--text-soft); cursor: pointer; transition: all 0.18s;
+    flex: 1 1 auto; min-width: 96px; padding: 0.52rem 0.6rem;
+    font-family: var(--font); font-size: 0.755rem; font-weight: 600;
+    border: 1px solid transparent; border-radius: 8px; background: transparent;
+    color: var(--text-muted); cursor: pointer; transition: all var(--vlot);
+    display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+    line-height: 1.25; text-align: center;
   }
-  .bron-btn:hover:not(.actief) { border-color: var(--accent); color: var(--text); }
-  .bron-btn.actief { background: var(--accent-light); border-color: var(--accent); color: var(--accent-strong); font-weight: 600; }
-
-  .prompt-area { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
-  .prompt-area.first { margin-top: 0; padding-top: 0; border-top: none; }
-  .prompt-area label { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; color: var(--text-soft); margin-bottom: 0.45rem; }
-  textarea {
-    padding: 0.7rem 0.9rem; font-size: 0.88rem; resize: vertical; line-height: 1.6;
+  .bron-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .bron-btn:hover:not(.actief) { color: var(--text); background: var(--surface-3); }
+  .bron-btn.actief {
+    background: var(--surface); border-color: var(--border);
+    color: var(--accent-strong); box-shadow: var(--schaduw-1);
   }
-  #customPrompt { min-height: 130px; }
-  #voorinformatie { min-height: 150px; }
-  textarea::placeholder { color: var(--text-muted); }
 
-  .geslacht-badge { display: inline-block; font-size: 0.66rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.2rem 0.7rem; border-radius: 20px; margin-left: 0.5rem; vertical-align: middle; }
-  .geslacht-man { background: #e3eef6; color: #2c6e8f; }
-  .geslacht-vrouw { background: #f6e6ee; color: #9c426b; }
-
-  .record-area { display: flex; align-items: center; gap: 1.6rem; }
+  /* ── Opnameknop ──────────────────────────────────────────── */
+  .record-area { display: flex; align-items: center; gap: 1.3rem; }
+  .record-knop-wrap { position: relative; width: 76px; height: 76px; flex-shrink: 0; }
   .btn-record {
-    width: 68px; height: 68px; border-radius: 50%; border: 2px solid var(--border-strong);
-    background: var(--surface2); cursor: pointer; display: flex; align-items: center;
-    justify-content: center; transition: all 0.25s; flex-shrink: 0;
+    position: relative; z-index: 2;
+    width: 76px; height: 76px; border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    background: linear-gradient(160deg, var(--surface), var(--surface-2));
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: transform var(--vlot), border-color var(--vlot), box-shadow var(--traag);
+    box-shadow: var(--schaduw-2), var(--glans);
   }
-  .btn-record:hover { border-color: var(--accent); box-shadow: 0 0 0 6px rgba(47,111,143,0.08); }
-  .btn-record .dot { width: 22px; height: 22px; border-radius: 50%; background: var(--recording-pulse); transition: all 0.25s; }
-  .btn-record.recording { border-color: var(--recording-pulse); box-shadow: 0 0 0 8px rgba(214,69,61,0.1); }
-  .btn-record.recording .dot { border-radius: 5px; width: 18px; height: 18px; animation: pulse 1.2s ease-in-out infinite; }
-  @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.84); } }
+  .btn-record:hover { border-color: var(--rec); transform: translateY(-1px); }
+  .btn-record:active { transform: scale(0.96); }
+  .btn-record .dot {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: linear-gradient(160deg, #ea5a52, var(--rec));
+    box-shadow: 0 2px 8px -1px var(--rec-soft);
+    transition: all var(--traag) ;
+  }
+  .btn-record.recording { border-color: var(--rec); }
+  .btn-record.recording .dot { border-radius: 6px; width: 21px; height: 21px; }
+  /* De ringen ademen mee met het binnenkomende niveau (--niveau, 0..1). */
+  .rec-ring {
+    position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+    border: 1.5px solid var(--rec); opacity: 0;
+    transform: scale(1); transition: transform 0.12s linear, opacity 0.25s;
+  }
+  .btn-record.recording ~ .rec-ring {
+    opacity: calc(0.34 - var(--niveau, 0) * 0.16);
+    transform: scale(calc(1 + var(--niveau, 0) * 0.30));
+  }
+  .btn-record.recording ~ .rec-ring.twee {
+    opacity: calc(0.20 - var(--niveau, 0) * 0.10);
+    transform: scale(calc(1.1 + var(--niveau, 0) * 0.52));
+  }
   .record-info { flex: 1; min-width: 0; }
-  .record-status { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.3rem; transition: color 0.2s; }
-  .record-status.active { color: var(--recording-pulse); }
-  .record-timer { font-size: 1.7rem; font-weight: 500; color: var(--text-muted); letter-spacing: 0.04em; transition: color 0.2s; font-variant-numeric: tabular-nums; }
-  .record-timer.active { color: var(--text); }
-
-  /* Progress stepper */
-  .progress-steps {
-    display: flex; align-items: center;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); box-shadow: var(--shadow);
-    padding: 1.1rem 1.5rem;
+  .record-status { font-size: 0.83rem; color: var(--text-muted); margin-bottom: 0.15rem; transition: color var(--vlot); }
+  .record-status.active { color: var(--rec); font-weight: 500; }
+  .record-timer {
+    font-size: 1.85rem; font-weight: 500; color: var(--text-muted); letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums; line-height: 1.15; transition: color var(--vlot);
   }
+  .record-timer.active { color: var(--text); }
+  .record-hint { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem; display: flex; align-items: center; gap: 0.35rem; }
+
+  kbd {
+    font-family: var(--font); font-size: 0.68rem; font-weight: 600; line-height: 1;
+    padding: 0.22em 0.45em; border-radius: 5px; color: var(--text-soft);
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-bottom-width: 2px; white-space: nowrap; text-transform: none; letter-spacing: normal;
+  }
+  .btn kbd { background: color-mix(in srgb, currentColor 12%, transparent); border-color: transparent; color: inherit; opacity: 0.9; }
+
+  /* ── Golfbeeld en niveaus ────────────────────────────────── */
+  .golf-wrap {
+    margin-top: 1rem; border-radius: var(--r-md); background: var(--surface-2);
+    border: 1px solid var(--border); padding: 0.55rem 0.7rem; overflow: hidden;
+  }
+  #golfCanvas { display: block; width: 100%; height: 46px; }
+
+  .niveau-meters { margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; }
+  .niveau-rij { display: flex; align-items: center; gap: 0.6rem; }
+  .niveau-label { font-size: 0.73rem; color: var(--text-muted); width: 8.2rem; flex-shrink: 0; }
+  .niveau-balk { flex: 1; height: 5px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
+  .niveau-vul {
+    height: 100%; width: 0%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent-2), var(--ok));
+    transition: width 0.08s linear, background 0.3s;
+  }
+  .niveau-vul.stil { background: var(--border-strong); }
+  .niveau-waarschuwing {
+    margin-top: 0.45rem; font-size: 0.76rem; color: var(--warn);
+    display: flex; align-items: flex-start; gap: 0.4rem; line-height: 1.45;
+  }
+
+  /* ── Uploadvak ───────────────────────────────────────────── */
+  .upload-area { margin-top: 1.15rem; padding-top: 1.15rem; border-top: 1px solid var(--border); }
+  .upload-btn {
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer;
+    font-family: var(--font); font-size: 0.8rem; font-weight: 500;
+    border: 1.5px dashed var(--border-strong); border-radius: var(--r-md); padding: 0.68rem 1rem;
+    color: var(--text-soft); background: transparent; transition: all var(--vlot);
+  }
+  .upload-btn svg { width: 15px; height: 15px; }
+  .upload-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .upload-area input[type="file"] { display: none; }
+  .upload-filename { font-size: 0.78rem; color: var(--text); margin-top: 0.5rem; word-break: break-all; }
+
+  /* ── Uitklapper ──────────────────────────────────────────── */
+  details.uitklap { border-top: 1px solid var(--border); margin-top: 1.15rem; padding-top: 0.35rem; }
+  details.uitklap.los { border-top: none; margin-top: 0; padding-top: 0; }
+  details.uitklap > summary {
+    list-style: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.6rem 0; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.11em;
+    font-weight: 700; color: var(--text-muted); transition: color var(--vlot);
+  }
+  details.uitklap > summary::-webkit-details-marker { display: none; }
+  details.uitklap > summary:hover { color: var(--accent); }
+  details.uitklap > summary .pijl { margin-left: auto; transition: transform var(--vlot); }
+  details.uitklap[open] > summary .pijl { transform: rotate(180deg); }
+  details.uitklap > summary .pijl svg { width: 13px; height: 13px; display: block; }
+  .uitklap-inhoud { padding: 0.35rem 0 0.4rem; animation: zak 0.22s ease; }
+  @keyframes zak { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  /* ── Stappenbalk ─────────────────────────────────────────── */
+  .progress-wrap {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-xl); box-shadow: var(--schaduw-2), var(--glans); overflow: hidden;
+  }
+  .progress-steps { display: flex; align-items: center; padding: 1rem 1.4rem; }
   .step {
     flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.45rem;
-    position: relative; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;
-    color: var(--text-muted); transition: color 0.3s; text-align: center;
+    position: relative; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.09em;
+    font-weight: 700; color: var(--text-muted); transition: color var(--traag); text-align: center;
   }
   .step:not(:last-child)::after {
-    content: ''; position: absolute;
-    left: calc(50% + 16px); width: calc(100% - 32px);
-    top: 14px; height: 2px;
-    background: var(--border); transition: background 0.3s; z-index: 0;
+    content: ''; position: absolute; left: calc(50% + 18px); width: calc(100% - 36px);
+    top: 14px; height: 2px; border-radius: 2px;
+    background: var(--border); transition: background var(--traag); z-index: 0;
   }
   .step-dot {
     width: 30px; height: 30px; border-radius: 50%;
-    border: 2px solid var(--border-strong); background: var(--surface2);
+    border: 1.5px solid var(--border-strong); background: var(--surface-2);
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.74rem; transition: all 0.3s; position: relative; z-index: 1;
+    font-size: 0.74rem; font-weight: 700; transition: all var(--traag); position: relative; z-index: 1;
   }
   .step-label { line-height: 1; }
-  .step.active .step-dot { border-color: var(--accent); background: var(--accent-light); color: var(--accent-strong); box-shadow: 0 0 0 4px rgba(47,111,143,0.1); }
+  .step.active .step-dot {
+    border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
   .step.active { color: var(--accent-strong); }
-  .step.done .step-dot { border-color: var(--accent); background: var(--accent); color: white; font-size: 0; }
-  .step.done .step-dot::after { content: '✓'; font-size: 0.74rem; }
+  .step.active .step-dot::before {
+    content: ''; position: absolute; inset: -1.5px; border-radius: 50%;
+    border: 1.5px solid var(--accent); animation: golfje 1.8s ease-out infinite;
+  }
+  @keyframes golfje {
+    0% { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+  .step.done .step-dot { border-color: var(--accent); background: var(--accent); color: transparent; font-size: 0; }
+  .step.done .step-dot::after {
+    content: ''; width: 5px; height: 10px; border: solid var(--op-accent);
+    border-width: 0 2px 2px 0; transform: rotate(43deg) translate(-1px,-1px);
+  }
   .step.done { color: var(--accent); }
   .step.done::after { background: var(--accent); }
 
+  .bezig-balk { height: 2px; background: var(--surface-3); overflow: hidden; }
+  .bezig-balk::after {
+    content: ''; display: block; height: 100%; width: 40%;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    animation: schuif 1.35s ease-in-out infinite;
+  }
+  @keyframes schuif { 0% { transform: translateX(-100%); } 100% { transform: translateX(320%); } }
+
+  /* ── Tekstvakken ─────────────────────────────────────────── */
   .transcript-box {
-    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
-    padding: 1rem 1.1rem; font-size: 0.88rem; line-height: 1.7; color: var(--text-muted);
-    min-height: 80px; max-height: 220px; overflow-y: auto; white-space: pre-wrap;
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md);
+    padding: 0.95rem 1.05rem; font-size: 0.875rem; line-height: 1.72; color: var(--text-muted);
+    min-height: 78px; max-height: 220px; overflow-y: auto; white-space: pre-wrap;
+    transition: max-height var(--traag), color var(--vlot);
   }
   .transcript-box.filled { color: var(--text); }
+  .transcript-box.uit { max-height: 60vh; }
 
   .titel-regel {
-    font-family: var(--serif); font-size: 1.35rem; color: var(--accent-strong);
-    margin-bottom: 1rem; padding-bottom: 0.7rem; border-bottom: 1px solid var(--border); display: none;
+    font-family: var(--serif); font-size: 1.42rem; line-height: 1.3; color: var(--text);
+    margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); display: none;
   }
-  .titel-regel.show { display: block; }
+  .titel-regel.show { display: block; animation: opkomen 0.4s ease both; }
+  @keyframes opkomen { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
   .output-box {
-    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
-    padding: 1.3rem 1.4rem; font-size: 0.92rem; line-height: 1.7; color: var(--text);
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md);
+    padding: 1.25rem 1.4rem; font-size: 0.93rem; line-height: 1.72; color: var(--text);
     min-height: 120px; white-space: pre-wrap;
   }
-  .output-box.placeholder { color: var(--text-muted); }
+  .output-box.placeholder { color: var(--text-muted); display: flex; align-items: center; justify-content: center; text-align: center; min-height: 150px; }
   .output-box.formatted { white-space: normal; }
-  .output-box.formatted h2 { font-size: 1.08rem; font-weight: 700; color: var(--accent-strong); margin: 1.4rem 0 0.5rem; }
+  .output-box.formatted h2 {
+    font-size: 1.02rem; font-weight: 700; color: var(--accent-strong); margin: 1.5rem 0 0.5rem;
+    letter-spacing: -0.005em;
+    display: flex; align-items: baseline; gap: 0.55rem; flex-wrap: wrap;
+  }
   .output-box.formatted h2:first-child { margin-top: 0; }
-  .output-box.formatted h3 { font-size: 0.95rem; font-weight: 600; color: var(--text); margin: 1.1rem 0 0.35rem; }
+
+  /* Elke sectie gaat in het dossier naar een eigen veld, dus heeft elke kop een
+     eigen kopieerknop. Halfzichtbaar in rust, vol bij aanwijzen. */
+  .sectie-kopieer {
+    font-family: var(--font); font-size: 0.66rem; font-weight: 600; line-height: 1;
+    letter-spacing: normal; text-transform: none; white-space: nowrap;
+    padding: 0.28rem 0.5rem; border-radius: var(--r-sm);
+    border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
+    cursor: pointer; opacity: 0.5; transition: all var(--vlot);
+    user-select: none;   /* zodat de knoptekst niet meekomt als je zelf tekst selecteert */
+  }
+  .output-box.formatted h2:hover .sectie-kopieer, .sectie-kopieer:focus-visible { opacity: 1; }
+  .sectie-kopieer:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .sectie-kopieer:active { transform: translateY(1px); }
+  .sectie-kopieer.gedaan {
+    opacity: 1; color: var(--ok); border-color: var(--ok-rand); background: var(--ok-soft);
+  }
+  .output-box.formatted h3 { font-size: 0.94rem; font-weight: 600; color: var(--text); margin: 1.15rem 0 0.3rem; }
   .output-box.formatted p { margin: 0.55rem 0; }
-  .output-box.formatted ul, .output-box.formatted ol { margin: 0.5rem 0 0.6rem 1.4rem; }
-  .output-box.formatted li { margin: 0.28rem 0; }
+  .output-box.formatted ul, .output-box.formatted ol { margin: 0.5rem 0 0.6rem 1.35rem; }
+  .output-box.formatted li { margin: 0.3rem 0; padding-left: 0.15rem; }
+  .output-box.formatted li::marker { color: var(--accent); }
   .output-box.formatted strong { font-weight: 600; }
   .output-box.formatted hr { border: none; border-top: 1px solid var(--border); margin: 1.2rem 0; }
+  .output-box.formatted code { font-size: 0.86em; background: var(--surface-3); padding: 0.1em 0.35em; border-radius: 4px; }
 
-  .overweging-card { border-color: var(--overweging); display: none; }
-  .overweging-card.show { display: block; }
-  .overweging-card .card-label { color: var(--overweging); }
-  .overweging-box {
-    background: var(--overweging-light); border: 1px solid rgba(47,143,125,0.3); border-radius: 8px;
-    padding: 0.7rem 1.3rem; font-size: 0.9rem; line-height: 1.7; color: var(--text);
-  }
-  .overweging-hint { font-size: 0.72rem; color: var(--overweging); margin-bottom: 0.6rem; }
-  .overweging-item { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.55rem 0; }
-  .overweging-item:not(:last-child) { border-bottom: 1px solid rgba(47,143,125,0.16); }
-  .overweging-item input[type="checkbox"] {
-    appearance: none; width: 18px; height: 18px; border: 1.5px solid rgba(47,143,125,0.6);
-    border-radius: 5px; background: var(--surface); cursor: pointer; flex-shrink: 0; margin-top: 3px;
-    position: relative; transition: all 0.15s;
-  }
-  .overweging-item input[type="checkbox"]:checked { background: var(--overweging); border-color: var(--overweging); }
-  .overweging-item input[type="checkbox"]:checked::after { content: '✓'; position: absolute; color: white; font-size: 12px; top: -1px; left: 3px; }
-  .overweging-item label { font-size: 0.9rem; line-height: 1.6; cursor: pointer; flex: 1; transition: opacity 0.15s; }
-  .overweging-item input:not(:checked) + label { opacity: 0.4; text-decoration: line-through; }
+  .telling { font-size: 0.7rem; color: var(--text-muted); font-weight: 500; font-variant-numeric: tabular-nums; text-transform: none; letter-spacing: normal; }
 
-  .upload-area { margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
-  .upload-area .upload-label { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; color: var(--text-soft); margin-bottom: 0.5rem; }
-  .upload-btn {
-    display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer;
-    font-family: var(--font); font-size: 0.8rem; font-weight: 500;
-    border: 1px dashed var(--border-strong); border-radius: 8px; padding: 0.6rem 1rem;
-    color: var(--text-soft); background: var(--surface2); transition: all 0.18s;
+  .geslacht-badge {
+    display: inline-block; font-size: 0.64rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; padding: 0.2rem 0.6rem; border-radius: 999px; vertical-align: middle;
   }
-  .upload-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .upload-area input[type="file"] { display: none; }
-  .upload-filename { font-size: 0.78rem; color: var(--text); margin-top: 0.55rem; word-break: break-all; }
+  .geslacht-man { background: rgba(44,110,143,0.13); color: #2c6e8f; }
+  .geslacht-vrouw { background: rgba(156,66,107,0.13); color: #9c426b; }
+  [data-thema="donker"] .geslacht-man { color: #7cc0dd; }
+  [data-thema="donker"] .geslacht-vrouw { color: #e6a0c0; }
 
-  .output-actions { display: flex; gap: 0.7rem; margin-top: 1.1rem; justify-content: flex-end; align-items: center; flex-wrap: wrap; }
-  .copy-confirmation { font-size: 0.78rem; color: var(--accent); opacity: 0; transition: opacity 0.3s; margin-right: auto; }
-  .copy-confirmation.show { opacity: 1; }
-
-  .regen-panel {
-    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
-    padding: 0.9rem 1rem; margin-top: 1rem; display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap;
+  /* ── Collegiale tip ──────────────────────────────────────── */
+  .tip-card { border-color: var(--ok-rand); display: none; }
+  .tip-card.show { display: block; animation: opkomen 0.4s ease both; }
+  .tip-card .card-label { color: var(--ok); }
+  .tip-box {
+    background: var(--ok-soft); border: 1px solid var(--ok-rand); border-radius: var(--r-md);
+    padding: 0.6rem 1.2rem; font-size: 0.9rem; line-height: 1.7;
   }
-  .regen-panel.hidden { display: none; }
-  .regen-panel-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-soft); }
+
+  /* ── Knoppen ─────────────────────────────────────────────── */
+  .btn {
+    font-family: var(--font); font-size: 0.815rem; font-weight: 600;
+    padding: 0.58rem 1.05rem; border-radius: var(--r-sm);
+    border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-soft);
+    cursor: pointer; transition: all var(--vlot);
+    display: inline-flex; align-items: center; gap: 0.45rem; white-space: nowrap;
+    text-transform: none; letter-spacing: normal;
+  }
+  .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .btn:active:not(:disabled) { transform: translateY(1px); }
+  .btn.primary {
+    background: linear-gradient(160deg, var(--accent-2), var(--accent));
+    border-color: transparent; color: var(--op-accent);
+    box-shadow: 0 1px 2px rgba(12,26,42,0.12), 0 8px 20px -10px var(--accent-rand), var(--glans);
+  }
+  .btn.primary:hover:not(:disabled) { filter: brightness(1.06); color: var(--op-accent); }
+  .btn.ghost { border-color: transparent; background: transparent; padding: 0.4rem 0.6rem; font-size: 0.76rem; }
+  .btn.ghost:hover:not(:disabled) { background: var(--surface-2); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.primary:disabled {
+    background: var(--surface-2); border: 1px solid var(--border); color: var(--text-muted); box-shadow: none;
+  }
+  .btn-klein { padding: 0.3rem 0.6rem; font-size: 0.78rem; }
+
+  .output-actions { display: flex; gap: 0.55rem; margin-top: 1.1rem; justify-content: flex-end; align-items: center; flex-wrap: wrap; }
+  .output-actions .links { margin-right: auto; }
+
+  /* ── Panelen ─────────────────────────────────────────────── */
+  .regen-panel, .suggestie-paneel {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md);
+    padding: 0.85rem 0.95rem; margin-top: 0.85rem;
+  }
+  .regen-panel { display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; }
+  .regen-panel-label { font-size: 0.71rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-soft); }
   .regen-panel select {
-    background-color: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-    padding: 0.4rem 2rem 0.4rem 0.7rem; font-family: var(--font);
-    font-size: 0.82rem; color: var(--text); outline: none; transition: border-color 0.18s;
+    background-color: var(--surface); padding: 0.38rem 1.9rem 0.38rem 0.65rem; font-size: 0.8rem;
   }
-  .regen-panel select:focus { border-color: var(--accent); }
+  .suggestie-paneel label { display: block; font-size: 0.79rem; color: var(--text-soft); margin-bottom: 0.5rem; line-height: 1.5; }
+  .suggestie-paneel textarea { min-height: 74px; background: var(--surface); font-size: 0.85rem; }
+  .suggestie-acties { margin-top: 0.6rem; display: flex; justify-content: flex-end; align-items: center; gap: 0.6rem; }
 
   /* Versiegeschiedenis en herziening. De versies blijven alleen in het geheugen
      van dit tabblad: er staat cliëntinformatie in en die hoort niet op schijf. */
   .versie-balk {
-    display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
-    margin-top: 1rem; font-size: 0.8rem; color: var(--text-soft);
+    display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+    margin-top: 0.9rem; font-size: 0.79rem; color: var(--text-soft);
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: var(--r-md); padding: 0.45rem 0.6rem;
   }
-  .versie-balk.hidden { display: none; }
-  .versie-suggestie { font-style: italic; opacity: 0.85; }
-  .btn-klein { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
+  .versie-balk .btn-klein { padding: 0.2rem 0.55rem; }
+  #versieLabel { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .versie-suggestie { font-style: italic; opacity: 0.85; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-  .suggestie-paneel {
-    background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
-    padding: 0.9rem 1rem; margin-top: 0.7rem;
+  /* ── Meldingen ───────────────────────────────────────────── */
+  .error-msg {
+    background: var(--danger-soft); border: 1px solid var(--danger-rand); border-radius: var(--r-lg);
+    padding: 0.85rem 1.1rem; font-size: 0.86rem; color: var(--danger); display: none;
+    align-items: flex-start; gap: 0.6rem; line-height: 1.5;
   }
-  .suggestie-paneel.hidden { display: none; }
-  .suggestie-paneel label {
-    display: block; font-size: 0.78rem; color: var(--text-soft); margin-bottom: 0.5rem;
-  }
-  .suggestie-paneel textarea {
-    width: 100%; min-height: 74px; resize: vertical;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-    padding: 0.6rem 0.7rem; font-family: var(--font); font-size: 0.85rem;
-    color: var(--text); outline: none; transition: border-color 0.18s;
-  }
-  .suggestie-paneel textarea:focus { border-color: var(--accent); }
-  .suggestie-acties { margin-top: 0.6rem; display: flex; justify-content: flex-end; }
+  .error-msg.visible { display: flex; animation: opkomen 0.3s ease both; }
+  .error-msg svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+  .error-msg .sluit { margin-left: auto; cursor: pointer; opacity: 0.6; background: none; border: none; color: inherit; padding: 0 0 0 0.5rem; }
+  .error-msg .sluit:hover { opacity: 1; }
 
-  .btn {
-    font-family: var(--font); font-size: 0.82rem; font-weight: 500;
-    padding: 0.6rem 1.2rem; border-radius: 8px;
-    border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-soft);
-    cursor: pointer; transition: all 0.16s ease;
+  .info-msg {
+    background: var(--accent-soft); border: 1px solid var(--accent-rand); border-radius: var(--r-md);
+    padding: 0.7rem 0.9rem; font-size: 0.795rem; color: var(--text-soft); margin-top: 1rem;
+    display: none; overflow-wrap: anywhere; line-height: 1.55;
   }
-  .btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
-  .btn.primary {
-    background: var(--accent); border-color: var(--accent); color: white; font-weight: 600;
-    box-shadow: 0 1px 6px rgba(47,111,143,0.3);
+  .info-msg.visible { display: block; animation: zak 0.25s ease both; }
+  .info-msg strong { color: var(--text); }
+  .info-keuze { display: flex; flex-direction: column; gap: 0.3rem; margin-top: 0.65rem; min-width: 0; }
+  .info-keuze label { font-size: 0.72rem; font-weight: 600; color: var(--text-soft); }
+  .info-keuze select {
+    width: 100%; min-width: 0; background-color: var(--surface);
+    padding: 0.38rem 1.7rem 0.38rem 0.6rem; font-size: 0.79rem; text-overflow: ellipsis;
   }
-  .btn.primary:hover:not(:disabled) { background: var(--accent-strong); border-color: var(--accent-strong); color: white; }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn.primary:disabled { background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); box-shadow: none; }
-  .btn.small { padding: 0.6rem 0.9rem; font-size: 0.78rem; }
 
-  .statusbar { font-size: 0.75rem; color: var(--text-muted); padding: 0.4rem 0; display: flex; align-items: center; gap: 0.5rem; }
-  .dot-status { width: 8px; height: 8px; border-radius: 50%; background: var(--border-strong); transition: all 0.3s; }
-  .dot-status.ok { background: var(--overweging); }
-  .dot-status.err { background: var(--danger); }
-  .dot-status.busy { background: var(--warning); animation: pulse 1s infinite; }
+  /* ── Toasts ──────────────────────────────────────────────── */
+  .toasts {
+    position: fixed; right: 1.25rem; bottom: 1.25rem; z-index: 90;
+    display: flex; flex-direction: column-reverse; gap: 0.5rem; pointer-events: none;
+  }
+  .toast {
+    display: flex; align-items: center; gap: 0.6rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 3px solid var(--ok);
+    border-radius: var(--r-md); padding: 0.65rem 0.95rem;
+    font-size: 0.83rem; color: var(--text); box-shadow: var(--schaduw-pop);
+    animation: toastIn 0.32s cubic-bezier(.2,.9,.3,1.3) both;
+    max-width: 22rem;
+  }
+  .toast.weg { animation: toastUit 0.28s ease forwards; }
+  .toast.fout { border-left-color: var(--danger); }
+  .toast svg { width: 15px; height: 15px; flex-shrink: 0; color: var(--ok); }
+  .toast.fout svg { color: var(--danger); }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(10px) scale(0.97); } to { opacity: 1; transform: none; } }
+  @keyframes toastUit { to { opacity: 0; transform: translateX(14px); } }
 
-  .error-msg { background: var(--danger-light); border: 1px solid #e6b3ad; border-radius: var(--radius); padding: 0.8rem 1.1rem; font-size: 0.86rem; color: var(--danger); display: none; }
-  .error-msg.visible { display: block; }
-  .info-msg { background: var(--accent-light); border: 1px solid #b9d6e4; border-radius: 8px; padding: 0.7rem 1rem; font-size: 0.8rem; color: var(--accent-strong); margin-top: 1rem; display: none; }
-  .info-msg.visible { display: block; }
-  .privacy-note { font-size: 0.78rem; color: var(--text-muted); line-height: 1.6; }
-  .privacy-note a { color: var(--accent); }
+  /* ── Sneltoetsvenster ────────────────────────────────────── */
+  .overlay {
+    position: fixed; inset: 0; z-index: 100; display: none;
+    align-items: center; justify-content: center; padding: 1.5rem;
+    background: color-mix(in srgb, var(--bg) 55%, rgba(0,0,0,0.45));
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  .overlay.open { display: flex; animation: opkomen 0.2s ease both; }
+  .overlay-kaart {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl);
+    box-shadow: var(--schaduw-pop); padding: 1.5rem 1.6rem; width: min(30rem, 100%);
+    max-height: 85vh; overflow-y: auto;
+    animation: popIn 0.26s cubic-bezier(.2,.9,.3,1.2) both;
+  }
+  @keyframes popIn { from { opacity: 0; transform: translateY(12px) scale(0.97); } to { opacity: 1; transform: none; } }
+  .overlay-kop { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.1rem; }
+  .overlay-kop h2 { font-family: var(--serif); font-weight: 400; font-size: 1.3rem; }
+  .overlay-kop .icoonknop { margin-left: auto; }
+  .sneltoets-rij {
+    display: flex; align-items: center; gap: 1rem; padding: 0.42rem 0;
+    font-size: 0.86rem; color: var(--text-soft);
+  }
+  .sneltoets-rij:not(:last-child) { border-bottom: 1px solid var(--border); }
+  .sneltoets-rij .toetsen { margin-left: auto; display: flex; gap: 0.3rem; flex-shrink: 0; }
+  .sneltoets-groep {
+    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.11em; font-weight: 700;
+    color: var(--text-muted); margin: 1.1rem 0 0.2rem;
+  }
+  .sneltoets-groep:first-of-type { margin-top: 0; }
 
-  .spinner { display: inline-block; width: 12px; height: 12px; border: 1.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
-  @keyframes spin { to { transform: rotate(360deg); } }
   .hidden { display: none !important; }
-
-  /* ── Responsive ──────────────────────────────────────────── */
-  @media (max-width: 880px) {
-    body { padding: 1.5rem 1rem; }
-    .layout { grid-template-columns: 1fr; gap: 1.25rem; }
-    .sidebar { position: static; top: auto; }
-    header h1 { font-size: 1.7rem; }
+  .spinner {
+    display: inline-block; width: 12px; height: 12px; border: 1.5px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite;
+    vertical-align: middle; flex-shrink: 0;
   }
-  @media (max-width: 520px) {
-    body { padding: 1.1rem 0.8rem; }
-    .card { padding: 1.2rem; }
-    .progress-steps { padding: 1rem 0.8rem; }
-    .step-label { font-size: 0.58rem; }
-    .record-area { gap: 1.1rem; }
-    .record-timer { font-size: 1.4rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* De kaarten komen bij het laden zacht op; dat maakt de opbouw van het
+     scherm rustig in plaats van dat alles er ineens staat. */
+  .opkomst { animation: opkomen 0.5s cubic-bezier(.2,.7,.3,1) both; }
+  .opkomst:nth-child(2) { animation-delay: 0.05s; }
+  .opkomst:nth-child(3) { animation-delay: 0.1s; }
+  .opkomst:nth-child(4) { animation-delay: 0.15s; }
+
+  /* ── Klein scherm ────────────────────────────────────────── */
+  @media (max-width: 940px) {
+    .topbar-inner { padding: 0.75rem 1rem; }
+    .layout { grid-template-columns: 1fr; gap: 1.1rem; padding: 1.1rem 1rem 3rem; }
+    .sidebar { position: static; top: auto; }
+    .statuspil { max-width: 11rem; }
+  }
+  @media (max-width: 560px) {
+    .card { padding: 1.1rem; border-radius: var(--r-lg); }
+    .progress-steps { padding: 0.9rem 0.5rem; }
+    .step-label { font-size: 0.57rem; letter-spacing: 0.06em; }
+    .record-timer { font-size: 1.5rem; }
+    .merk .ondertitel { display: none; }
+    .statuspil { max-width: none; padding: 0.34rem 0.5rem; }
+    .statuspil #statusText { display: none; }
     .output-actions { justify-content: stretch; }
-    .output-actions .btn { flex: 1; }
-    .copy-confirmation { margin-right: 0; width: 100%; text-align: center; margin-bottom: 0.3rem; }
+    .output-actions .btn { flex: 1; justify-content: center; }
+    .toasts { left: 1rem; right: 1rem; bottom: 1rem; }
+    .toast { max-width: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important; animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important; scroll-behavior: auto !important;
+    }
   }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Sessienotitie</h1>
-  <span>Klinische documentatie via Mistral</span>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="merk">
+      <div class="merk-teken" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round">
+          <path d="M4 12v1M8 7v10M12 4v16M16 8v8M20 11v2"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Sessienotitie</h1>
+        <div class="ondertitel">Klinische documentatie</div>
+      </div>
+    </div>
+    <div class="topbar-acties">
+      <div class="statuspil" title="Status">
+        <span class="dot-status" id="statusDot"></span>
+        <span id="statusText">Gereed</span>
+      </div>
+      <button class="icoonknop" id="btnThema" title="Donker of licht (D)" aria-label="Thema wisselen">
+        <svg class="maan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="zon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <a class="icoonknop" href="https://github.com/Klankschrift/sessienotitie" target="_blank" rel="noopener" title="Broncode op GitHub" aria-label="Broncode op GitHub">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48l-.01-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.35 1.09 2.92.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.69-4.57 4.94.36.31.68.92.68 1.86l-.01 2.75c0 .27.18.58.69.48A10 10 0 0 0 12 2z"/></svg>
+      </a>
+      <button class="icoonknop" id="btnSneltoetsen" title="Sneltoetsen (?)" aria-label="Sneltoetsen tonen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2.5"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M8 14h8"/></svg>
+      </button>
+    </div>
+  </div>
 </header>
 
 <div class="layout"><aside class="sidebar">
 
   <!-- API-sleutel -->
-  <div class="card">
-    <div class="card-label">Mistral API-sleutel</div>
+  <div class="card opkomst">
+    <div class="card-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.7 12.3L21 2M17 6l3 3M14 9l3 3"/></svg>
+      Mistral API-sleutel
+    </div>
     <div class="field">
-      <div class="key-row">
-        <input type="password" id="apiKey" placeholder="Plak je Mistral-sleutel…" autocomplete="off" spellcheck="false">
-        <button class="btn small" id="btnSaveKey">Opslaan</button>
+      <div class="sleutel-rij">
+        <input type="password" id="apiKey" placeholder="Plak je Mistral-sleutel…" autocomplete="off" spellcheck="false" aria-label="Mistral API-sleutel">
+        <button class="btn" id="btnSaveKey">Opslaan</button>
       </div>
-      <div class="key-status none" id="keyStatus"><span class="pip"></span><span id="keyStatusText">Nog geen sleutel opgeslagen</span></div>
+      <div class="sleutel-status leeg" id="sleutelStatus">
+        <span class="pip"></span><span id="sleutelStatusTekst">Nog geen sleutel opgeslagen</span>
+      </div>
       <div class="field-note">
-        Een API-sleutel is een soort persoonlijk wachtwoord waarmee deze app namens jou bij Mistral
-        mag transcriberen en schrijven. Maak er een aan op
+        Een API-sleutel is een soort persoonlijk wachtwoord waarmee deze pagina namens jou bij
+        Mistral mag transcriberen en schrijven. Maak er een aan op
         <a href="https://console.mistral.ai/api-keys" target="_blank" rel="noopener">console.mistral.ai</a>
-        — stap voor stap uitgelegd in de <a href="https://github.com/Klankschrift/sessienotitie/blob/main/README.md" target="_blank" rel="noopener">handleiding</a>.
+        — stap voor stap uitgelegd in de
+        <a href="https://github.com/Klankschrift/sessienotitie/blob/main/README.md" target="_blank" rel="noopener">handleiding</a>.
         Hij blijft alleen in deze browser en gaat uitsluitend rechtstreeks naar Mistral.
         <a href="#" id="btnClearKey">Wissen</a>
       </div>
     </div>
   </div>
 
+  <!-- Opname -->
+  <div class="card opkomst">
+    <div class="card-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/></svg>
+      Opname
+    </div>
+    <div class="bron-keuze" role="group" aria-label="Opnamebron">
+      <button class="bron-btn actief" id="bronMic" onclick="kiesBron('mic')" title="Alleen de microfoon van dit apparaat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+        Microfoon
+      </button>
+      <button class="bron-btn" id="bronScherm" onclick="kiesBron('scherm')" title="Voor een online gesprek: gedeelde audio plus je eigen microfoon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Scherm + audio
+      </button>
+    </div>
+
+    <div class="record-area">
+      <div class="record-knop-wrap">
+        <button class="btn-record" id="btnRecord" aria-label="Opname starten of stoppen">
+          <span class="dot"></span>
+        </button>
+        <span class="rec-ring" aria-hidden="true"></span>
+        <span class="rec-ring twee" aria-hidden="true"></span>
+      </div>
+      <div class="record-info">
+        <div class="record-status" id="recordStatus">Klaar om op te nemen</div>
+        <div class="record-timer" id="recordTimer">00:00:00</div>
+        <div class="record-hint"><kbd>Spatie</kbd> starten en stoppen</div>
+      </div>
+    </div>
+
+    <div class="golf-wrap"><canvas id="golfCanvas" aria-hidden="true"></canvas></div>
+
+    <div class="niveau-meters hidden" id="niveauMeters">
+      <div class="niveau-rij">
+        <span class="niveau-label">Jouw microfoon</span>
+        <div class="niveau-balk"><div class="niveau-vul" id="niveauMic"></div></div>
+      </div>
+      <div class="niveau-rij hidden" id="niveauSchermRij">
+        <span class="niveau-label">Gesprekspartner</span>
+        <div class="niveau-balk"><div class="niveau-vul" id="niveauScherm"></div></div>
+      </div>
+      <div class="niveau-waarschuwing hidden" id="niveauWaarschuwing"></div>
+    </div>
+
+    <div class="info-msg" id="schermInfo">
+      Kies bij het delen een <strong>tabblad</strong> of <strong>venster</strong> en vink
+      "Audio delen" aan. Je eigen microfoon wordt automatisch meegenomen, zodat beide kanten
+      van het gesprek worden opgenomen. Volledig-scherm delen levert op sommige systemen geen audio.
+    </div>
+
+    <div class="field" style="margin-top: 1.15rem;">
+      <label for="micSelect">Microfoon</label>
+      <select id="micSelect"><option value="">Bezig met laden...</option></select>
+      <div class="field-note" id="micNote">Microfoons worden geladen...</div>
+      <div class="field-note">Een losse vergadermicrofoon (usb of bluetooth) geeft duidelijk
+        betere resultaten dan de ingebouwde laptopmicrofoon — en dus een nauwkeuriger verslag.</div>
+    </div>
+
+    <div class="upload-area">
+      <span class="upload-label">Of werk een bestaande opname uit</span>
+      <label class="upload-btn" for="audioUpload">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        Audiobestand kiezen…
+        <kbd>U</kbd>
+      </label>
+      <input type="file" id="audioUpload" accept="audio/*,video/*,.m4a,.mp3,.wav,.ogg,.webm,.mp4,.opus,.flac">
+      <div class="upload-filename" id="uploadFilename"></div>
+    </div>
+  </div>
+
   <!-- Instellingen -->
-  <div class="card">
-    <div class="card-label">Instellingen</div>
+  <div class="card opkomst">
+    <div class="card-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Instellingen
+    </div>
     <div class="config-grid">
       <div class="field">
-        <label>Type gesprek</label>
+        <label for="gesprekType">Type gesprek</label>
         <select id="gesprekType">
           <option value="intakegesprek">Intakegesprek</option>
           <option value="behandelgesprek" selected>Behandelgesprek</option>
         </select>
       </div>
       <div class="field">
-        <label>Geslacht cliënt</label>
+        <label for="geslacht">Geslacht cliënt</label>
         <select id="geslacht" onchange="updateGeslachtBadge()">
           <option value="onbekend" selected>Niet opgegeven</option>
           <option value="man">Man</option>
           <option value="vrouw">Vrouw</option>
         </select>
       </div>
-      <div class="field">
-        <label>Uitvoerformaat (kopiëren)</label>
-        <select id="outputFormat">
-          <option value="plat" selected>Platte tekst</option>
-          <option value="markdown">Ruwe Markdown</option>
-          <option value="html">Opgemaakt (HTML)</option>
-        </select>
-        <div class="field-note" id="formatNote">Wordt als platte tekst naar het klembord gekopieerd.</div>
-      </div>
-      <div class="field">
-        <label>Microfoon</label>
-        <select id="micSelect"><option value="">Bezig met laden...</option></select>
-        <div class="field-note" id="micNote">Microfoons worden geladen — je browser vraagt nu toestemming, zodat de lijst getoond kan worden. Er wordt nog niets opgenomen.</div>
-        <div class="field-note">🎙️ Tip: een losse vergadermicrofoon (via USB of bluetooth) geeft duidelijk betere resultaten dan de ingebouwde laptopmicrofoon — en dus een nauwkeuriger verslag.</div>
-      </div>
     </div>
 
-    <div class="opties">
-      <div class="optie-rij">
-        <input type="checkbox" id="optEmoji" checked>
-        <label for="optEmoji">Emoji bij kopjes voor betere leesbaarheid</label>
+    <details class="uitklap" id="uitklapOpties">
+      <summary>
+        Uitvoer en opties
+        <span class="pijl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span>
+      </summary>
+      <div class="uitklap-inhoud">
+        <div class="field" style="margin-bottom: 1rem;">
+          <label for="outputFormat">Uitvoerformaat (kopiëren)</label>
+          <select id="outputFormat">
+            <option value="plat" selected>Platte tekst</option>
+            <option value="markdown">Ruwe Markdown</option>
+            <option value="html">Opgemaakt (HTML)</option>
+          </select>
+          <div class="field-note" id="formatNote">Wordt als platte tekst naar het klembord gekopieerd.</div>
+        </div>
+        <div class="opties">
+          <div class="optie-rij">
+            <input type="checkbox" id="optEmoji" checked>
+            <label for="optEmoji">Emoji bij kopjes voor betere leesbaarheid</label>
+          </div>
+          <div class="optie-rij">
+            <input type="checkbox" id="optFeedback" checked>
+            <label for="optFeedback">Tip van een collega toevoegen (apart venster)</label>
+          </div>
+          <div class="optie-rij">
+            <input type="checkbox" id="optTitel" checked>
+            <label for="optTitel">Titel voor het gespreksonderwerp verzinnen</label>
+          </div>
+        </div>
       </div>
-      <div class="optie-rij">
-        <input type="checkbox" id="optFeedback" checked>
-        <label for="optFeedback">Collegiale overwegingen toevoegen (apart venster)</label>
-      </div>
-      <div class="optie-rij">
-        <input type="checkbox" id="optTitel" checked>
-        <label for="optTitel">Titel voor het gespreksonderwerp verzinnen</label>
-      </div>
-    </div>
-  </div>
-
-  <!-- Opname -->
-  <div class="card">
-    <div class="card-label">Opname</div>
-    <div class="bron-keuze">
-      <button class="bron-btn actief" id="bronMic" onclick="kiesBron('mic')">🎙 Microfoon</button>
-      <button class="bron-btn" id="bronScherm" onclick="kiesBron('scherm')">🖥 Scherm + audio (online gesprek)</button>
-    </div>
-    <div class="record-area">
-      <button class="btn-record" id="btnRecord" title="Klik om opname te starten">
-        <div class="dot"></div>
-      </button>
-      <div class="record-info">
-        <div class="record-status" id="recordStatus">Klik op de knop om te beginnen</div>
-        <div class="record-timer" id="recordTimer">00:00:00</div>
-      </div>
-    </div>
-    <div class="info-msg" id="schermInfo">
-      Bij schermdeling: kies een <strong>tabblad</strong> of <strong>venster</strong> en vink
-      "Audio delen" aan. Je eigen microfoon wordt automatisch meegenomen, zodat beide kanten
-      van het gesprek worden opgenomen. Volledig-scherm delen levert op sommige systemen geen audio.
-    </div>
-    <div class="upload-area">
-      <span class="upload-label">Of gebruik een bestaand audiobestand</span>
-      <label class="upload-btn" for="audioUpload">📁 Audiobestand kiezen…</label>
-      <input type="file" id="audioUpload" accept="audio/*,video/*,.m4a,.mp3,.wav,.ogg,.webm,.mp4,.opus,.flac">
-      <div class="upload-filename" id="uploadFilename"></div>
-    </div>
+    </details>
   </div>
 
 </aside><div class="main">
 
   <!-- Voorbereiding -->
-  <div class="card">
-    <div class="card-label">Voorbereiding</div>
-    <div class="prompt-area first">
-      <label for="voorinformatie">Voorinformatie (optioneel)</label>
-      <textarea id="voorinformatie" placeholder="Achtergrond die het model mag meenemen, bijv. uitkomsten van een vragenlijst of een eerder gespreksverslag."></textarea>
-      <div class="optie-rij" style="margin-top: 0.7rem;">
-        <input type="checkbox" id="optVoorinfoInVerslag">
-        <label for="optVoorinfoInVerslag">Voorinformatie ook in het verslag opnemen (bijv. vragenlijst bij een intake)</label>
+  <div class="card opkomst">
+    <details class="uitklap los" id="uitklapVoorbereiding" open>
+      <summary>
+        Voorbereiding — voorinformatie en extra instructie
+        <span class="pijl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span>
+      </summary>
+      <div class="uitklap-inhoud">
+        <div class="prompt-area first">
+          <label for="voorinformatie">Voorinformatie (optioneel) <kbd>V</kbd></label>
+          <textarea id="voorinformatie" placeholder="Achtergrond die het model mag meenemen, bijv. uitkomsten van een vragenlijst of een eerder gespreksverslag."></textarea>
+          <div class="optie-rij" style="margin-top: 0.7rem;">
+            <input type="checkbox" id="optVoorinfoInVerslag">
+            <label for="optVoorinfoInVerslag">Voorinformatie ook in het verslag opnemen (bijv. vragenlijst bij een intake)</label>
+          </div>
+        </div>
+        <div class="prompt-area" style="margin-top: 1.1rem;">
+          <label for="customPrompt">Extra instructie (optioneel) <kbd>I</kbd></label>
+          <textarea id="customPrompt" placeholder="Bijv: Er waren meerdere gesprekspartners aanwezig. Richt je vooral op de bespreking van de thuisopdracht."></textarea>
+        </div>
       </div>
-    </div>
-    <div class="prompt-area">
-      <label for="customPrompt">Extra instructie (optioneel)</label>
-      <textarea id="customPrompt" placeholder="Bijv: Er waren meerdere gesprekspartners aanwezig. Richt je vooral op de bespreking van de thuisopdracht."></textarea>
-    </div>
+    </details>
   </div>
 
   <!-- Voortgang -->
-  <div class="progress-steps">
-    <div class="step" id="step1"><span class="step-dot">1</span><span class="step-label">Opname</span></div>
-    <div class="step" id="step2"><span class="step-dot">2</span><span class="step-label">Transcriptie</span></div>
-    <div class="step" id="step3"><span class="step-dot">3</span><span class="step-label">Verslag</span></div>
+  <div class="progress-wrap opkomst">
+    <div class="progress-steps">
+      <div class="step" id="step1"><span class="step-dot">1</span><span class="step-label">Opname</span></div>
+      <div class="step" id="step2"><span class="step-dot">2</span><span class="step-label">Transcriptie</span></div>
+      <div class="step" id="step3"><span class="step-dot">3</span><span class="step-label">Verslag</span></div>
+    </div>
+    <div class="bezig-balk hidden" id="bezigBalk"></div>
   </div>
 
-  <div class="error-msg" id="errorMsg"></div>
+  <div class="error-msg" id="errorMsg">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+    <span id="errorTekst"></span>
+    <button class="sluit" onclick="hideError()" aria-label="Melding sluiten">✕</button>
+  </div>
 
   <!-- Transcript -->
-  <div class="card">
-    <div class="card-label">Transcript <span id="transcriptSpinner" class="spinner hidden"></span></div>
-    <div class="transcript-box" id="transcriptBox">Transcript verschijnt hier na de opname...</div>
+  <div class="card opkomst">
+    <div class="card-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 6h16M4 11h16M4 16h9"/></svg>
+      Transcript
+      <span id="transcriptSpinner" class="spinner hidden"></span>
+      <span class="rechts">
+        <span class="telling" id="transcriptTelling"></span>
+        <button class="btn ghost" id="btnTranscriptUit" onclick="transcriptUitklappen()" title="Volledig tonen">Uitklappen</button>
+        <button class="btn ghost" id="btnKopieerTranscript" onclick="kopieerTranscript()" title="Transcript kopiëren (T)">Kopiëren <kbd>T</kbd></button>
+      </span>
+    </div>
+    <div class="transcript-box" id="transcriptBox">Het transcript verschijnt hier zodra de opname is uitgewerkt.</div>
   </div>
 
   <!-- Verslag -->
-  <div class="card">
+  <div class="card opkomst">
     <div class="card-label">
-      Gespreksverslag <span id="verslagBadge"></span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>
+      Gespreksverslag
+      <span id="verslagBadge"></span>
       <span id="verslagSpinner" class="spinner hidden"></span>
+      <span class="rechts"><span class="telling" id="verslagTelling"></span></span>
     </div>
     <div class="titel-regel" id="titelRegel"></div>
-    <div class="output-box placeholder" id="outputBox">Verslag verschijnt hier na verwerking door het taalmodel...</div>
-
-    <div class="regen-panel hidden" id="regenPanel">
-      <span class="regen-panel-label">Opnieuw genereren als:</span>
-      <select id="regenType">
-        <option value="intakegesprek">Intakegesprek</option>
-        <option value="behandelgesprek">Behandelgesprek</option>
-      </select>
-      <select id="regenGeslacht">
-        <option value="onbekend">Geslacht: niet opgegeven</option>
-        <option value="man">Geslacht: man</option>
-        <option value="vrouw">Geslacht: vrouw</option>
-      </select>
-      <button class="btn" id="btnRegen" onclick="regenereerVerslag()">↻ Genereer opnieuw</button>
-    </div>
+    <div class="output-box placeholder" id="outputBox">Het verslag verschijnt hier zodra het taalmodel het heeft uitgewerkt.</div>
 
     <div class="versie-balk hidden" id="versieBalk">
-      <button class="btn btn-klein" id="btnVorigeVersie" onclick="stapVersie(-1)">←</button>
+      <button class="btn btn-klein" id="btnVorigeVersie" onclick="stapVersie(-1)" title="Vorige versie">←</button>
       <span id="versieLabel">Versie 1 van 1</span>
-      <button class="btn btn-klein" id="btnVolgendeVersie" onclick="stapVersie(1)">→</button>
+      <button class="btn btn-klein" id="btnVolgendeVersie" onclick="stapVersie(1)" title="Volgende versie">→</button>
       <span class="versie-suggestie" id="versieSuggestie"></span>
     </div>
 
     <div class="suggestie-paneel hidden" id="suggestiePaneel">
       <label for="suggestieInput">Wat moet er anders? Het verslag wordt opnieuw uit het transcript geschreven met jouw aanwijzing erbij.</label>
-      <textarea id="suggestieInput" placeholder="Bijv: Werk de afspraken explicieter uit, elk met een eigen kopje, in plaats van ze samen te vatten."></textarea>
+      <textarea id="suggestieInput" placeholder="Bijv: We hebben zes levensthema's benoemd met acties erbij. Werk die expliciet uit, elk met een eigen kopje, in plaats van ze samen te vatten."></textarea>
       <div class="suggestie-acties">
+        <span class="telling"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span>
         <button class="btn primary" id="btnHerzie" onclick="herzieVerslag()">Verslag herzien</button>
       </div>
     </div>
 
-    <!-- Let op: btnKopieerBeide is de knop ZONDER overwegingen, btnKopieer die MET.
-         De ids zijn historisch omgedraaid; kijk naar het onclick-doel, niet naar de naam. -->
+    <details class="uitklap" id="uitklapRegen">
+      <summary>
+        Opnieuw genereren met andere instellingen
+        <span class="pijl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span>
+      </summary>
+      <div class="regen-panel hidden" id="regenPanel">
+        <span class="regen-panel-label">Genereer als</span>
+        <select id="regenType">
+          <option value="intakegesprek">Intakegesprek</option>
+          <option value="behandelgesprek">Behandelgesprek</option>
+        </select>
+        <select id="regenGeslacht">
+          <option value="onbekend">Geslacht: niet opgegeven</option>
+          <option value="man">Geslacht: man</option>
+          <option value="vrouw">Geslacht: vrouw</option>
+        </select>
+        <button class="btn" id="btnRegen" onclick="regenereerVerslag()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+          Genereer opnieuw <kbd>G</kbd>
+        </button>
+      </div>
+    </details>
+
     <div class="output-actions">
-      <span class="copy-confirmation" id="copyConfirmation">✓ Gekopieerd naar klembord</span>
-      <button class="btn" onclick="resetAll()">Nieuw gesprek</button>
-      <button class="btn hidden" id="btnKopieerBeide" disabled onclick="kopieerVerslag()">Alleen verslag kopiëren</button>
-      <button class="btn primary" id="btnKopieer" disabled onclick="kopieerBeide()">Alles kopiëren</button>
+      <button class="btn ghost links" id="btnNieuw" onclick="nieuwGesprek()" title="Alles wissen (N)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Nieuw gesprek <kbd>N</kbd>
+      </button>
+      <button class="btn primary" id="btnKopieer" disabled onclick="kopieerVerslag()" title="Het verslag kopiëren (C)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Kopiëren <kbd>C</kbd>
+      </button>
     </div>
     <div class="field-note">
       Er wordt niets bewaard: bij het herladen of sluiten van deze pagina zijn transcript,
@@ -541,51 +1053,101 @@
     </div>
   </div>
 
-  <!-- Overwegingen -->
-  <div class="card overweging-card" id="overwegingCard">
-    <div class="card-label">Overwegingen — collegiale reflectie <span id="overwegingSpinner" class="spinner hidden"></span></div>
-    <div class="overweging-box" id="overwegingBox"></div>
+  <!-- Collegiale tip -->
+  <div class="card tip-card" id="tipCard">
+    <div class="card-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V16h8v-1.3A7 7 0 0 0 12 2z"/></svg>
+      Tip van een collega
+      <span id="tipSpinner" class="spinner hidden"></span>
+    </div>
+    <div class="tip-box" id="tipBox"></div>
   </div>
 
   <!-- Privacy -->
   <div class="card">
-    <div class="card-label">Privacy &amp; verantwoordelijkheid</div>
+    <div class="card-label">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3.5v5c0 4.6-3.2 8.7-8 9.9-4.8-1.2-8-5.3-8-9.9v-5z"/></svg>
+      Privacy &amp; verantwoordelijkheid
+    </div>
     <div class="privacy-note">
-      Audio en transcript gaan rechtstreeks van deze browser naar Mistral (EU, ISO 27001-
-      gecertificeerd) — er zit geen tussenserver tussen.
-      <strong>Minimumvereiste: gebruik dit voor échte cliëntgegevens alleen
-      als je bij Mistral Zero Data Retention (ZDR) hebt aangevraagd en het aanstaat</strong>; zonder
-      ZDR bewaart Mistral je gegevens standaard ~30 dagen. En ook mét ZDR voldoe je niet automatisch
+      Audio en transcript gaan rechtstreeks van deze browser naar het Europese endpoint van
+      Mistral (api.eu.mistral.ai) — er zit geen tussenserver tussen.
+      <strong>Minimumvereiste: gebruik dit voor échte cliëntgegevens alleen als je bij Mistral
+      Zero Data Retention (ZDR) hebt aangevraagd en het aanstaat</strong>; zonder ZDR bewaart
+      Mistral je gegevens standaard ongeveer 30 dagen. En ook mét ZDR voldoe je niet automatisch
       aan NEN 7510 — dat hangt af van je verdere inrichting. Dit is een hulpmiddel: je blijft zelf
       verwerkingsverantwoordelijke. Gebruik is voor eigen risico —
       <strong>controleer elk verslag voordat je het in het dossier opneemt</strong>.
       Dit is een experimenteel open-source project, geen commercieel product, zonder garanties.
-      Zie <a href="https://github.com/Klankschrift/sessienotitie/blob/main/PRIVACY.md" target="_blank" rel="noopener">PRIVACY.md</a> voor de volledige toelichting.
+      Zie <a href="https://github.com/Klankschrift/sessienotitie/blob/main/PRIVACY.md" target="_blank" rel="noopener">PRIVACY.md</a>
+      voor de volledige toelichting.
     </div>
-  </div>
-
-  <div class="statusbar">
-    <div class="dot-status" id="statusDot"></div>
-    <span id="statusText">Gereed</span>
   </div>
 
 </div></div>
 
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<div class="overlay" id="sneltoetsOverlay" role="dialog" aria-modal="true" aria-label="Sneltoetsen">
+  <div class="overlay-kaart">
+    <div class="overlay-kop">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2.5"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M8 14h8"/></svg>
+      <h2>Sneltoetsen</h2>
+      <button class="icoonknop" onclick="sluitOverlay()" aria-label="Sluiten">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="sneltoets-groep">Opnemen</div>
+    <div class="sneltoets-rij">Opname starten of stoppen <span class="toetsen"><kbd>Spatie</kbd><kbd>R</kbd></span></div>
+    <div class="sneltoets-rij">Opname stoppen <span class="toetsen"><kbd>Esc</kbd></span></div>
+    <div class="sneltoets-rij">Audiobestand kiezen <span class="toetsen"><kbd>U</kbd></span></div>
+    <div class="sneltoets-groep">Verslag</div>
+    <div class="sneltoets-rij">Verslag kopiëren <span class="toetsen"><kbd>C</kbd></span></div>
+    <div class="sneltoets-rij">Transcript kopiëren <span class="toetsen"><kbd>T</kbd></span></div>
+    <div class="sneltoets-rij">Opnieuw genereren <span class="toetsen"><kbd>G</kbd></span></div>
+    <div class="sneltoets-rij">Herzien op een aanwijzing <span class="toetsen"><kbd>H</kbd></span></div>
+    <div class="sneltoets-rij">Herziening versturen <span class="toetsen"><kbd>Ctrl</kbd><kbd>Enter</kbd></span></div>
+    <div class="sneltoets-rij">Vorige of volgende versie <span class="toetsen"><kbd>←</kbd><kbd>→</kbd></span></div>
+    <div class="sneltoets-groep">Schrijven en scherm</div>
+    <div class="sneltoets-rij">Naar voorinformatie <span class="toetsen"><kbd>V</kbd></span></div>
+    <div class="sneltoets-rij">Naar extra instructie <span class="toetsen"><kbd>I</kbd></span></div>
+    <div class="sneltoets-rij">Nieuw gesprek <span class="toetsen"><kbd>N</kbd></span></div>
+    <div class="sneltoets-rij">Donker of licht <span class="toetsen"><kbd>D</kbd></span></div>
+    <div class="sneltoets-rij">Dit overzicht <span class="toetsen"><kbd>?</kbd></span></div>
+  </div>
+</div>
+
 <script>
 // ── Mistral API ───────────────────────────────────────────────
-const MISTRAL_TRANSCRIBE_URL = 'https://api.mistral.ai/v1/audio/transcriptions';
-const MISTRAL_CHAT_URL       = 'https://api.mistral.ai/v1/chat/completions';
+// Het Europese endpoint: de aanvraag blijft daarmee binnen de EU. Er zit geen
+// eigen server tussen — audio en transcript gaan rechtstreeks van deze browser
+// naar Mistral, met de sleutel die de gebruiker zelf heeft ingevoerd.
+const MISTRAL_TRANSCRIBE_URL = 'https://api.eu.mistral.ai/v1/audio/transcriptions';
+const MISTRAL_CHAT_URL       = 'https://api.eu.mistral.ai/v1/chat/completions';
 const TRANSCRIBE_MODEL       = 'voxtral-mini-latest';
 const CHAT_MODEL             = 'mistral-large-latest';
+const TEMPERATUUR            = 0.3;
 
-// ── Systeemprompt (basis) ─────────────────────────────────────
-// Algemeen deel: geldt voor elk gesprekstype. Wordt aangevuld met het
-// structuurdeel dat bij het gekozen gesprekstype hoort (zie bouwSysteemprompt).
-const ALGEMEEN_PROMPT = `Je schrijft dossierverslagen voor een psycholoog, op basis van het transcript van een
+// ── Systeemprompt ─────────────────────────────────────────────
+// Een behandelgesprek krijgt alleen de opdracht mee en kiest zelf de indeling
+// die bij dít gesprek past: een prompt die de vorm dicteert koppelt de indeling
+// los van dít gesprek, en dan komen de secties er ook als er niets in te zetten
+// valt. Een intake houdt wél de voorgeschreven secties, want daar is de
+// volledigheid van de uitvraag juist wat je wilt afdwingen.
+const V3_ALGEMEEN = `Dit is het transcript van een psychologisch gesprek. Jouw taak is er een bondig verslag van te maken voor het patiëntendossier.
+
+Begin meteen met het verslag zelf. Zet er geen briefhoofd boven met datum, aanwezigen of duur: die gegevens staan al in het dossier en jij kunt ze niet weten.
+
+Sluit ook niet af met een ondertekening: geen naam van de behandelaar, geen paraaf, geen invulregel voor een volgende afspraak. Een afspraak die in het gesprek werkelijk gemaakt is hoort gewoon in het verslag zelf. Het verslag eindigt bij de laatste inhoudelijke regel.
+
+Vul nergens een vierkant haakje met een invulaanduiding in ("[Datum gesprek]", "[Naam]"). Wat je niet uit het gesprek weet, laat je weg.
+`;
+
+const INTAKE_ALGEMEEN = `Je schrijft dossierverslagen voor een psycholoog, op basis van het transcript van een
 behandelgesprek met een cliënt.
 
 Schrijf voor één lezer op één moment: de behandelaar zelf, vijf minuten voor het
-volgende gesprek, die sinds dit gesprek twintig andere cliënten heeft gezien. Die
+volgende gesprek, die sinds dit gesprek twintig andere cliënten heeft gezien. Zij
 leest je verslag door en moet denken: ja, ik weet weer waar we staan. Dat is de toets
 voor elke zin die je opschrijft. Draagt een zin daar niet aan bij, dan hoort hij er
 niet.
@@ -727,58 +1289,52 @@ alleen professioneel klinkt en verder niets toevoegt, schrap hem.
 
 ## Opmaak
 
-Markdown, ## voor hoofdsecties en ### voor subkopjes. Nooit vetgedrukte tekst als kopje. Begin direct met de eerste sectie, zonder overkoepelende titel.`;
+Markdown, ## voor hoofdsecties en ### voor subkopjes. Nooit vetgedrukte tekst als kopje. Begin direct met de eerste sectie, zonder overkoepelende titel.
 
-// Structuurdeel — behandelgesprek: vijf secties.
-const STRUCT_BEHANDEL = `## Structuur
+`;
 
-Vijf secties, in deze volgorde, en nooit een zesde.
+const INTAKE_STRUCTUUR = `## Structuur
 
-## Waar we staan
-Twee tot vier zinnen. Wie alleen dit leest, moet het volgende gesprek in kunnen. Wat
-speelt er op dit moment, en wat heeft dit gesprek daaraan veranderd. Geen opsomming
-van onderwerpen — de stand van zaken.
+Een intakeverslag is iets anders dan een behandelverslag. De lezer is dezelfde, maar
+zij weet nog niets: dit is het verslag waar zij over een jaar op terugvalt om te zien
+waarmee het begon. Wees dus volledig en neem liever te veel op dan te weinig, met de
+concrete details erbij — tijdsaanduidingen, frequenties, hoe lang klachten al spelen,
+namen van eerdere behandelaars als die genoemd zijn. De omvangsmaten van een
+behandelverslag gelden hier niet, en er is geen sectie 'Wat blijft staan'.
 
-## Sinds vorige keer
-Twee tot vier zinnen: wat er sinds het vorige gesprek is gebeurd. Alleen subkopjes
-als er echt meerdere losse onderwerpen speelden. Illustreert cliënt iets met een
-voorbeeld uit een verder verleden ("toen ik ging scheiden", "vroeger"), dan hoort dat
-hier niet — zet het bij het onderwerp waar het als voorbeeld voor diende, met de
-tijdsaanduiding zoals die genoemd is.
+Gebruik deze secties, in deze volgorde, met ## ervoor. Laat een sectie weg als het
+onderwerp niet aan bod kwam — behalve Veiligheid en Afspraken, die staan er altijd.
 
-## Vandaag gewerkt aan
-Maximaal drie subkopjes, elk drie tot vijf zinnen. Kwamen er meer thema's aan bod,
-kies dan de drie die het zwaarst wegen. Voeg verwante onderwerpen samen onder één
-kopje; twee kopjes over hetzelfde onderwerp is een fout, en twee scherp afgebakende
-kopjes zijn beter dan drie die elkaar overlappen. Beschrijf per kopje ook welke
-aanpak of interventie is ingezet en hoe die uitpakte.
+1. Aanmeldingsklachten en symptomen
+2. Luxerende factoren
+3. Hulpvraag
+4. Leef- en werksituatie
+5. Relevante voorgeschiedenis en ontwikkeling
+6. Eerdere hulpverlening
+7. Middelengebruik
+8. Medische gegevens en medicatie
+9. Veiligheid
+10. Behandeldoel en plan van aanpak
+11. Overig — alleen bij relevante informatie die nergens anders past
+12. Afspraken
 
-Een thema mag zowel hier als onder 'Sinds vorige keer' staan — wat er in de vakantie
-gebeurde en wat daar in het gesprek mee is gedaan zijn twee verschillende dingen.
-Hetzelfde féit hoort maar op één plek: kom je het twee keer tegen, laat het staan
-waar het het meest is uitgewerkt.
+Luxerende factoren zijn de omstandigheden waardoor de klachten zijn gaan spelen of
+zijn opgelaaid: waar het volgens cliënt mee begon, wat de aanleiding was om nú hulp
+te zoeken, of wat de klachten telkens weer erger maakt. Het is iets anders dan de
+klacht zelf, en ook iets anders dan wat iemand er kwetsbaar voor maakte — het gaat om
+de aanleiding, niet om de aanleg. Schrijf hier alleen op wat in het gesprek als
+aanleiding naar voren komt: dat twee dingen in de tijd samenvielen maakt het ene nog
+niet de aanleiding voor het andere.
 
-## Wat blijft staan
-Drie tot vijf punten, elk één hele zin, het zwaarste bovenaan. Dit is geen verkorte
-herhaling van hierboven — die staat er al. De vraag hier is wat er open blijft en
-waar het volgende gesprek niet omheen kan: een vraag die is opgeworpen en niet
-beantwoord, iets wat is aangeraakt maar niet uitgewerkt, een beslissing die nog moet
-vallen, een spanning tussen wat cliënt wil en wat zij doet, een reactie die om
-navolging vraagt.
+Dat een intakeverslag volledig is, verandert niets aan wat je nooit doet. Juist hier
+is de verleiding groot om een levensverhaal rond te maken: een klacht die logisch bij
+een gebeurtenis past, een verband tussen de jeugd en de huidige situatie, een duur
+die niet genoemd is. Volledig betekent dat je alles opneemt wat er gezegd is, niet
+dat je de gaten opvult.
 
-Elk punt is concreet genoeg dat het niet net zo goed onder een ander gesprek over
-hetzelfde thema zou kunnen staan. "Stilgestaan is bij de spanning op het werk" is een
-onderwerp; "Zolang het gesprek met de leidinggevende wordt uitgesteld blijft de
-spanning staan, en dat uitstel is nog niet besproken" is een punt dat blijft staan.
-Varieer de formulering en herhaal geen zin die hierboven al letterlijk staat.
+`;
 
-Niet elk gesprek levert een doorbraak op, en die verwachting is hier het grootste
-risico: een verzonnen besef is schadelijker dan een saai punt. Ging het gesprek
-vooral over inventariseren of over praktische zaken, schrijf dan dát. Geen afspraken
-hier — die staan in de laatste sectie.`;
-
-// Afspraken — behandelgesprek.
-const AFSPRAKEN_BEHANDEL = `## Afspraken
+const INTAKE_AFSPRAKEN = `## Afspraken
 Alleen wat expliciet is uitgesproken: een vervolgafspraak, een concrete oefening of
 taak, een toezegging van cliënt of behandelaar.
 
@@ -810,56 +1366,11 @@ drie hekjes en zonder dubbele punt erachter:
 
 ### Voorgenomen voor het volgende gesprek
 
-Laat de regel weg als er niets is aangekondigd.`;
+Laat de regel weg als er niets is aangekondigd.
 
-// Veiligheid — behandelgesprek.
-const VEILIGHEID_BEHANDEL = `## Veiligheid
+`;
 
-Kwamen er veiligheidsaspecten aan de orde, benoem die dan altijd expliciet onder een subkopje 'Veiligheid', binnen de sectie waar het thuishoort. Nooit als zesde hoofdsectie. Het gaat om suïcidaliteit of gedachten aan zelfdoding (ook zonder
-concrete plannen, of wanneer uitvoering wordt ontkend), zelfbeschadiging, agressie of
-geweldsgedachten richting anderen, huiselijk geweld, mishandeling of misbruik als
-slachtoffer of pleger, zorgen over de veiligheid van kinderen of andere kwetsbare
-personen, ernstige verwaarlozing of onvermogen tot zelfzorg, en gevaarlijk gedrag
-door psychose, dissociatie of ernstig middelengebruik.
-
-Beschrijf feitelijk: de aard van de gedachten of het gedrag, of er concrete plannen
-of intenties zijn, en de inschatting zoals die in het gesprek naar voren kwam.
-Speelde er niets, schrijf er dan niets over — geen zin als "Er zijn geen acute
-veiligheidsrisico's besproken".`;
-
-// Structuurdeel — intakegesprek.
-const STRUCT_INTAKE = `## Structuur
-
-Een intakeverslag is iets anders dan een behandelverslag. De lezer is dezelfde, maar
-weet nog niets: dit is het verslag waar de behandelaar over een jaar op terugvalt om
-te zien waarmee het begon. Wees dus volledig en neem liever te veel op dan te weinig, met de
-concrete details erbij — tijdsaanduidingen, frequenties, hoe lang klachten al spelen,
-namen van eerdere behandelaars als die genoemd zijn. De omvangsmaten van een
-behandelverslag gelden hier niet, en er is geen sectie 'Wat blijft staan'.
-
-Gebruik deze secties, in deze volgorde, met ## ervoor. Laat een sectie weg als het
-onderwerp niet aan bod kwam — behalve Veiligheid en Afspraken, die staan er altijd.
-
-1. Aanmeldingsklachten en symptomen
-2. Hulpvraag
-3. Leef- en werksituatie
-4. Relevante voorgeschiedenis en ontwikkeling
-5. Eerdere hulpverlening
-6. Middelengebruik
-7. Medische gegevens en medicatie
-8. Veiligheid
-9. Behandeldoel en plan van aanpak
-10. Overig — alleen bij relevante informatie die nergens anders past
-11. Afspraken
-
-Dat een intakeverslag volledig is, verandert niets aan wat je nooit doet. Juist hier
-is de verleiding groot om een levensverhaal rond te maken: een klacht die logisch bij
-een gebeurtenis past, een verband tussen de jeugd en de huidige situatie, een duur
-die niet genoemd is. Volledig betekent dat je alles opneemt wat er gezegd is, niet
-dat je de gaten opvult.`;
-
-// Veiligheid — intakegesprek.
-const VEILIGHEID_INTAKE = `## Veiligheid
+const INTAKE_VEILIGHEID = `## Veiligheid
 
 Kwamen er veiligheidsaspecten aan de orde, benoem die dan altijd expliciet onder de sectie 'Veiligheid'. Het gaat om suïcidaliteit of gedachten aan zelfdoding (ook zonder
 concrete plannen, of wanneer uitvoering wordt ontkend), zelfbeschadiging, agressie of
@@ -871,22 +1382,23 @@ door psychose, dissociatie of ernstig middelengebruik.
 Beschrijf feitelijk: de aard van de gedachten of het gedrag, of er concrete plannen
 of intenties zijn, en de inschatting zoals die in het gesprek naar voren kwam.
 Is veiligheid niet besproken, schrijf dan: "Veiligheidsaspecten zijn in dit
-gesprek niet expliciet besproken."`;
+gesprek niet expliciet besproken."
+`;
 
-// ── Geslacht instructies ──────────────────────────────────────
+// De regels die het duurst zijn om te missen, herhaald aan het eind van het
+// gebruikersbericht: Mistral Large volgt een instructie beter als die daar ook staat.
+const INTAKE_REMINDER = "\nLet bij het schrijven op: een intakeverslag is uitgebreid en volledig. Schrijf thematisch — beschrijf wáár het gesprek over ging, niet wíe wat zei.\nEn houd deze vier het scherpst in de gaten, want ze zijn in een dossier het duurst:\n1. Schrijf geen verband op ('waardoor', 'als gevolg van', 'maar') dat in het gesprek niet is uitgesproken, ook niet als het voor de hand ligt.\n2. Neem elk getal dat wél gevallen is letterlijk over, en verzin er geen dat niet gevallen is.\n3. Is een passage in het transcript verminkt, kies dan geen lezing: schrijf alleen het deel op dat hoe dan ook vaststaat.\n4. Elke toekomstige afspraak die valt hoort onder Afspraken, ook als die al eerder gepland stond en terloops langskomt ('we hebben de 26e nog staan'). Noteer de datum precies zoals die genoemd is en vermeld erbij wie er dan bij zijn.";
+
 const GESLACHT_TEKST = {
   onbekend: "Het geslacht van de cliënt is niet opgegeven. Gebruik uitsluitend 'cliënt' als verwijzing — geen voornaamwoorden.",
   man: "De cliënt is een man. Je mag 'hij', 'hem' en 'zijn' gebruiken naast 'cliënt', maar gebruik dit consistent en professioneel.",
   vrouw: "De cliënt is een vrouw. Je mag 'zij', 'haar' gebruiken naast 'cliënt', maar gebruik dit consistent en professioneel.",
 };
-
 // ── Systeemprompt samenstellen ────────────────────────────────
 function bouwSysteemprompt(gesprekType, emoji, feedback, titel) {
-  let prompt = ALGEMEEN_PROMPT + '\n\n' + (
-    gesprekType === 'intakegesprek'
-      ? STRUCT_INTAKE + '\n\n' + VEILIGHEID_INTAKE
-      : STRUCT_BEHANDEL + '\n\n' + AFSPRAKEN_BEHANDEL + '\n\n' + VEILIGHEID_BEHANDEL
-  );
+  let prompt = gesprekType === 'intakegesprek'
+    ? INTAKE_ALGEMEEN + INTAKE_STRUCTUUR + INTAKE_AFSPRAKEN + INTAKE_VEILIGHEID
+    : V3_ALGEMEEN;
 
   if (titel) {
     prompt += "\n\nTITEL:\n"
@@ -907,22 +1419,33 @@ function bouwSysteemprompt(gesprekType, emoji, feedback, titel) {
   }
 
   if (feedback) {
-    prompt += "\n\nCOLLEGIALE OVERWEGINGEN:\n"
+    prompt += "\n\nCOLLEGIALE TIP:\n"
       + "Nadat je het volledige verslag hebt geschreven, voeg je een scheidingslijn "
       + "toe die letterlijk en exact zo luidt (geen markdown-kopje, geen ##, geen aanhalingstekens — "
-      + "gewoon deze tekst op een lege regel): ===OVERWEGINGEN===\n"
-      + "Schrijf daarna je eigen overwegingen als behandelaar in de ik-vorm, "
-      + "in de vorm van bullet points. Schrijf alsof je hardop nadenkt over "
-      + "je eigen casus: wat valt je op, wat wil je onthouden, waar wil je "
-      + "de volgende keer op letten. Elk punt is bondig en direct — geen "
-      + "verhalende tekst. Dit deel is niet bedoeld voor het cliëntdossier.";
+      + "gewoon deze tekst op een lege regel): ===TIP===\n"
+      + "Daarna schrijf je één tip, alsof een collega heeft meegekeken en er na afloop "
+      + "één ding uit meegeeft. Dit is niet voor het cliëntdossier en de cliënt leest "
+      + "het niet mee — het is bedoeld voor de behandelaar zelf.\n\n"
+      + "De tip gaat over het gesprek zelf of over het volgende gesprek: een vraag die "
+      + "bleef liggen, een signaal waar niet op is doorgegaan, een interventie die geen "
+      + "ruimte kreeg om te landen, iets wat een volgende keer gerichter kan. Geen "
+      + "samenvatting van het verslag en geen compliment — een collega die alleen maar "
+      + "bevestigt heeft niets toe te voegen.\n\n"
+      + "Eén tip, gericht aan de behandelaar en dus in de je-vorm ('je zou kunnen', "
+      + "'het zou de moeite waard zijn om'). Begin bij een concrete waarneming uit het "
+      + "gesprek en eindig bij wat die suggereert. Hoogstens twee zinnen, ongeveer "
+      + "dertig tot veertig woorden — kort genoeg om in één oogopslag te lezen.\n"
+      + "Schrijf de tip als lopende tekst, zonder streepje of opsomming ervoor.\n"
+      + "Blijf bij het gesprek — speculeer niet over wat er niet in het transcript "
+      + "staat, en stel geen diagnoses.";
   }
 
   return prompt;
 }
 
 // ── Gebruiker-prompt samenstellen ─────────────────────────────
-function bouwGebruikerPrompt(transcript, gesprekType, geslacht, customPrompt, voorinformatie, voorinfoInVerslag, feedback, suggestie = '', vorigVerslag = '') {
+function bouwGebruikerPrompt(transcript, gesprekType, geslacht, customPrompt, voorinformatie,
+                             voorinfoInVerslag, feedback, suggestie = '', vorigVerslag = '') {
   const geslachtInstructie = GESLACHT_TEKST[geslacht] || GESLACHT_TEKST.onbekend;
   const extraInstructie = customPrompt ? `\nExtra instructie voor dit gesprek: ${customPrompt}` : '';
 
@@ -942,44 +1465,36 @@ function bouwGebruikerPrompt(transcript, gesprekType, geslacht, customPrompt, vo
       + "tenzij die in het transcript bevestigd wordt:\n" + voorinformatie;
   }
 
-  const overwegingenReminder = feedback
-    ? "\nSluit af met de scheidingslijn ===OVERWEGINGEN=== gevolgd door je collegiale overwegingen."
+  const tipReminder = feedback
+    ? "\nSluit af met de scheidingslijn ===TIP=== gevolgd door één tip die een collega "
+      + "je zou meegeven bij dit gesprek, in de je-vorm."
     : '';
 
-  const kernReminder = gesprekType === 'intakegesprek'
-    ? "\nLet bij het schrijven op: een intakeverslag is uitgebreid en volledig. "
-      + "Schrijf thematisch — beschrijf wáár het gesprek over ging, niet wíe wat zei."
-    : "\nLet bij het schrijven op: vat alleen samen wat de behandelaar weer op de hoogte brengt, "
-      + "met maximaal drie subkopjes onder 'Vandaag gewerkt aan'. Kies liever minder thema's en werk "
-      + "die volwaardig uit dan alles half. Schrijf thematisch en in hele zinnen — beschrijf wáár "
-      + "het gesprek over ging, niet wíe wat zei."
-      + "\nZet onder 'Wat blijft staan' wat er open blijft en waar het volgende gesprek niet omheen "
-      + "kan, en niet een verkorte samenvatting van de tekst erboven."
-      + "\nEn houd deze vier het scherpst in de gaten, want ze zijn in een dossier het duurst:"
-      + "\n1. Schrijf geen verband op ('waardoor', 'als gevolg van', 'maar') dat in het gesprek niet "
-      + "is uitgesproken, ook niet als het voor de hand ligt."
-      + "\n2. Neem elk getal dat wél gevallen is letterlijk over, en verzin er geen dat niet gevallen is."
-      + "\n3. Is een passage in het transcript verminkt, kies dan geen lezing: schrijf alleen het "
-      + "deel op dat hoe dan ook vaststaat."
-      + "\n4. Elke toekomstige afspraak die valt hoort onder Afspraken, ook als die al eerder "
-      + "gepland stond en terloops langskomt ('we hebben de 26e nog staan'). Noteer de datum "
-      + "precies zoals die genoemd is en vermeld erbij wie er dan bij zijn.";
+  const kernReminder = gesprekType === 'intakegesprek' ? INTAKE_REMINDER : '';
 
-  const herzieningBlok = bouwHerzieningBlok(suggestie, vorigVerslag);
+  // Een behandelgesprek krijgt alleen te horen wát voor gesprek het is: de
+  // systeemprompt zegt zelf al wat er moet gebeuren en in welk register. Een
+  // intake volgt de oudere prompt en houdt daarom de oude opdrachtregel.
+  const opdrachtregel = gesprekType === 'intakegesprek'
+    ? `Maak een professioneel dossierverslag van het onderstaande transcript van een ${gesprekType}.\n`
+    : `Het gesprek hieronder is een ${gesprekType}.\n`;
 
-  return `Maak een professioneel dossierverslag van het onderstaande transcript van een ${gesprekType}.\n`
-    + `${geslachtInstructie}${extraInstructie}${overwegingenReminder}${kernReminder}${voorinfoBlok}${herzieningBlok}\n\n`
-    + `TRANSCRIPT:\n${transcript}`;
+  return `${opdrachtregel}${geslachtInstructie}${extraInstructie}${tipReminder}${kernReminder}`
+    + `${voorinfoBlok}${bouwHerzieningBlok(suggestie, vorigVerslag)}\n\n`
+    + `Het transcript staat hieronder tussen <<< en >>>.\n\n`
+    + `TRANSCRIPT:\n<<<\n${transcript}\n>>>`;
 }
 
-// ── Herziening op aanwijzing: het verslag wordt opnieuw uit het transcript
-// geschreven met de aanwijzing erbij, niet bijgewerkt — een model dat zijn
-// eigen tekst redigeert laat de fout staan en schrapt de onderbouwing.
+// ── Herziening op aanwijzing ──────────────────────────────────
+// Het verslag wordt opnieuw uit het transcript geschreven met de aanwijzing
+// erbij, niet bijgewerkt — een model dat zijn eigen tekst redigeert laat de
+// fout staan en schrapt de onderbouwing. De vorige versie gaat wel mee, zodat
+// wat goed was blijft staan.
 function bouwHerzieningBlok(suggestie, vorigVerslag) {
   if (!suggestie) return '';
   if (vorigVerslag) {
     return "\n\nHERZIENING. Van dit gesprek is al een verslag gemaakt en de behandelaar "
-      + "heeft het gelezen en vraagt om deze aanpassing:\n"
+      + "heeft het gelezen. Zij vraagt om deze aanpassing:\n"
       + `<<<\n${suggestie}\n>>>\n`
       + "Schrijf het verslag helemaal opnieuw op basis van het transcript, met die "
       + "aanpassing verwerkt. Behoud wat goed was: neem de onderdelen die de "
@@ -999,8 +1514,8 @@ function bouwHerzieningBlok(suggestie, vorigVerslag) {
 
 // ── Transcript opbouwen met sprekerslabels (diarisatie) ───────
 // Voxtral geeft bij diarisatie een `segments`-array terug, elk met een
-// sprekerskenmerk (`speaker` of `speaker_id`) en `text`. We bundelen
-// opeenvolgende segmenten van dezelfde spreker tot "Spreker N: ...".
+// sprekerskenmerk (`speaker` of `speaker_id`) en `text`. Opeenvolgende
+// segmenten van dezelfde spreker worden gebundeld tot "Spreker N: ...".
 // Ontbreken de segmenten, dan vallen we terug op de platte `text`.
 function bouwTranscript(data) {
   const segmenten = (Array.isArray(data.segments) ? data.segments : [])
@@ -1031,32 +1546,35 @@ function bouwTranscript(data) {
 }
 
 // ── Herhalingsloops uit transcript verwijderen ────────────────
+// Spraakherkenning blijft soms in een lus hangen. Meer dan drie keer hetzelfde
+// fragment vervangen we door één keer plus een markering, zodat het taalmodel
+// er geen betekenis aan hecht.
 function verwijderHerhalingen(tekst, maxHerhaling = 3) {
   const normaliseer = w => w.replace(/^[.,!?;:"'\-–—]+/, '').replace(/[.,!?;:"'\-–—]+$/, '').toLowerCase();
-  const woorden = tekst.split(/\s+/).filter(w => w.length);
-  if (!woorden.length) return tekst;
+  const woordenlijst = tekst.split(/\s+/).filter(w => w.length);
+  if (!woordenlijst.length) return tekst;
 
-  const genorm = woorden.map(normaliseer);
+  const genorm = woordenlijst.map(normaliseer);
   const resultaat = [];
   let i = 0;
-  while (i < woorden.length) {
+  while (i < woordenlijst.length) {
     let gevonden = false;
     for (let n = 4; n >= 1; n--) {
-      if (i + n * (maxHerhaling + 1) > woorden.length) continue;
+      if (i + n * (maxHerhaling + 1) > woordenlijst.length) continue;
       const fragment = genorm.slice(i, i + n).join('\x00');
       let teller = 1, j = i + n;
-      while (j + n <= woorden.length && genorm.slice(j, j + n).join('\x00') === fragment) {
+      while (j + n <= woordenlijst.length && genorm.slice(j, j + n).join('\x00') === fragment) {
         teller++; j += n;
       }
       if (teller > maxHerhaling) {
-        resultaat.push(...woorden.slice(i, i + n));
+        resultaat.push(...woordenlijst.slice(i, i + n));
         resultaat.push('[herhalingsfout in transcript]');
         i = j;
         gevonden = true;
         break;
       }
     }
-    if (!gevonden) { resultaat.push(woorden[i]); i++; }
+    if (!gevonden) { resultaat.push(woordenlijst[i]); i++; }
   }
   return resultaat.join(' ');
 }
@@ -1153,69 +1671,151 @@ function convertMarkdownToHtml(md) {
 
 // ── State ─────────────────────────────────────────────────────
 let mediaRecorder = null, audioChunks = [], timerInterval = null;
+let opnameType = '';
 let secondsElapsed = 0, isRecording = false;
 let finalVerslag = '', verslagMarkdown = '', huidigeTitel = '', huidigTranscript = '';
-let overwegingItems = [], confirmTimer = null;
+let collegaTip = '';
+// Het gesprekstype waarmee het verslag dat je nu ziet is uitgewerkt. Bepaalt of de
+// secties een eigen kopieerknop krijgen en wat de knop 'opnieuw uitwerken' aanbiedt.
+let huidigGesprekType = '';
+// Versiegeschiedenis: alleen in het geheugen van dit tabblad. Bij 'Nieuw gesprek'
+// of een herlaadbeurt is hij weg, net als de opname zelf.
+let versies = [], huidigeVersie = -1;
 let opnameBron = 'mic';
 let schermStream = null, micStream = null, audioContext = null;
-let versies = [], huidigeVersie = -1;
 
 // ── DOM ───────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 const btnRecord = $('btnRecord'), recordStatus = $('recordStatus'), recordTimer = $('recordTimer');
-const transcriptBox = $('transcriptBox'), outputBox = $('outputBox'), overwegingBox = $('overwegingBox');
-const overwegingCard = $('overwegingCard'), titelRegel = $('titelRegel');
-const btnKopieer = $('btnKopieer'), btnKopieerBeide = $('btnKopieerBeide'), btnRegen = $('btnRegen');
+const recordWrap = btnRecord.parentElement;
+const niveauMeters = $('niveauMeters'), niveauMic = $('niveauMic'), niveauScherm = $('niveauScherm');
+const niveauSchermRij = $('niveauSchermRij'), niveauWaarschuwing = $('niveauWaarschuwing');
+const transcriptBox = $('transcriptBox'), outputBox = $('outputBox'), tipBox = $('tipBox');
+const tipCard = $('tipCard'), titelRegel = $('titelRegel');
+const btnKopieer = $('btnKopieer'), btnRegen = $('btnRegen');
 const regenPanel = $('regenPanel'), regenType = $('regenType'), regenGeslacht = $('regenGeslacht');
+const errorMsg = $('errorMsg'), errorTekst = $('errorTekst'), statusDot = $('statusDot'), statusText = $('statusText');
+const transcriptSpinner = $('transcriptSpinner'), verslagSpinner = $('verslagSpinner'), tipSpinner = $('tipSpinner');
+const verslagBadge = $('verslagBadge'), micSelect = $('micSelect'), micNote = $('micNote');
+const gesprekTypeSelect = $('gesprekType'), geslachtSelect = $('geslacht');
+const customPromptInput = $('customPrompt'), voorinformatieInput = $('voorinformatie'), schermInfo = $('schermInfo');
 const versieBalk = $('versieBalk'), versieLabel = $('versieLabel'), versieSuggestie = $('versieSuggestie');
 const btnVorigeVersie = $('btnVorigeVersie'), btnVolgendeVersie = $('btnVolgendeVersie');
 const suggestiePaneel = $('suggestiePaneel'), suggestieInput = $('suggestieInput'), btnHerzie = $('btnHerzie');
-const errorMsg = $('errorMsg'), statusDot = $('statusDot'), statusText = $('statusText');
-const transcriptSpinner = $('transcriptSpinner'), verslagSpinner = $('verslagSpinner'), overwegingSpinner = $('overwegingSpinner');
-const verslagBadge = $('verslagBadge'), micSelect = $('micSelect'), micNote = $('micNote');
-const copyConfirmation = $('copyConfirmation'), gesprekTypeSelect = $('gesprekType'), geslachtSelect = $('geslacht');
-const customPromptInput = $('customPrompt'), voorinformatieInput = $('voorinformatie'), schermInfo = $('schermInfo');
 const optEmoji = $('optEmoji'), optFeedback = $('optFeedback'), optTitel = $('optTitel');
 const optVoorinfoInVerslag = $('optVoorinfoInVerslag');
 const outputFormat = $('outputFormat'), formatNote = $('formatNote');
 const bronMic = $('bronMic'), bronScherm = $('bronScherm');
 const audioUpload = $('audioUpload'), uploadFilename = $('uploadFilename');
+const bezigBalk = $('bezigBalk'), toasts = $('toasts'), sneltoetsOverlay = $('sneltoetsOverlay');
+const golfCanvas = $('golfCanvas'), golfCtx = golfCanvas.getContext('2d');
+const transcriptTelling = $('transcriptTelling'), verslagTelling = $('verslagTelling');
+const btnTranscriptUit = $('btnTranscriptUit'), btnNieuw = $('btnNieuw');
+const uitklapRegen = $('uitklapRegen'), uitklapOpties = $('uitklapOpties'), uitklapVoorbereiding = $('uitklapVoorbereiding');
+const btnThema = $('btnThema');
 const apiKeyInput = $('apiKey'), btnSaveKey = $('btnSaveKey'), btnClearKey = $('btnClearKey');
-const keyStatus = $('keyStatus'), keyStatusText = $('keyStatusText');
+const sleutelStatus = $('sleutelStatus'), sleutelStatusTekst = $('sleutelStatusTekst');
 
-// ── API-sleutel & model (localStorage) ────────────────────────
-function getApiKey() { return (localStorage.getItem('mistralApiKey') || '').trim(); }
+// ── Meldingen ─────────────────────────────────────────────────
+function toast(msg, soort) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (soort === 'fout' ? ' fout' : '');
+  const vink = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+  const kruis = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>';
+  el.innerHTML = (soort === 'fout' ? kruis : vink) + '<span></span>';
+  el.lastChild.textContent = msg.replace(/^✓\s*/, '');
+  toasts.appendChild(el);
+  setTimeout(() => { el.classList.add('weg'); setTimeout(() => el.remove(), 300); }, 2800);
+  while (toasts.children.length > 3) toasts.firstChild.remove();
+}
+const toonKopieBevestiging = msg => toast(msg || 'Gekopieerd naar klembord');
+const showError = msg => { errorTekst.textContent = msg; errorMsg.classList.add('visible'); };
+const hideError = () => errorMsg.classList.remove('visible');
+const formatTime = s => [Math.floor(s/3600), Math.floor((s%3600)/60), s%60].map(n => String(n).padStart(2,'0')).join(':');
 
-function toonKeyStatus() {
+// Statuspil met een meelopende teller: bij het wachten op transcriptie of
+// taalmodel wil je zien dát er iets gebeurt, en hoe lang al.
+let bezigTimer = null, bezigStart = 0, bezigLabel = '';
+function setStatus(type, msg, metTeller = true) {
+  statusDot.className = 'dot-status ' + type;
+  statusText.textContent = msg;
+  clearInterval(bezigTimer); bezigTimer = null;
+  if (type === 'busy' && metTeller) {
+    bezigLabel = msg; bezigStart = Date.now();
+    bezigBalk.classList.remove('hidden');
+    bezigTimer = setInterval(() => {
+      const s = Math.round((Date.now() - bezigStart) / 1000);
+      statusText.textContent = bezigLabel + (s >= 3 ? ' · ' + (s < 60 ? s + 's' : Math.floor(s/60) + 'm ' + String(s%60).padStart(2,'0')) : '');
+    }, 1000);
+  } else {
+    bezigBalk.classList.add('hidden');
+  }
+}
+const setStep = n => ['step1','step2','step3'].forEach((id, i) => { $(id).className = 'step' + (i+1 < n ? ' done' : i+1 === n ? ' active' : ''); });
+
+const woorden = t => t.trim() ? t.trim().split(/\s+/).length : 0;
+const telZin = n => n ? n.toLocaleString('nl-NL') + ' woorden' : '';
+
+// ── Thema ─────────────────────────────────────────────────────
+function wisselThema() {
+  const nieuw = document.documentElement.getAttribute('data-thema') === 'donker' ? 'licht' : 'donker';
+  document.documentElement.setAttribute('data-thema', nieuw);
+  try { localStorage.setItem('sessienotitie.thema', nieuw); } catch {}
+  tekenGolf();
+}
+btnThema.addEventListener('click', wisselThema);
+
+// ── API-sleutel ───────────────────────────────────────────────
+// De sleutel blijft in de browser van de gebruiker en gaat nergens anders heen
+// dan naar Mistral zelf. Hij hoort niet bij de overige instellingen: die staan
+// onder één sleutel samen, deze apart, zodat 'Wissen' precies dit ene wist.
+const SLEUTEL_SLEUTEL = 'mistralApiKey';
+function getApiKey() {
+  try { return (localStorage.getItem(SLEUTEL_SLEUTEL) || '').trim(); } catch { return ''; }
+}
+
+function toonSleutelStatus() {
   const key = getApiKey();
   if (key) {
     const masker = key.length > 8 ? key.slice(0, 4) + '…' + key.slice(-4) : '••••';
-    keyStatus.className = 'key-status ok';
-    keyStatusText.textContent = 'Sleutel opgeslagen (' + masker + ')';
+    sleutelStatus.className = 'sleutel-status ok';
+    sleutelStatusTekst.textContent = 'Sleutel opgeslagen (' + masker + ')';
   } else {
-    keyStatus.className = 'key-status none';
-    keyStatusText.textContent = 'Nog geen sleutel opgeslagen';
+    sleutelStatus.className = 'sleutel-status leeg';
+    sleutelStatusTekst.textContent = 'Nog geen sleutel opgeslagen';
   }
 }
 
 btnSaveKey.addEventListener('click', () => {
   const v = apiKeyInput.value.trim();
   if (!v) { showError('Voer een Mistral API-sleutel in voordat je opslaat.'); return; }
-  localStorage.setItem('mistralApiKey', v);
+  try { localStorage.setItem(SLEUTEL_SLEUTEL, v); }
+  catch { showError('De sleutel kon niet worden opgeslagen — staat opslag in deze browser uit?'); return; }
   apiKeyInput.value = '';
   hideError();
-  toonKeyStatus();
-  toonKopieBevestiging('✓ Sleutel opgeslagen');
+  toonSleutelStatus();
+  toast('Sleutel opgeslagen');
 });
 apiKeyInput.addEventListener('keydown', e => { if (e.key === 'Enter') btnSaveKey.click(); });
 btnClearKey.addEventListener('click', e => {
   e.preventDefault();
-  localStorage.removeItem('mistralApiKey');
+  try { localStorage.removeItem(SLEUTEL_SLEUTEL); } catch {}
   apiKeyInput.value = '';
-  toonKeyStatus();
+  toonSleutelStatus();
+  toast('Sleutel gewist');
 });
 
-// ── Mistral-foutmelding uit response halen ────────────────────
+// Zonder sleutel valt er niets te transcriberen; dat hoort te blijken vóór de
+// opname is gemaakt, niet erna.
+function sleutelOntbreekt() {
+  if (getApiKey()) return false;
+  showError('Voer eerst je Mistral API-sleutel in — het bovenste paneel in de zijbalk.');
+  setStatus('err', 'Geen API-sleutel');
+  apiKeyInput.focus();
+  return true;
+}
+
+// ── Mistral-foutmeldingen leesbaar maken ──────────────────────
 function mistralFoutmelding(status) {
   if (status === 401) return 'Mistral API-sleutel is ongeldig of ontbreekt.';
   if (status === 429) return 'Mistral API-limiet bereikt. Probeer het later opnieuw.';
@@ -1223,9 +1823,8 @@ function mistralFoutmelding(status) {
   return `Mistral antwoordde met status ${status}.`;
 }
 
-// Haalt een leesbare fouttekst uit een Mistral-foutobject. Het bericht kan
-// een string zijn, maar ook een geneste structuur (message/error/detail),
-// waarbij detail een array van {msg}-objecten kan zijn.
+// Het foutbericht kan een string zijn, maar ook een geneste structuur
+// (message/error/detail), waarbij detail een array van {msg}-objecten kan zijn.
 function foutTekstUit(e) {
   if (e == null) return '';
   if (typeof e === 'string') return e;
@@ -1240,6 +1839,49 @@ function foutTekstUit(e) {
   return String(e);
 }
 
+async function foutUitAntwoord(resp) {
+  let msg = mistralFoutmelding(resp.status);
+  if (resp.status !== 401 && resp.status !== 429) {
+    try { msg = foutTekstUit(await resp.json()) || msg; } catch {}
+  }
+  return new Error(msg);
+}
+
+// ── Instellingen onthouden ────────────────────────────────────
+// Alleen de keuzes, nooit de inhoud: voorinformatie, extra instructie,
+// transcript en verslag bevatten cliëntgegevens en blijven in het geheugen.
+const INSTEL_SLEUTEL = 'sessienotitie.instellingen';
+const KEUZES = { gesprekType: gesprekTypeSelect, outputFormat: outputFormat };
+const VINKJES = { optEmoji, optFeedback, optTitel };
+
+function bewaarInstellingen() {
+  try {
+    const data = { bron: opnameBron, mic: micSelect.value, opties: uitklapOpties.open, voorbereiding: uitklapVoorbereiding.open };
+    for (const [k, el] of Object.entries(KEUZES)) data[k] = el.value;
+    for (const [k, el] of Object.entries(VINKJES)) data[k] = el.checked;
+    localStorage.setItem(INSTEL_SLEUTEL, JSON.stringify(data));
+  } catch {}
+}
+
+function laadInstellingen() {
+  let data = {};
+  try { data = JSON.parse(localStorage.getItem(INSTEL_SLEUTEL) || '{}'); } catch {}
+  for (const [k, el] of Object.entries(KEUZES)) {
+    if (data[k] && [...el.options].some(o => o.value === data[k])) el.value = data[k];
+  }
+  for (const [k, el] of Object.entries(VINKJES)) {
+    if (typeof data[k] === 'boolean') el.checked = data[k];
+  }
+  if (typeof data.opties === 'boolean') uitklapOpties.open = data.opties;
+  if (typeof data.voorbereiding === 'boolean') uitklapVoorbereiding.open = data.voorbereiding;
+  if (data.bron && $('bron' + data.bron.charAt(0).toUpperCase() + data.bron.slice(1))) kiesBron(data.bron);
+  return data;
+}
+
+[...Object.values(KEUZES), ...Object.values(VINKJES)].forEach(el => el.addEventListener('change', bewaarInstellingen));
+[uitklapOpties, uitklapVoorbereiding].forEach(el => el.addEventListener('toggle', bewaarInstellingen));
+micSelect.addEventListener('change', bewaarInstellingen);
+
 // ── Uitvoerformaat ────────────────────────────────────────────
 const FORMAT_NOTES = {
   plat: 'Wordt als platte tekst naar het klembord gekopieerd.',
@@ -1251,8 +1893,8 @@ outputFormat.addEventListener('change', async () => {
   // Achteraf van formaat wisselen: meteen opnieuw kopiëren in het nieuwe formaat
   if (finalVerslag) {
     try {
-      await schrijfKlembord(true);
-      toonKopieBevestiging('✓ Formaat gewijzigd en opnieuw gekopieerd');
+      await schrijfKlembord();
+      toonKopieBevestiging('Formaat gewijzigd en opnieuw gekopieerd');
     } catch {}
   }
 });
@@ -1263,7 +1905,10 @@ function kiesBron(bron) {
   bronMic.classList.toggle('actief', bron === 'mic');
   bronScherm.classList.toggle('actief', bron === 'scherm');
   schermInfo.classList.toggle('visible', bron === 'scherm');
-  micSelect.closest('.field').style.opacity = bron === 'scherm' ? '0.4' : '1';
+  // Bij schermdelen wordt de microfoon automatisch meegenomen; de keuze eruit
+  // speelt dan geen rol meer.
+  micSelect.closest('.field').style.opacity = bron === 'mic' ? '1' : '0.4';
+  bewaarInstellingen();
 }
 
 // ── Geslacht badge ────────────────────────────────────────────
@@ -1275,12 +1920,17 @@ function updateGeslachtBadge() {
 
 // ── Microfoons laden ──────────────────────────────────────────
 async function laadMicrofoons() {
+  let bewaardeMic = '';
+  try { bewaardeMic = (JSON.parse(localStorage.getItem(INSTEL_SLEUTEL) || '{}').mic) || ''; } catch {}
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     stream.getTracks().forEach(t => t.stop());
     const devices = await navigator.mediaDevices.enumerateDevices();
     const allesMics = devices.filter(d => d.kind === 'audioinput');
-    const mics = allesMics.filter((mic, index, arr) =>
+    // Monitor-bronnen zijn geen microfoons maar het afspeelsignaal van een
+    // uitgang (Linux); die horen niet in de lijst. Daarna dubbele ingangen van
+    // hetzelfde apparaat wegfilteren.
+    const mics = allesMics.filter(d => !/monitor/i.test(d.label)).filter((mic, index, arr) =>
       arr.map(m => m.groupId).indexOf(mic.groupId) === index
     );
     micSelect.innerHTML = '';
@@ -1290,29 +1940,226 @@ async function laadMicrofoons() {
       opt.textContent = mic.label || `Microfoon ${i + 1}`;
       micSelect.appendChild(opt);
     });
+    if (bewaardeMic && mics.some(m => m.deviceId === bewaardeMic)) micSelect.value = bewaardeMic;
     micNote.textContent = `${mics.length} microfoon${mics.length !== 1 ? 's' : ''} gevonden`;
   } catch {
     micSelect.innerHTML = '<option value="">Toegang geweigerd</option>';
-    micNote.textContent = 'Geef microfoontoestemming in de browser (klik op het slotje in de adresbalk) en herlaad de pagina.';
+    micNote.textContent = 'Geef microfoontoestemming in de browser';
   }
 }
 
-// ── Helpers ───────────────────────────────────────────────────
-const setStatus = (type, msg) => { statusDot.className = 'dot-status ' + type; statusText.textContent = msg; };
-const setStep = n => ['step1','step2','step3'].forEach((id, i) => { $(id).className = 'step' + (i+1 < n ? ' done' : i+1 === n ? ' active' : ''); });
-const showError = msg => { errorMsg.textContent = msg; errorMsg.classList.add('visible'); };
-const hideError = () => errorMsg.classList.remove('visible');
-const formatTime = s => [Math.floor(s/3600), Math.floor((s%3600)/60), s%60].map(n => String(n).padStart(2,'0')).join(':');
+// ── Golfbeeld ─────────────────────────────────────────────────
+// Een meelopend beeld van het binnenkomende niveau. Puur ter controle: je ziet
+// in één oogopslag of er geluid binnenkomt en hoe hard.
+const GOLF_BREEDTE = 3, GOLF_TUSSEN = 2;
+let golfHistorie = [], golfBreedte = 0, golfHoogte = 0;
 
-// ── Opname ────────────────────────────────────────────────────
-btnRecord.addEventListener('click', () => {
-  if (!isRecording && !getApiKey()) {
-    showError('Voer eerst je Mistral API-sleutel in (zie het paneel "Mistral API-sleutel").');
-    setStatus('err', 'Geen API-sleutel');
+function maatGolf() {
+  const rect = golfCanvas.getBoundingClientRect();
+  if (!rect.width) return;
+  const dpr = window.devicePixelRatio || 1;
+  golfBreedte = rect.width; golfHoogte = rect.height || 46;
+  golfCanvas.width = Math.round(golfBreedte * dpr);
+  golfCanvas.height = Math.round(golfHoogte * dpr);
+  golfCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const n = Math.floor(golfBreedte / (GOLF_BREEDTE + GOLF_TUSSEN));
+  while (golfHistorie.length < n) golfHistorie.unshift(0);
+  if (golfHistorie.length > n) golfHistorie = golfHistorie.slice(golfHistorie.length - n);
+  tekenGolf();
+}
+
+function duwGolf(niveau) {
+  golfHistorie.push(niveau);
+  if (golfHistorie.length > Math.floor(golfBreedte / (GOLF_BREEDTE + GOLF_TUSSEN))) golfHistorie.shift();
+}
+
+function tekenGolf() {
+  if (!golfBreedte) return;
+  const stijl = getComputedStyle(document.documentElement);
+  const midden = golfHoogte / 2, maxHoogte = golfHoogte - 4;
+  golfCtx.clearRect(0, 0, golfBreedte, golfHoogte);
+  const verloop = golfCtx.createLinearGradient(0, 0, golfBreedte, 0);
+  verloop.addColorStop(0, stijl.getPropertyValue('--accent').trim() || '#26708f');
+  verloop.addColorStop(1, stijl.getPropertyValue('--accent-2').trim() || '#43a2bd');
+  const stil = stijl.getPropertyValue('--border-strong').trim() || '#ccc';
+  // Zonder signaal één rustige lijn in plaats van een rij losse stipjes.
+  if (!golfHistorie.some(n => n > 0.02)) {
+    golfCtx.fillStyle = stil; golfCtx.globalAlpha = 0.45;
+    golfCtx.beginPath();
+    if (golfCtx.roundRect) golfCtx.roundRect(0, midden - 1, golfBreedte, 2, 1);
+    else golfCtx.rect(0, midden - 1, golfBreedte, 2);
+    golfCtx.fill(); golfCtx.globalAlpha = 1;
     return;
   }
-  isRecording ? stopRecording() : startRecording();
+  for (let i = 0; i < golfHistorie.length; i++) {
+    const n = golfHistorie[i];
+    const h = Math.max(2, n * maxHoogte);
+    const x = i * (GOLF_BREEDTE + GOLF_TUSSEN);
+    golfCtx.fillStyle = n > 0.02 ? verloop : stil;
+    golfCtx.globalAlpha = n > 0.02 ? 0.55 + 0.45 * Math.min(1, n * 2) : 0.35;
+    const r = GOLF_BREEDTE / 2;
+    golfCtx.beginPath();
+    if (golfCtx.roundRect) golfCtx.roundRect(x, midden - h / 2, GOLF_BREEDTE, h, r);
+    else golfCtx.rect(x, midden - h / 2, GOLF_BREEDTE, h);
+    golfCtx.fill();
+  }
+  golfCtx.globalAlpha = 1;
+}
+
+window.addEventListener('resize', maatGolf);
+
+// ── Niveaumeters ──────────────────────────────────────────────
+// Tonen per bron of er signaal binnenkomt. Bedoeld als controle in de eerste
+// seconden van een opname: browsers vertragen tijdlijnen in achtergrondtabbladen,
+// dus de balken lopen alleen betrouwbaar zolang deze pagina zichtbaar is.
+let meterFrame = null, meterBronnen = [], laatsteDuw = 0;
+
+function meterBronToevoegen(naam, node, balk) {
+  const analyser = node.context.createAnalyser();
+  analyser.fftSize = 512;
+  node.connect(analyser);
+  balk.classList.remove('stil');
+  balk.style.width = '0%';
+  meterBronnen.push({ naam, analyser, balk, data: new Uint8Array(analyser.fftSize), stilSinds: Date.now() });
+}
+
+function startMeters() {
+  if (!meterBronnen.length) return;
+  niveauMeters.classList.remove('hidden');
+  niveauWaarschuwing.classList.add('hidden');
+  const tik = () => {
+    const stil = [];
+    let piek = 0;
+    for (const bron of meterBronnen) {
+      bron.analyser.getByteTimeDomainData(bron.data);
+      let top = 0;
+      for (const waarde of bron.data) top = Math.max(top, Math.abs(waarde - 128));
+      const niveau = Math.min(1, top / 64);
+      piek = Math.max(piek, niveau);
+      bron.balk.style.width = (niveau * 100).toFixed(0) + '%';
+      if (niveau > 0.04) {
+        bron.stilSinds = Date.now();
+        bron.balk.classList.remove('stil');
+      } else if (Date.now() - bron.stilSinds > 10000) {
+        bron.balk.classList.add('stil');
+        stil.push(bron.naam);
+      }
+    }
+    if (stil.length) {
+      niveauWaarschuwing.textContent = `${stil.join(' en ')} al 10 seconden stil — controleer of de juiste bron gedeeld wordt.`;
+      niveauWaarschuwing.classList.remove('hidden');
+    } else {
+      niveauWaarschuwing.classList.add('hidden');
+    }
+    recordWrap.style.setProperty('--niveau', piek.toFixed(3));
+    const nu = performance.now();
+    if (nu - laatsteDuw > 55) { laatsteDuw = nu; duwGolf(piek); }
+    tekenGolf();
+    meterFrame = requestAnimationFrame(tik);
+  };
+  meterFrame = requestAnimationFrame(tik);
+}
+
+function stopMeters() {
+  if (meterFrame) cancelAnimationFrame(meterFrame);
+  meterFrame = null;
+  meterBronnen = [];
+  niveauMeters.classList.add('hidden');
+  niveauSchermRij.classList.add('hidden');
+  niveauWaarschuwing.classList.add('hidden');
+  [niveauMic, niveauScherm].forEach(b => { b.style.width = '0%'; b.classList.remove('stil'); });
+  recordWrap.style.setProperty('--niveau', '0');
+  golfHistorie = golfHistorie.map(() => 0);
+  tekenGolf();
+}
+
+// ── Opname ────────────────────────────────────────────────────
+btnRecord.addEventListener('click', () => isRecording ? stopRecording() : startRecording());
+
+// Bij een online gesprek gebruikt het gespreksprogramma (Teams, Meet) dezelfde
+// microfoon. Vragen we die op met de verwerking uít, dan moet de browser het
+// apparaat herconfigureren en valt hún opname stil. Met dezelfde instellingen
+// kunnen beide dezelfde stream delen. Echo-onderdrukking houdt bovendien de stem
+// van de ander uit ons microfoonkanaal; die komt al via de andere bron binnen.
+const gedeeldeMic = deviceId => {
+  const verwerking = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+  return deviceId ? { deviceId: { exact: deviceId }, ...verwerking } : verwerking;
+};
+
+// Voor een opname zonder gespreksprogramma ernaast: onbewerkt levert het beste
+// transcript op.
+const onbewerkt = deviceId => {
+  const verwerking = { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
+  return deviceId ? { deviceId: { exact: deviceId }, ...verwerking } : verwerking;
+};
+
+function opnameUIStart(statusTekst) {
+  isRecording = true;
+  btnRecord.classList.add('recording');
+  btnRecord.setAttribute('aria-label', 'Opname stoppen');
+  recordStatus.textContent = statusTekst;
+  recordStatus.classList.add('active');
+  secondsElapsed = 0;
+  recordTimer.textContent = formatTime(0);
+  timerInterval = setInterval(() => {
+    secondsElapsed++;
+    recordTimer.textContent = formatTime(secondsElapsed);
+    recordTimer.classList.add('active');
+    document.title = '\u25cf ' + formatTime(secondsElapsed).replace(/^00:/, '') + ' — Sessienotitie';
+  }, 1000);
+  setStep(1);
+  setStatus('busy', 'Opname actief', false);
+}
+
+function opnameUIStop(statusTekst) {
+  clearInterval(timerInterval);
+  document.title = 'Sessienotitie';
+  isRecording = false;
+  btnRecord.classList.remove('recording');
+  btnRecord.setAttribute('aria-label', 'Opname starten of stoppen');
+  recordStatus.textContent = statusTekst;
+  recordStatus.classList.remove('active');
+}
+
+// ── Scherm wakker houden ──────────────────────────────────────
+// Op een telefoon valt de opname stil zodra het scherm uitgaat. Zolang er wordt
+// opgenomen houdt de wake lock het scherm aan. Het systeem trekt hem zelf in
+// als de pagina naar de achtergrond gaat, dus bij terugkomst opnieuw vragen.
+let schermWakeLock = null;
+
+async function wakeLockAanvragen() {
+  if (!('wakeLock' in navigator)) return;
+  try {
+    schermWakeLock = await navigator.wakeLock.request('screen');
+    schermWakeLock.addEventListener('release', () => { schermWakeLock = null; });
+  } catch {
+    // Geweigerd, bijvoorbeeld door batterijbesparing. De opname loopt gewoon door.
+    schermWakeLock = null;
+  }
+}
+
+function wakeLockLoslaten() {
+  schermWakeLock?.release().catch(() => {});
+  schermWakeLock = null;
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  if (isRecording && !schermWakeLock) wakeLockAanvragen();
 });
+
+// Een MediaRecorder weigert een formaat dat de browser niet kent: Safari kent
+// alleen mp4, Chrome en Firefox webm. Vandaar kiezen in plaats van vastleggen —
+// met audio/webm hard erin begint een opname op een iPhone niet eens.
+function kiesOpnameType() {
+  return ['audio/webm', 'audio/mp4', 'audio/ogg'].find(t => MediaRecorder.isTypeSupported(t)) || '';
+}
+
+function opnameExtensie(type) {
+  if (type.includes('mp4')) return 'm4a';
+  if (type.includes('ogg')) return 'ogg';
+  return 'webm';
+}
 
 async function startRecording() {
   hideError();
@@ -1328,23 +2175,25 @@ async function startRecording() {
       }
       schermStream.getVideoTracks().forEach(t => t.stop());
 
-      const deviceId = micSelect.value;
       try {
-        const micConstraints = deviceId
-          ? { deviceId: { exact: deviceId }, echoCancellation: false, noiseSuppression: false, autoGainControl: false }
-          : { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
-        micStream = await navigator.mediaDevices.getUserMedia({ audio: micConstraints });
+        micStream = await navigator.mediaDevices.getUserMedia({ audio: gedeeldeMic(micSelect.value) });
         const track = micStream.getAudioTracks()[0];
         console.log('Actieve microfoon (scherm+mic modus):', track.label);
+        console.log('Microfoon instellingen:', JSON.stringify(track.getSettings()));
       } catch (e) {
         micStream = null;
       }
 
       audioContext = new (window.AudioContext || window.webkitAudioContext)();
       const destination = audioContext.createMediaStreamDestination();
-      audioContext.createMediaStreamSource(new MediaStream(schermAudio)).connect(destination);
+      const schermBron = audioContext.createMediaStreamSource(new MediaStream(schermAudio));
+      schermBron.connect(destination);
+      niveauSchermRij.classList.remove('hidden');
+      meterBronToevoegen('De gedeelde audio is', schermBron, niveauScherm);
       if (micStream) {
-        audioContext.createMediaStreamSource(micStream).connect(destination);
+        const micBron = audioContext.createMediaStreamSource(micStream);
+        micBron.connect(destination);
+        meterBronToevoegen('Je microfoon is', micBron, niveauMic);
       }
       stream = destination.stream;
 
@@ -1352,52 +2201,54 @@ async function startRecording() {
         showError('Let op: microfoon niet beschikbaar — alleen de audio van de ander wordt opgenomen.');
       }
     } else {
-      const deviceId = micSelect.value;
-      const audioConstraints = deviceId
-        ? { deviceId: { exact: deviceId }, echoCancellation: false, noiseSuppression: false, autoGainControl: false }
-        : { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
-      stream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
+      stream = await navigator.mediaDevices.getUserMedia({ audio: onbewerkt(micSelect.value) });
       const track = stream.getAudioTracks()[0];
       console.log('Actieve microfoon:', track.label);
+      console.log('Microfoon instellingen:', JSON.stringify(track.getSettings()));
+
+      // Alleen om mee te luisteren; de opname loopt over de onbewerkte stream.
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      meterBronToevoegen('Je microfoon is', audioContext.createMediaStreamSource(stream), niveauMic);
     }
 
-    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+    opnameType = kiesOpnameType();
+    mediaRecorder = new MediaRecorder(stream, opnameType ? { mimeType: opnameType } : {});
     audioChunks = [];
     mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
     mediaRecorder.onstop = handleStop;
     mediaRecorder.start(1000);
+    startMeters();
+    wakeLockAanvragen();
 
-    isRecording = true;
-    btnRecord.classList.add('recording');
-    recordStatus.textContent = opnameBron === 'scherm' ? 'Opname bezig (scherm + audio)...' : 'Opname bezig...';
-    recordStatus.classList.add('active');
-    secondsElapsed = 0;
-    timerInterval = setInterval(() => { secondsElapsed++; recordTimer.textContent = formatTime(secondsElapsed); recordTimer.classList.add('active'); }, 1000);
-    setStep(1);
-    setStatus('busy', 'Opname actief');
+    opnameUIStart(opnameBron === 'scherm' ? 'Opname bezig (scherm + audio)...' : 'Opname bezig...');
   } catch (err) {
+    stopMeters();
+    wakeLockLoslaten();
+    [schermStream, micStream].forEach(s => s?.getTracks().forEach(t => t.stop()));
+    schermStream = null; micStream = null;
+    if (audioContext && audioContext.state !== 'closed') audioContext.close();
+    audioContext = null;
     showError('Opname starten mislukt: ' + err.message);
     setStatus('err', 'Opname fout');
   }
 }
 
 function stopRecording() {
+  stopMeters();
+  wakeLockLoslaten();
   if (mediaRecorder?.state !== 'inactive') mediaRecorder.stop();
   mediaRecorder?.stream.getTracks().forEach(t => t.stop());
   schermStream?.getTracks().forEach(t => t.stop());
   micStream?.getTracks().forEach(t => t.stop());
   if (audioContext && audioContext.state !== 'closed') audioContext.close();
   schermStream = null; micStream = null; audioContext = null;
-  clearInterval(timerInterval);
-  isRecording = false;
-  btnRecord.classList.remove('recording');
-  recordStatus.textContent = 'Opname gestopt — bezig met verwerken...';
-  recordStatus.classList.remove('active');
+  opnameUIStop('Opname gestopt — bezig met verwerken...');
 }
 
 async function handleStop() {
-  const blob = new Blob(audioChunks, { type: 'audio/webm' });
-  await transcribeer(blob);
+  const type = opnameType || 'audio/webm';
+  const blob = new Blob(audioChunks, { type });
+  await transcribeer(blob, 'opname.' + opnameExtensie(type));
 }
 
 // ── Audiobestand uploaden ─────────────────────────────────────
@@ -1405,7 +2256,6 @@ audioUpload.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
   if (isRecording) { showError('Stop eerst de lopende opname voordat je een bestand uploadt.'); e.target.value = ''; return; }
-  if (!getApiKey()) { showError('Voer eerst je Mistral API-sleutel in (zie het paneel "Mistral API-sleutel").'); e.target.value = ''; return; }
   hideError();
   uploadFilename.textContent = '📄 ' + file.name;
   recordTimer.textContent = '00:00:00'; recordTimer.classList.remove('active');
@@ -1418,20 +2268,15 @@ audioUpload.addEventListener('change', async (e) => {
   }
 });
 
-// ── Transcriptie (rechtstreeks naar Mistral / Voxtral) ────────
+// ── Transcriptie ──────────────────────────────────────────────
 async function transcribeer(blob, bestandsnaam = 'opname.webm') {
-  const key = getApiKey();
-  if (!key) {
-    showError('Voer eerst je Mistral API-sleutel in (zie het paneel "Mistral API-sleutel").');
-    setStatus('err', 'Geen API-sleutel');
-    recordStatus.textContent = 'Klaar voor nieuw gesprek';
-    return;
-  }
+  if (sleutelOntbreekt()) { recordStatus.textContent = 'Klaar voor nieuw gesprek'; return; }
   setStep(2);
-  setStatus('busy', 'Transcriptie bezig...');
+  setStatus('busy', 'Transcriptie bezig');
   transcriptSpinner.classList.remove('hidden');
   transcriptBox.textContent = 'Audio wordt getranscribeerd...';
   transcriptBox.classList.remove('filled');
+  transcriptTelling.textContent = '';
   try {
     const form = new FormData();
     form.append('file', blob, bestandsnaam);
@@ -1442,30 +2287,39 @@ async function transcribeer(blob, bestandsnaam = 'opname.webm') {
     form.append('timestamp_granularities', 'segment');
     const resp = await fetch(MISTRAL_TRANSCRIBE_URL, {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + key },
+      headers: { 'Authorization': 'Bearer ' + getApiKey() },
       body: form,
     });
-    if (!resp.ok) {
-      let msg = mistralFoutmelding(resp.status);
-      if (resp.status !== 401 && resp.status !== 429) {
-        try { const e = await resp.json(); msg = foutTekstUit(e) || msg; } catch {}
-      }
-      throw new Error(msg);
-    }
-    const data = await resp.json();
-    huidigTranscript = bouwTranscript(data);
+    if (!resp.ok) throw await foutUitAntwoord(resp);
+    huidigTranscript = bouwTranscript(await resp.json());
     if (!huidigTranscript.trim()) throw new Error('Leeg transcript ontvangen');
     transcriptBox.textContent = huidigTranscript;
     transcriptBox.classList.add('filled');
+    transcriptTelling.textContent = telZin(woorden(huidigTranscript));
     transcriptSpinner.classList.add('hidden');
-    await maakVerslag(huidigTranscript, gesprekTypeSelect.value, geslachtSelect.value, customPromptInput.value.trim(), voorinformatieInput.value.trim());
+    await maakVerslag(huidigTranscript, gesprekTypeSelect.value, geslachtSelect.value,
+                      customPromptInput.value.trim(), voorinformatieInput.value.trim());
   } catch (err) {
     transcriptSpinner.classList.add('hidden');
     showError('Transcriptie mislukt: ' + err.message);
     setStatus('err', 'Transcriptie fout');
     recordStatus.textContent = 'Klaar voor nieuw gesprek';
+    // Ook zonder verslag het regen-paneel tonen mits er een transcript is
     toonRegenPaneel(gesprekTypeSelect.value, geslachtSelect.value);
   }
+}
+
+// ── Transcript: uitklappen en kopiëren ────────────────────────
+function transcriptUitklappen() {
+  const uit = transcriptBox.classList.toggle('uit');
+  btnTranscriptUit.textContent = uit ? 'Inklappen' : 'Uitklappen';
+}
+async function kopieerTranscript() {
+  if (!huidigTranscript) { toast('Er is nog geen transcript.', 'fout'); return; }
+  try {
+    await navigator.clipboard.writeText(huidigTranscript);
+    toast('Transcript gekopieerd');
+  } catch { toast('Kopiëren mislukt — selecteer de tekst handmatig.', 'fout'); }
 }
 
 // ── Regen-paneel tonen ────────────────────────────────────────
@@ -1474,288 +2328,17 @@ function toonRegenPaneel(gesprekType, geslacht) {
   regenType.value = gesprekType;
   regenGeslacht.value = geslacht;
   regenPanel.classList.remove('hidden');
+  uitklapRegen.classList.remove('hidden');
   btnRegen.disabled = false;
 }
 
-// ── Verslag (streaming, rechtstreeks naar Mistral) ────────────
-async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '', voorinformatie = '', suggestie = '', vorigVerslag = '') {
-  const key = getApiKey();
-  if (!key) { showError('Voer eerst je Mistral API-sleutel in.'); setStatus('err', 'Geen API-sleutel'); return; }
-
-  setStep(3);
-  setStatus('busy', suggestie ? 'Verslag wordt herzien...' : 'Verslag wordt gegenereerd...');
-  verslagSpinner.classList.remove('hidden');
-  outputBox.classList.remove('placeholder', 'formatted');
-  outputBox.textContent = 'Het taalmodel is bezig met het uitwerken van het verslag...';
-  titelRegel.classList.remove('show');
-  toonOverwegingen(false);
-  btnKopieer.disabled = true; btnKopieerBeide.disabled = true; btnRegen.disabled = true;
-  btnHerzie.disabled = true;
-
-  try {
-    const systeemPrompt   = bouwSysteemprompt(gesprekType, optEmoji.checked, optFeedback.checked, optTitel.checked);
-    const gebruikerPrompt = bouwGebruikerPrompt(transcript, gesprekType, geslacht, customPrompt, voorinformatie, optVoorinfoInVerslag.checked, optFeedback.checked, suggestie, vorigVerslag);
-
-    const resp = await fetch(MISTRAL_CHAT_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + key,
-        'Content-Type': 'application/json',
-        'Accept': 'text/event-stream',
-      },
-      body: JSON.stringify({
-        model: CHAT_MODEL,
-        stream: true,
-        temperature: 0.3,
-        messages: [
-          { role: 'system', content: systeemPrompt },
-          { role: 'user',   content: gebruikerPrompt },
-        ],
-      }),
-    });
-    if (!resp.ok) {
-      let msg = mistralFoutmelding(resp.status);
-      if (resp.status !== 401 && resp.status !== 429) {
-        try { const e = await resp.json(); msg = foutTekstUit(e) || msg; } catch {}
-      }
-      throw new Error(msg);
-    }
-
-    const reader = resp.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '', ruweTekst = '';
-    outputBox.textContent = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop();           // bewaar onvolledige laatste regel
-      for (let line of lines) {
-        line = line.trim();
-        if (!line) continue;
-        if (line.startsWith('data:')) line = line.slice(5).trim();
-        if (line === '[DONE]') { buffer = ''; break; }
-        try {
-          const obj = JSON.parse(line);
-          if (obj.error) throw new Error(obj.error.message || obj.error);
-          ruweTekst += obj?.choices?.[0]?.delta?.content || '';
-          outputBox.textContent = ruweTekst;
-        } catch (e) {
-          if (e instanceof SyntaxError) continue; // onvolledige JSON, overslaan
-          throw e;
-        }
-      }
-    }
-
-    if (!ruweTekst.trim()) throw new Error('Leeg antwoord van het taalmodel ontvangen.');
-
-    verslagSpinner.classList.add('hidden');
-    verwerkOutput(ruweTekst);
-    bewaarVersie(suggestie);
-
-    toonRegenPaneel(gesprekType, geslacht);
-    suggestiePaneel.classList.remove('hidden');
-
-    btnKopieer.disabled = false;
-    btnKopieerBeide.disabled = false;
-    btnHerzie.disabled = false;
-
-    try {
-      await schrijfKlembord(true);
-      toonKopieBevestiging('✓ Verslag gegenereerd en gekopieerd');
-    } catch {}
-
-    setStatus('ok', suggestie ? 'Herziene versie gereed — automatisch gekopieerd' : 'Verslag gereed — automatisch gekopieerd');
-    recordStatus.textContent = 'Verslag voltooid';
-  } catch (err) {
-    verslagSpinner.classList.add('hidden');
-    showError('Verslag genereren mislukt: ' + err.message + ' — gebruik de knop hieronder om het opnieuw te proberen.');
-    setStatus('err', 'Taalmodel fout');
-    toonRegenPaneel(gesprekType, geslacht);
-    // Bij een mislukte herziening blijft de vorige versie gewoon staan.
-    btnHerzie.disabled = versies.length === 0;
-    if (versies.length) stapVersie(0);
-  }
-}
-
-// ── Output verwerken: titel + verslag + overwegingen splitsen ─
-function verwerkOutput(ruweTekst) {
-  huidigeTitel = ''; overwegingItems = [];
-  let werk = ruweTekst;
-
-  werk = werk.replace(/(?:^|\n)#{1,6}[^\S\n]*(?:collegiale[^\S\n]+)?overwegingen[^\n]*/gi, '\n===OVERWEGINGEN===');
-  const delen = werk.split(/===\s*OVERWEGINGEN\s*===/i);
-  if (delen.length > 1) {
-    werk = delen[0];
-    overwegingItems = parseOverwegingen(delen.slice(1).join('\n').trim());
-  }
-
-  const titelMatch = werk.match(/^===TITEL===\s*\n([^\n]+)/i);
-  if (titelMatch) {
-    huidigeTitel = titelMatch[1].trim();
-    werk = werk.replace(/^===TITEL===\s*\n[^\n]+\n?/, '');
-  }
-
-  // Sommige modellen zetten de emoji vóór de ##-markering ("🔄 ## Kop") waardoor
-  // de regel niet als kop wordt herkend. Normaliseer naar "## 🔄 Kop".
-  werk = werk.replace(/^[ \t]*([^\w#\n][^\w#\n]*?)[ \t]*(#{1,6})[ \t]+/gm, '$2 $1 ');
-
-  // Scheidingslijnen (horizontale regels: ---, ***, ___) die het model tussen
-  // secties zet, verwijderen — niet gewenst in welke uitvoer dan ook.
-  werk = werk.replace(/^[ \t]*([-*_])(?:[ \t]*\1){2,}[ \t]*$/gm, '');
-
-  verslagMarkdown = werk.trim().replace(/\n{3,}/g, '\n\n');
-  finalVerslag = convertMarkdown(verslagMarkdown);
-  outputBox.innerHTML = convertMarkdownToHtml(verslagMarkdown);
-  outputBox.classList.remove('placeholder');
-  outputBox.classList.add('formatted');
-
-  if (huidigeTitel) {
-    titelRegel.textContent = huidigeTitel;
-    titelRegel.classList.add('show');
-  }
-
-  if (overwegingItems.length) renderOverwegingen();
-  toonOverwegingen(overwegingItems.length > 0);
-}
-
-// ── Overwegingen: parsen tot losse, uitvinkbare punten ────────
-function parseOverwegingen(raw) {
-  const items = [];
-  let current = null;
-  for (const line of raw.split('\n')) {
-    const m = line.match(/^\s*[-*+]\s+(.+)/) || line.match(/^\s*\d+[.)]\s+(.+)/);
-    if (m) {
-      if (current !== null) items.push(current);
-      current = inline(m[1].trim());
-    } else if (line.trim()) {
-      const tekst = inline(line.replace(/^#{1,6}\s*/, '').trim());
-      current = current === null ? tekst : current + ' ' + tekst;
-    }
-  }
-  if (current !== null) items.push(current);
-  return items.filter(t => t).map(text => ({ text, checked: true }));
-}
-
-// Zonder overwegingen doen "Alles kopiëren" en "Alleen verslag kopiëren" precies
-// hetzelfde; die tweede knop tonen we dan niet.
-function toonOverwegingen(aan) {
-  overwegingCard.classList.toggle('show', aan);
-  btnKopieerBeide.classList.toggle('hidden', !aan);
-}
-
-function renderOverwegingen() {
-  overwegingBox.innerHTML = '';
-  const hint = document.createElement('div');
-  hint.className = 'overweging-hint';
-  hint.textContent = 'Vink uit wat je niet wilt overnemen — het klembord wordt direct bijgewerkt.';
-  overwegingBox.appendChild(hint);
-
-  overwegingItems.forEach((item, i) => {
-    const rij = document.createElement('div');
-    rij.className = 'overweging-item';
-    const cb = document.createElement('input');
-    cb.type = 'checkbox'; cb.checked = item.checked; cb.id = 'ow_' + i;
-    const lab = document.createElement('label');
-    lab.htmlFor = 'ow_' + i; lab.textContent = item.text;
-    cb.addEventListener('change', () => {
-      item.checked = cb.checked;
-      autoKopieerBeide();
-    });
-    rij.append(cb, lab);
-    overwegingBox.appendChild(rij);
-  });
-}
-
-// ── Kopieerteksten samenstellen (per formaat) ─────────────────
-function gekozenOverwegingen() {
-  return overwegingItems.filter(o => o.checked);
-}
-function buildPlain(includeOverwegingen) {
-  let t = (huidigeTitel ? huidigeTitel + '\n\n' : '') + finalVerslag;
-  if (includeOverwegingen) {
-    const g = gekozenOverwegingen();
-    if (g.length) {
-      t += '\n\n' + '='.repeat(40) + '\nOVERWEGINGEN\n' + '='.repeat(40) + '\n\n'
-         + g.map(o => '• ' + o.text).join('\n');
-    }
-  }
-  return t;
-}
-function buildMarkdown(includeOverwegingen) {
-  let t = (huidigeTitel ? '# ' + huidigeTitel + '\n\n' : '') + verslagMarkdown;
-  if (includeOverwegingen) {
-    const g = gekozenOverwegingen();
-    if (g.length) {
-      t += '\n\n---\n\n## Overwegingen\n\n' + g.map(o => '- ' + o.text).join('\n');
-    }
-  }
-  return t;
-}
-function buildHtml(includeOverwegingen) {
-  let h = (huidigeTitel ? '<h1>' + escapeHtml(huidigeTitel) + '</h1>\n' : '') + convertMarkdownToHtml(verslagMarkdown);
-  if (includeOverwegingen) {
-    const g = gekozenOverwegingen();
-    if (g.length) {
-      h += '\n<hr>\n<h2>Overwegingen</h2>\n<ul>\n'
-         + g.map(o => '<li>' + escapeHtml(o.text) + '</li>').join('\n') + '\n</ul>';
-    }
-  }
-  return h;
-}
-
-// ── Naar klembord schrijven (formaat-afhankelijk) ─────────────
-async function schrijfKlembord(includeOverwegingen) {
-  const fmt = outputFormat.value;
-  if (fmt === 'html') {
-    const html = buildHtml(includeOverwegingen);
-    const plat = buildPlain(includeOverwegingen);
-    if (navigator.clipboard.write && window.ClipboardItem) {
-      const item = new ClipboardItem({
-        'text/html': new Blob([html], { type: 'text/html' }),
-        'text/plain': new Blob([plat], { type: 'text/plain' })
-      });
-      await navigator.clipboard.write([item]);
-    } else {
-      await navigator.clipboard.writeText(plat);
-    }
-  } else {
-    const tekst = fmt === 'markdown' ? buildMarkdown(includeOverwegingen) : buildPlain(includeOverwegingen);
-    await navigator.clipboard.writeText(tekst);
-  }
-}
-
-function toonKopieBevestiging(msg) {
-  copyConfirmation.textContent = msg || '✓ Gekopieerd naar klembord';
-  copyConfirmation.classList.add('show');
-  clearTimeout(confirmTimer);
-  confirmTimer = setTimeout(() => copyConfirmation.classList.remove('show'), 2800);
-}
-
-// Auto-kopiëren zodra een overweging wordt aan- of uitgevinkt — geen knop nodig
-async function autoKopieerBeide() {
-  try {
-    await schrijfKlembord(true);
-    toonKopieBevestiging('✓ Overwegingen bijgewerkt en gekopieerd');
-  } catch {}
-}
-
-// ── Opnieuw genereren ─────────────────────────────────────────
-async function regenereerVerslag() {
-  if (!huidigTranscript) { showError('Geen transcript beschikbaar.'); return; }
-  hideError();
-  await maakVerslag(huidigTranscript, regenType.value, regenGeslacht.value, customPromptInput.value.trim(), voorinformatieInput.value.trim());
-}
-
 // ── Versiegeschiedenis ────────────────────────────────────────
-// Een nieuwe versie komt altijd achteraan, ook als je eerst bent teruggebladerd:
-// teruggaan is bedoeld om te vergelijken, niet om werk weg te gooien.
 function bewaarVersie(suggestie) {
+  // Een nieuwe versie komt altijd achteraan, ook als je eerst bent teruggebladerd:
+  // teruggaan is bedoeld om te vergelijken, niet om werk weg te gooien.
   versies.push({
-    verslagMarkdown, finalVerslag, huidigeTitel,
-    overwegingItems: overwegingItems.map(o => ({ ...o })),
+    verslagMarkdown, finalVerslag, huidigeTitel, collegaTip,
+    gesprekType: huidigGesprekType,
     suggestie: suggestie || ''
   });
   huidigeVersie = versies.length - 1;
@@ -1780,22 +2363,25 @@ function stapVersie(richting) {
   verslagMarkdown = v.verslagMarkdown;
   finalVerslag = v.finalVerslag;
   huidigeTitel = v.huidigeTitel;
-  overwegingItems = v.overwegingItems.map(o => ({ ...o }));
+  collegaTip = v.collegaTip;
+  huidigGesprekType = v.gesprekType || huidigGesprekType;
   outputBox.innerHTML = convertMarkdownToHtml(verslagMarkdown);
+  zetSectieKnoppen();
   outputBox.classList.remove('placeholder');
   outputBox.classList.add('formatted');
+  verslagTelling.textContent = telZin(woorden(finalVerslag));
   titelRegel.textContent = huidigeTitel;
   titelRegel.classList.toggle('show', !!huidigeTitel);
-  if (overwegingItems.length) renderOverwegingen();
-  toonOverwegingen(overwegingItems.length > 0);
+  if (collegaTip) { renderTip(); tipCard.classList.add('show'); }
+  else { tipCard.classList.remove('show'); }
   werkVersieBalkBij();
-  autoKopieerBeide();
+  autoKopieerVerslag();
 }
 
 // ── Herziening op aanwijzing van de behandelaar ───────────────
 async function herzieVerslag() {
   const suggestie = suggestieInput.value.trim();
-  if (!suggestie) { showError('Schrijf eerst op wat er anders moet.'); return; }
+  if (!suggestie) { showError('Schrijf eerst op wat er anders moet.'); suggestieInput.focus(); return; }
   if (!huidigTranscript) { showError('Geen transcript beschikbaar.'); return; }
   hideError();
   // De versie waar je nu naar kijkt is het vertrekpunt, niet per se de laatste.
@@ -1806,42 +2392,342 @@ async function herzieVerslag() {
   suggestieInput.value = '';
 }
 
+// ── Verslag ───────────────────────────────────────────────────
+async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '', voorinformatie = '',
+                           suggestie = '', vorigVerslag = '') {
+  if (sleutelOntbreekt()) return;
+  setStep(3);
+  setStatus('busy', suggestie ? 'Verslag wordt herzien' : 'Verslag wordt geschreven');
+  verslagSpinner.classList.remove('hidden');
+  outputBox.classList.remove('placeholder', 'formatted');
+  outputBox.textContent = 'Het taalmodel is bezig met het uitwerken van het verslag...';
+  verslagTelling.textContent = '';
+  titelRegel.classList.remove('show');
+  tipCard.classList.remove('show');
+  btnKopieer.disabled = true; btnRegen.disabled = true;
+  btnHerzie.disabled = true;
+
+  try {
+    const systeemPrompt   = bouwSysteemprompt(gesprekType, optEmoji.checked, optFeedback.checked, optTitel.checked);
+    const gebruikerPrompt = bouwGebruikerPrompt(verwijderHerhalingen(transcript), gesprekType, geslacht,
+                                                customPrompt, voorinformatie, optVoorinfoInVerslag.checked,
+                                                optFeedback.checked, suggestie, vorigVerslag);
+
+    const resp = await fetch(MISTRAL_CHAT_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + getApiKey(),
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream',
+      },
+      body: JSON.stringify({
+        model: CHAT_MODEL,
+        stream: true,
+        temperature: TEMPERATUUR,
+        messages: [
+          { role: 'system', content: systeemPrompt },
+          { role: 'user',   content: gebruikerPrompt },
+        ],
+      }),
+    });
+    if (!resp.ok) throw await foutUitAntwoord(resp);
+
+    // Server-sent events: 'data: {...}' per regel, afgesloten met 'data: [DONE]'.
+    // Een brok kan midden in een regel eindigen, dus de staart blijft in de buffer.
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '', ruweTekst = '';
+    outputBox.textContent = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const regels = buffer.split('\n');
+      buffer = regels.pop();
+      for (let regel of regels) {
+        regel = regel.trim();
+        if (!regel) continue;
+        if (regel.startsWith('data:')) regel = regel.slice(5).trim();
+        if (regel === '[DONE]') { buffer = ''; break; }
+        try {
+          const obj = JSON.parse(regel);
+          if (obj.error) throw new Error(foutTekstUit(obj.error));
+          ruweTekst += obj?.choices?.[0]?.delta?.content || '';
+          outputBox.textContent = ruweTekst;
+        } catch (e) {
+          if (e instanceof SyntaxError) continue;   // onvolledige JSON, overslaan
+          throw e;
+        }
+      }
+    }
+
+    if (!ruweTekst.trim()) throw new Error('Leeg antwoord van het taalmodel ontvangen.');
+
+    verslagSpinner.classList.add('hidden');
+    huidigGesprekType = gesprekType;
+    verwerkOutput(ruweTekst);
+    bewaarVersie(suggestie);
+
+    toonRegenPaneel(gesprekType, geslacht);
+    suggestiePaneel.classList.remove('hidden');
+
+    btnKopieer.disabled = false;
+    btnHerzie.disabled = false;
+
+    try {
+      await schrijfKlembord();
+      toonKopieBevestiging(suggestie ? 'Herziene versie gereed en gekopieerd' : 'Verslag gereed en gekopieerd');
+    } catch {}
+
+    setStatus('ok', suggestie ? 'Herziene versie gereed — automatisch gekopieerd'
+                             : 'Verslag gereed — automatisch gekopieerd');
+    recordStatus.textContent = 'Verslag voltooid';
+  } catch (err) {
+    verslagSpinner.classList.add('hidden');
+    showError('Verslag genereren mislukt: ' + err.message + ' — gebruik de knop hieronder om het opnieuw te proberen.');
+    setStatus('err', 'Taalmodel fout');
+    toonRegenPaneel(gesprekType, geslacht);
+    uitklapRegen.open = true;
+    // Bij een mislukte herziening blijft de vorige versie gewoon staan.
+    btnHerzie.disabled = versies.length === 0;
+    if (versies.length) stapVersie(0);
+  }
+}
+
+// ── Output verwerken: titel + verslag + collegiale tip splitsen ─
+function verwerkOutput(ruweTekst) {
+  huidigeTitel = ''; collegaTip = '';
+  let werk = ruweTekst;
+
+  // Het model zet er soms een invulplaatshouder in ("de 26e [datum onbekend]")
+  // als een gegeven in het gesprek onvolledig is. Drie promptregels kregen dat
+  // er niet uit, dus halen we het hier weg. De markeringen die de app zelf
+  // gebruikt bevatten het woord 'transcript' en blijven staan.
+  werk = werk.replace(/[ \t]*\[(?![^\]]*transcript)[^\]\n]{3,30}\][ \t]*/g, ' ')
+             .replace(/[ \t]+([,.;:])/g, '$1');
+
+  // Een kopregel die de hekjes van de instructie meeneemt ("### ### Voorgenomen")
+  // is twee keer eerder via de prompt bestreden en kwam terug; hier gaat het altijd goed.
+  werk = werk.replace(/^(#{1,6})[ \t]+#{1,6}[ \t]*/gm, '$1 ')
+             .replace(/^(#{1,6}[ \t]*)`+([^\n`]+?)`+[ \t]*$/gm, '$1$2');
+
+  werk = werk.replace(/(?:^|\n)#{1,6}[^\S\n]*(?:collegiale[^\S\n]+)?tip[^\n]*/gi, '\n===TIP===');
+  const delen = werk.split(/===\s*TIP\s*===/i);
+  if (delen.length > 1) {
+    werk = delen[0];
+    collegaTip = parseTip(delen.slice(1).join('\n').trim());
+  }
+
+  const titelMatch = werk.match(/^===TITEL===\s*\n([^\n]+)/i);
+  if (titelMatch) {
+    huidigeTitel = titelMatch[1].trim();
+    werk = werk.replace(/^===TITEL===\s*\n[^\n]+\n?/, '');
+  }
+
+  // Sommige modellen zetten de emoji vóór de ##-markering ("🔄 ## Kop") waardoor
+  // de regel niet als kop wordt herkend. Normaliseer naar "## 🔄 Kop".
+  werk = werk.replace(/^[ \t]*([^\w#\n][^\w#\n]*?)[ \t]*(#{1,6})[ \t]+/gm, '$2 $1 ');
+
+  // Scheidingslijnen (horizontale regels: ---, ***, ___) die het model tussen
+  // secties zet, verwijderen — niet gewenst in welke uitvoer dan ook.
+  werk = werk.replace(/^[ \t]*([-*_])(?:[ \t]*\1){2,}[ \t]*$/gm, '');
+
+  verslagMarkdown = werk.trim().replace(/\n{3,}/g, '\n\n');
+  finalVerslag = convertMarkdown(verslagMarkdown);
+  outputBox.innerHTML = convertMarkdownToHtml(verslagMarkdown);
+  zetSectieKnoppen();
+  outputBox.classList.remove('placeholder');
+  outputBox.classList.add('formatted');
+  verslagTelling.textContent = telZin(woorden(finalVerslag));
+
+  if (huidigeTitel) {
+    titelRegel.textContent = huidigeTitel;
+    titelRegel.classList.add('show');
+  }
+
+  if (collegaTip) {
+    renderTip();
+    tipCard.classList.add('show');
+  }
+}
+
+// ── Collegiale tip: parsen tot platte tekst ───────────────────
+// Eén tip, geen lijst — een eventueel streepje ervoor is opmaak van het model
+// en geen opsomming, dus die halen we eraf; regeleindes worden spaties.
+function parseTip(raw) {
+  return raw.split('\n')
+    .map(regel => inline(regel.replace(/^\s*[-*+]\s+/, '').replace(/^#{1,6}\s*/, '').trim()))
+    .filter(t => t)
+    .join(' ');
+}
+
+function renderTip() {
+  tipBox.innerHTML = collegaTip;
+}
+
+// ── Kopieerteksten samenstellen (per formaat) ──────────────────
+// De collegiale tip staat in zijn eigen venster en gaat nooit mee in wat
+// hier wordt opgebouwd — dat is precies waar dat venster voor is.
+function buildPlain() {
+  return (huidigeTitel ? huidigeTitel + '\n\n' : '') + finalVerslag;
+}
+function buildMarkdown() {
+  return (huidigeTitel ? '# ' + huidigeTitel + '\n\n' : '') + verslagMarkdown;
+}
+function buildHtml() {
+  return (huidigeTitel ? '<h1>' + escapeHtml(huidigeTitel) + '</h1>\n' : '') + convertMarkdownToHtml(verslagMarkdown);
+}
+
+// ── Naar klembord schrijven (formaat-afhankelijk) ─────────────
+async function schrijfKlembord() {
+  const fmt = outputFormat.value;
+  if (fmt === 'html') {
+    const html = buildHtml();
+    const plat = buildPlain();
+    if (navigator.clipboard.write && window.ClipboardItem) {
+      const item = new ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([plat], { type: 'text/plain' })
+      });
+      await navigator.clipboard.write([item]);
+    } else {
+      await navigator.clipboard.writeText(plat);
+    }
+  } else {
+    const tekst = fmt === 'markdown' ? buildMarkdown() : buildPlain();
+    await navigator.clipboard.writeText(tekst);
+  }
+}
+
+// Auto-kopiëren bij het terugbladeren door de versiegeschiedenis — geen knop nodig
+async function autoKopieerVerslag() {
+  try {
+    await schrijfKlembord();
+    toonKopieBevestiging('Verslag bijgewerkt en gekopieerd');
+  } catch {}
+}
+
+// ── Opnieuw genereren ─────────────────────────────────────────
+async function regenereerVerslag() {
+  if (!huidigTranscript) { showError('Geen transcript beschikbaar.'); return; }
+  hideError();
+  await maakVerslag(huidigTranscript, regenType.value, regenGeslacht.value,
+                    customPromptInput.value.trim(), voorinformatieInput.value.trim());
+}
+
+// ── Kopiëren per sectie ───────────────────────────────────────
+// Elke hoofdsectie gaat in het dossier naar een eigen veld, dus krijgt elke kop
+// een eigen knop. Wat er gekopieerd wordt is de inhoud zónder de kopregel: het
+// veld in het dossier draagt die naam zelf al.
+function verslagSecties(md) {
+  // Dezelfde koppen als convertMarkdownToHtml tot een <h2> maakt (# en ##), in
+  // dezelfde volgorde, zodat sectie n bij de n-de h2 in de uitvoer hoort.
+  const secties = [];
+  let huidig = null;
+  for (const regel of md.split('\n')) {
+    const kop = regel.replace(/\s+$/, '').match(/^#{1,2} (.+)/);
+    if (kop) { huidig = { titel: kop[1].trim(), regels: [] }; secties.push(huidig); continue; }
+    if (huidig) huidig.regels.push(regel);
+  }
+  return secties.map(s => ({ titel: s.titel, markdown: s.regels.join('\n').trim() }));
+}
+
+function zetSectieKnoppen() {
+  // Alleen bij een intake: daar gaat elke sectie naar een eigen dossierveld. Een
+  // behandelverslag gaat in zijn geheel het dossier in, en houdt dus schone koppen.
+  if (huidigGesprekType !== 'intakegesprek') return;
+  const secties = verslagSecties(verslagMarkdown);
+  outputBox.querySelectorAll('h2').forEach((kop, i) => {
+    const sectie = secties[i];
+    if (!sectie || !sectie.markdown) return;   // een lege sectie valt niets te kopiëren
+    const knop = document.createElement('button');
+    knop.type = 'button';
+    knop.className = 'sectie-kopieer';
+    knop.textContent = 'Kopiëren';
+    knop.title = 'De inhoud van deze sectie kopiëren, zonder de kopregel';
+    knop.addEventListener('click', () => kopieerSectie(sectie, knop));
+    kop.appendChild(knop);
+  });
+}
+
+async function kopieerSectie(sectie, knop) {
+  const fmt = outputFormat.value;
+  try {
+    if (fmt === 'html' && navigator.clipboard.write && window.ClipboardItem) {
+      await navigator.clipboard.write([new ClipboardItem({
+        'text/html':  new Blob([convertMarkdownToHtml(sectie.markdown)], { type: 'text/html' }),
+        'text/plain': new Blob([convertMarkdown(sectie.markdown)], { type: 'text/plain' })
+      })]);
+    } else {
+      await navigator.clipboard.writeText(fmt === 'markdown' ? sectie.markdown
+                                                             : convertMarkdown(sectie.markdown));
+    }
+    // De knop blijft gemarkeerd staan, zodat je in een lange intake ziet welke
+    // velden je al in het dossier hebt staan.
+    knop.classList.add('gedaan');
+    knop.textContent = '✓ Gekopieerd';
+    toonKopieBevestiging(sectie.titel + ' gekopieerd');
+  } catch {
+    showError('Kopiëren mislukt — selecteer de tekst handmatig.');
+  }
+}
+
 // ── Kopiëren ──────────────────────────────────────────────────
 async function kopieerVerslag() {
+  if (btnKopieer.disabled) return;
   try {
-    await schrijfKlembord(false);
-    btnKopieerBeide.textContent = '✓ Gekopieerd';
-    toonKopieBevestiging('✓ Alleen verslag gekopieerd');
-    setTimeout(() => { btnKopieerBeide.textContent = 'Alleen verslag kopiëren'; }, 2500);
-  } catch { showError('Kopiëren mislukt — selecteer de tekst handmatig.'); }
-}
-async function kopieerBeide() {
-  try {
-    await schrijfKlembord(true);
-    btnKopieer.textContent = '✓ Gekopieerd';
-    toonKopieBevestiging();
-    setTimeout(() => { btnKopieer.textContent = 'Alles kopiëren'; }, 2500);
+    await schrijfKlembord();
+    toonKopieBevestiging('Verslag gekopieerd');
   } catch { showError('Kopiëren mislukt — selecteer de tekst handmatig.'); }
 }
 
-// ── Reset ─────────────────────────────────────────────────────
+// ── Nieuw gesprek ─────────────────────────────────────────────
+// Alles weggooien is niet terug te draaien, dus als er werk staat vraagt de
+// knop eerst om een bevestiging in plaats van een systeemvenster.
+let bevestigTimer = null;
+function nieuwGesprek() {
+  if (isRecording) { toast('Stop eerst de lopende opname.', 'fout'); return; }
+  const erIsWerk = huidigTranscript || verslagMarkdown;
+  if (erIsWerk && !btnNieuw.dataset.bevestig) {
+    btnNieuw.dataset.bevestig = '1';
+    btnNieuw.innerHTML = 'Zeker weten? Klik nogmaals';
+    btnNieuw.classList.add('primary');
+    clearTimeout(bevestigTimer);
+    bevestigTimer = setTimeout(herstelNieuwKnop, 4000);
+    return;
+  }
+  herstelNieuwKnop();
+  resetAll();
+  toast('Klaar voor een nieuw gesprek');
+}
+function herstelNieuwKnop() {
+  clearTimeout(bevestigTimer);
+  delete btnNieuw.dataset.bevestig;
+  btnNieuw.classList.remove('primary');
+  btnNieuw.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Nieuw gesprek <kbd>N</kbd>';
+}
+
 function resetAll() {
-  finalVerslag = ''; verslagMarkdown = ''; overwegingItems = []; huidigeTitel = ''; huidigTranscript = '';
-  transcriptBox.textContent = 'Transcript verschijnt hier na de opname...';
-  transcriptBox.classList.remove('filled');
-  outputBox.innerHTML = 'Verslag verschijnt hier na verwerking door het taalmodel...';
+  finalVerslag = ''; verslagMarkdown = ''; collegaTip = ''; huidigeTitel = ''; huidigTranscript = '';
+  transcriptBox.textContent = 'Het transcript verschijnt hier zodra de opname is uitgewerkt.';
+  transcriptBox.classList.remove('filled', 'uit');
+  btnTranscriptUit.textContent = 'Uitklappen';
+  transcriptTelling.textContent = ''; verslagTelling.textContent = '';
+  outputBox.innerHTML = 'Het verslag verschijnt hier zodra het taalmodel het heeft uitgewerkt.';
   outputBox.classList.remove('formatted'); outputBox.classList.add('placeholder');
   titelRegel.classList.remove('show'); titelRegel.textContent = '';
-  toonOverwegingen(false); overwegingBox.innerHTML = '';
+  tipCard.classList.remove('show'); tipBox.innerHTML = '';
   uploadFilename.textContent = '';
-  btnKopieer.disabled = true; btnKopieer.textContent = 'Alles kopiëren';
-  btnKopieerBeide.disabled = true; btnKopieerBeide.textContent = 'Alleen verslag kopiëren';
+  btnKopieer.disabled = true;
   recordTimer.textContent = '00:00:00'; recordTimer.classList.remove('active');
-  recordStatus.textContent = 'Klik op de knop om te beginnen';
-  hideError(); copyConfirmation.classList.remove('show');
+  recordStatus.textContent = 'Klaar om op te nemen';
+  hideError();
   regenPanel.classList.add('hidden'); btnRegen.disabled = false;
+  uitklapRegen.classList.add('hidden'); uitklapRegen.open = false;
   versies = []; huidigeVersie = -1;
   versieBalk.classList.add('hidden');
+  huidigGesprekType = '';
   suggestiePaneel.classList.add('hidden'); suggestieInput.value = ''; btnHerzie.disabled = false;
   geslachtSelect.value = 'onbekend';
   customPromptInput.value = '';
@@ -1849,12 +2735,103 @@ function resetAll() {
   optVoorinfoInVerslag.checked = false;
   updateGeslachtBadge();
   setStep(0); setStatus('', 'Gereed');
+  golfHistorie = golfHistorie.map(() => 0); tekenGolf();
 }
 
+// ── Sneltoetsen ───────────────────────────────────────────────
+// Eén regel: in een tekstveld typ je, daarbuiten bedien je. De opnameknop is
+// het belangrijkst en zit daarom op de spatiebalk.
+const overlayOpen = () => sneltoetsOverlay.classList.contains('open');
+function toonOverlay() { sneltoetsOverlay.classList.add('open'); }
+function sluitOverlay() { sneltoetsOverlay.classList.remove('open'); }
+$('btnSneltoetsen').addEventListener('click', () => overlayOpen() ? sluitOverlay() : toonOverlay());
+sneltoetsOverlay.addEventListener('click', e => { if (e.target === sneltoetsOverlay) sluitOverlay(); });
+
+const inTekstveld = el => !!el && (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.isContentEditable);
+const opBediening = el => !!el && (el.tagName === 'BUTTON' || el.tagName === 'SUMMARY' || el.tagName === 'A' || el.tagName === 'LABEL');
+
+function focusVeld(el) {
+  const blok = el.closest('details');
+  if (blok && !blok.open) blok.open = true;
+  el.focus();
+  el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+
+document.addEventListener('keydown', e => {
+  // Ctrl/⌘ + Enter verstuurt de herziening, ook vanuit het tekstveld zelf.
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    if (document.activeElement === suggestieInput) { e.preventDefault(); herzieVerslag(); }
+    return;
+  }
+  if (e.key === 'Escape') {
+    if (overlayOpen()) { sluitOverlay(); return; }
+    if (inTekstveld(document.activeElement)) { document.activeElement.blur(); return; }
+    if (isRecording) { e.preventDefault(); stopRecording(); }
+    return;
+  }
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (inTekstveld(document.activeElement)) return;
+  if (overlayOpen() && e.key !== '?') return;
+
+  // Spatie en Enter horen bij de knop die de aandacht heeft; die niet afpakken.
+  if ((e.key === ' ' || e.key === 'Enter') && opBediening(document.activeElement)) return;
+
+  const toets = e.key.toLowerCase();
+  switch (toets) {
+    case ' ':
+    case 'r':
+      e.preventDefault(); isRecording ? stopRecording() : startRecording(); break;
+    case 'u':
+      e.preventDefault(); audioUpload.click(); break;
+    case 'c':
+      e.preventDefault(); kopieerVerslag(); break;
+    case 't':
+      e.preventDefault(); kopieerTranscript(); break;
+    case 'g':
+      if (!btnRegen.disabled && !regenPanel.classList.contains('hidden')) { e.preventDefault(); uitklapRegen.open = true; regenereerVerslag(); }
+      break;
+    case 'h':
+      if (!suggestiePaneel.classList.contains('hidden')) { e.preventDefault(); focusVeld(suggestieInput); }
+      break;
+    case 'v':
+      e.preventDefault(); focusVeld(voorinformatieInput); break;
+    case 'i':
+      e.preventDefault(); focusVeld(customPromptInput); break;
+    case 'n':
+      e.preventDefault(); nieuwGesprek(); break;
+    case 'd':
+      e.preventDefault(); wisselThema(); break;
+    case 'arrowleft':
+      if (versies.length > 1) { e.preventDefault(); stapVersie(-1); } break;
+    case 'arrowright':
+      if (versies.length > 1) { e.preventDefault(); stapVersie(1); } break;
+    case '?':
+    case '/':
+      if (e.key === '?') { e.preventDefault(); overlayOpen() ? sluitOverlay() : toonOverlay(); }
+      break;
+  }
+});
+
+// De bevestigingsstand van 'Nieuw gesprek' vervalt zodra je iets anders doet.
+document.addEventListener('click', e => {
+  if (btnNieuw.dataset.bevestig && !btnNieuw.contains(e.target)) herstelNieuwKnop();
+});
+
+// Een lopende opname mag niet ongemerkt verdwijnen bij het sluiten van het tabblad.
+window.addEventListener('beforeunload', e => {
+  if (isRecording || huidigTranscript) { e.preventDefault(); e.returnValue = ''; }
+});
+
 // ── Init ──────────────────────────────────────────────────────
-toonKeyStatus();
+laadInstellingen();
+toonSleutelStatus();
+formatNote.textContent = FORMAT_NOTES[outputFormat.value];
+uitklapRegen.classList.add('hidden');
 laadMicrofoons();
 updateGeslachtBadge();
+maatGolf();
+// Webfonts verschuiven de opbouw iets; daarna nog eens opmeten.
+if (document.fonts?.ready) document.fonts.ready.then(maatGolf);
 </script>
 </body>
 </html>

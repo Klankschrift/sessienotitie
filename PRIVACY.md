@@ -6,11 +6,14 @@ alarmerend, maar ook niet mooier dan het is.
 
 ## In het kort
 
-- Audio en transcript gaan **rechtstreeks van jouw browser naar Mistral**. Er zit geen
-  tussenserver van de maker tussen; de maker en een eventuele host zien je gegevens niet.
+- Audio en transcript gaan **rechtstreeks van jouw browser naar het Europese endpoint van
+  Mistral** (`api.eu.mistral.ai`). Er zit geen tussenserver van de maker tussen; de maker
+  en een eventuele host zien je gegevens niet.
 - Je **API-sleutel** blijft lokaal in je browser (`localStorage`) en wordt alleen
-  meegestuurd naar Mistral. Verder wordt er **niets** bewaard: opname, transcript, verslag
-  en versies verdwijnen zodra je het tabblad sluit of ververst.
+  meegestuurd naar Mistral. Daarnaast onthoudt de browser je **instellingen** (gesprekstype,
+  uitvoerformaat, microfoonkeuze, vinkjes, licht of donker) — nooit cliëntinhoud. Van het
+  gesprek zelf wordt **niets** bewaard: opname, transcript, verslag en versies verdwijnen
+  zodra je het tabblad sluit of ververst.
 - Mistral verwerkt in de **EU** en is **ISO 27001**-gecertificeerd.
 - **Minimumvereiste: gebruik dit voor échte cliëntgegevens alleen als je _Zero Data
   Retention_ (ZDR) bij Mistral hebt aangevraagd en aanstaat.** Zonder ZDR bewaart Mistral
@@ -29,6 +32,8 @@ Alles draait in je eigen browser. Wanneer je opneemt of een bestand uploadt:
 2. Het transcript komt terug en wordt — opnieuw rechtstreeks — naar het tekstmodel van
    Mistral gestuurd om het verslag te genereren.
 
+Beide aanroepen gaan naar het **Europese endpoint** van Mistral, `api.eu.mistral.ai`.
+
 Er is geen backend van deze applicatie. Ook als je `index.html` via een statische host
 (zoals GitHub Pages) opent, wordt alleen het kale HTML-bestand geserveerd; je audio,
 transcript en verslag passeren die host niet.
@@ -38,12 +43,13 @@ transcript en verslag passeren die host niet.
 | Gegeven | Waar het staat | Hoe lang |
 |---|---|---|
 | **API-sleutel** | `localStorage` van deze browser | Tot je op **Wissen** klikt (of je browsergegevens opschoont) |
+| **Je instellingen** (gesprekstype, uitvoerformaat, microfoonkeuze, opnamebron, vinkjes, licht of donker) | `localStorage` van deze browser | Tot je je browsergegevens opschoont. Bevat geen cliëntgegevens: wat je in voorinformatie of extra instructie typt gaat hier nooit heen |
 | **Opname (audio)** | Alleen in het werkgeheugen van het tabblad | Tot je de pagina sluit of ververst — er wordt nooit een audiobestand op je schijf geschreven |
-| **Transcript, verslag, overwegingen, versiegeschiedenis** | Alleen in het werkgeheugen van het tabblad | Tot je de pagina sluit, ververst of op **Nieuw gesprek** klikt |
+| **Transcript, verslag, tip, versiegeschiedenis** | Alleen in het werkgeheugen van het tabblad | Tot je de pagina sluit, ververst of op **Nieuw gesprek** klikt |
 | **Wat dan ook bij de maker of een host** | Nergens — er is geen server van deze applicatie | — |
 
-Er is dus geen "vorige sessie terughalen": alles behalve de API-sleutel is na het sluiten
-van het tabblad weg. Dat is de bedoeling — het betekent ook dat er geen cliëntgegevens op
+Er is dus geen "vorige sessie terughalen": alle gespreksinhoud is na het sluiten van het
+tabblad weg; alleen je sleutel en je instellingen blijven staan. Dat is de bedoeling — het betekent ook dat er geen cliëntgegevens op
 je computer blijven staan — maar het betekent wél dat je **je verslag moet kopiëren
 voordat je afsluit**.
 

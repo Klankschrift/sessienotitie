@@ -33,6 +33,7 @@ Het hele programma is één bestand: `index.html`.
 - [Wat je nodig hebt](#wat-je-nodig-hebt)
 - [Aan de slag](#aan-de-slag)
 - [Zo werk je ermee](#zo-werk-je-ermee)
+- [Sneltoetsen](#7-sneltoetsen)
 - [Goed om te weten](#goed-om-te-weten)
 - [Problemen oplossen](#problemen-oplossen)
 - [Kosten (indicatie)](#kosten-indicatie)
@@ -59,6 +60,9 @@ Het hele programma is één bestand: `index.html`.
 - Het verslag wordt geschreven door het beste Mistral-taalmodel
   (`mistral-large-latest`), met een ingebouwde klinische systeemprompt die thematisch en
   feitelijk schrijft. De app kiest deze modellen automatisch — je hoeft niets in te stellen.
+- Een **behandelgesprek** krijgt geen secties voorgeschreven: het model kiest zelf de
+  indeling die bij dít gesprek past. Een **intake** houdt de vaste kopjes, want daar is de
+  volledigheid van de uitvraag juist wat je wilt afdwingen.
 - Keuze tussen **intake-** en **behandelgesprek** (elk met een eigen opbouw), optioneel
   het geslacht van de cliënt, optionele **voorinformatie**, **extra instructies**, een
   automatisch verzonnen **titel** en emoji bij kopjes.
@@ -75,19 +79,33 @@ Het hele programma is één bestand: `index.html`.
 
 **Overnemen in het dossier**
 
-- Losse **"collegiale overwegingen"** in een apart venster, per punt aan- of uit te
-  vinken — bedoeld voor jezelf, niet voor het dossier.
+- Een **tip van een collega** in een apart venster: één ding dat opviel aan het gesprek —
+  bedoeld voor jezelf, niet voor het dossier.
 - **Kopiëren naar klembord** als platte tekst, Markdown of opgemaakte (HTML) tekst;
   het formaat mag je ook achteraf nog wisselen.
+- Bij een intake krijgt **elke sectiekop een eigen kopieerknop**, die alleen de inhoud van
+  die sectie kopieert — zonder de kopregel, voor een dossier met een apart veld per
+  onderwerp.
+
+**De bediening**
+
+- **Sneltoetsen** voor alles wat je vaak doet: spatie start en stopt de opname, `C` en `T`
+  kopiëren, `?` toont het hele overzicht.
+- Een **donkere modus** die je systeem volgt, met een knop om hem te wisselen.
+- Een **golfbeeld en niveaumeters** tijdens de opname, zodat je ziet dát er geluid
+  binnenkomt — met een waarschuwing als een bron tien seconden stil blijft.
+- Je **keuzes blijven bewaard** tussen sessies (gesprekstype, uitvoerformaat, microfoon,
+  vinkjes). Cliëntinhoud nadrukkelijk niet.
+- Op een telefoon blijft het **scherm aan** tijdens de opname, zodat die niet stilvalt.
 
 ---
 
 ## Wat je nodig hebt
 
-- **Chrome of Edge.** Opnemen gebeurt in een formaat dat **Safari niet ondersteunt**, en
-  "Scherm + audio" werkt alleen in Chromium-browsers (Chrome, Edge, Brave, Vivaldi).
-  Werk je in Safari of Firefox, neem dan met een ander programma op en **upload** het
-  bestand — dat werkt overal.
+- **Een moderne browser.** Opnemen met de microfoon werkt in Chrome, Edge, Firefox en
+  Safari (ook op iPhone en iPad): de app kiest zelf een opnameformaat dat de browser aankan.
+  **"Scherm + audio"** werkt alleen in Chromium-browsers (Chrome, Edge, Brave, Vivaldi) —
+  Firefox en Safari delen geen tabbladaudio. Uploaden van een bestaande opname werkt overal.
 - **Een Mistral-account met betaalmethode**, en voor echte cliëntgegevens **ZDR aan**
   (zie [Stap 1](#stap-1--account-betaling-en-zero-data-retention)).
 - **Een goede microfoon.** De kwaliteit van het verslag staat of valt met de kwaliteit
@@ -210,17 +228,20 @@ Links, in het paneel **Instellingen**:
 
 | Instelling | Waarvoor |
 |---|---|
-| **Type gesprek** | Intake- of behandelgesprek. Bepaalt de opbouw van het verslag: een intake krijgt de klassieke intake-kopjes, een behandelgesprek een verloopstructuur. |
+| **Type gesprek** | Intake- of behandelgesprek. Bepaalt de opbouw van het verslag: een intake krijgt de klassieke intake-kopjes, een behandelgesprek kiest zijn eigen indeling. |
 | **Geslacht cliënt** | Zodat het verslag de juiste voornaamwoorden gebruikt. Laat je dit op "Niet opgegeven", dan schrijft het model neutraal. |
-| **Uitvoerformaat (kopiëren)** | Platte tekst, ruwe Markdown of opgemaakte (HTML) tekst. Kies wat je dossiersysteem het beste aankan; achteraf wisselen mag ook. |
-| **Microfoon** | Welke microfoon je gebruikt, als er meerdere zijn aangesloten. |
 
-En de drie vinkjes:
+De **microfoonkeuze** staat een paneel hoger, bij **Opname** — daar hoort hij bij. Achter
+**Uitvoer en opties** (uitklapbaar) zitten het uitvoerformaat en de drie vinkjes:
 
+- **Uitvoerformaat (kopiëren)** — platte tekst, ruwe Markdown of opgemaakte (HTML) tekst.
+  Kies wat je dossiersysteem het beste aankan; achteraf wisselen mag ook.
 - **Emoji bij kopjes** — maakt het verslag sneller scanbaar. Zet uit als je dossier daar
   niet van houdt.
-- **Collegiale overwegingen** — laat het model in een apart venster meedenken (zie stap 5).
+- **Tip van een collega** — laat het model in een apart venster meedenken (zie stap 5).
 - **Titel verzinnen** — een korte omschrijving van het gespreksonderwerp boven het verslag.
+
+Deze keuzes blijven bewaard voor de volgende keer; wat je in de tekstvelden typt niet.
 
 Rechts, in **Voorbereiding**:
 
@@ -281,19 +302,21 @@ aanwijzing die versie opleverde. Herzien gaat verder vanaf de versie die je op d
 bekijkt, en de nieuwe versie komt altijd achteraan. Elke versie die je bekijkt, wordt
 meteen naar het klembord gekopieerd.
 
-### 5. Collegiale overwegingen
+### 5. Tip van een collega
 
-Staat het vinkje aan, dan verschijnt onder het verslag een apart venster met
-**Overwegingen** — meedenkpunten in de ik-vorm, bedoeld voor jou en niet voor het dossier.
-Elk punt heeft een eigen vinkje: **vink uit wat je niet wilt overnemen**, en het klembord
-wordt direct bijgewerkt.
+Staat het vinkje aan, dan verschijnt onder het verslag een apart venster met één **tip**,
+alsof een collega heeft meegekeken en er na afloop één ding uit meegeeft: een vraag die
+bleef liggen, een signaal waar niet op is doorgegaan, iets wat een volgende keer gerichter
+kan. Die tip is voor jou en gaat **nooit mee in wat je kopieert** — daar is dat aparte
+venster voor.
 
 ### 6. Kopiëren en controleren
 
-Onder het verslag staan twee kopieerknoppen:
-
-- **Alleen verslag kopiëren** — alleen het verslag (met titel), zonder de overwegingen.
-- **Alles kopiëren** — het verslag én de aangevinkte overwegingen.
+Onder het verslag staat één knop, **Kopiëren** (sneltoets `C`): het verslag met de titel,
+zonder de tip. Bij een **intake** krijgt daarnaast elke sectiekop een eigen knopje
+**Kopiëren**, dat alleen de inhoud van die sectie op het klembord zet — zónder de kopregel,
+want het veld in het dossier draagt die naam zelf al. Zo'n knop blijft daarna aangevinkt
+staan, zodat je in een lange intake ziet welke velden je al hebt overgenomen.
 
 Het **uitvoerformaat** uit Instellingen bepaalt wat er op het klembord komt; wissel je het
 achteraf, dan wordt er meteen opnieuw gekopieerd.
@@ -301,21 +324,46 @@ achteraf, dan wordt er meteen opnieuw gekopieerd.
 > **Controleer het verslag altijd** voordat je het in het dossier plakt. Transcriptie en
 > taalmodellen maken fouten; de inhoudelijke verantwoordelijkheid blijft bij jou.
 
-Met **Nieuw gesprek** maak je het scherm leeg voor de volgende sessie.
+Met **Nieuw gesprek** maak je het scherm leeg voor de volgende sessie. Staat er nog werk,
+dan vraagt de knop eerst om een bevestiging.
+
+### 7. Sneltoetsen
+
+Buiten de tekstvelden bedien je de app met het toetsenbord. Het volledige overzicht staat
+achter de toetsenbordknop rechtsboven, of achter **?**:
+
+| Toets | Wat het doet |
+|---|---|
+| `Spatie` of `R` | Opname starten of stoppen |
+| `Esc` | Opname stoppen (of het overzicht sluiten) |
+| `U` | Audiobestand kiezen |
+| `C` | Verslag kopiëren |
+| `T` | Transcript kopiëren |
+| `G` | Opnieuw genereren |
+| `H` | Naar het veld "Verslag herzien" |
+| `Ctrl`+`Enter` | Herziening versturen |
+| `←` `→` | Vorige of volgende versie |
+| `V` / `I` | Naar voorinformatie / extra instructie |
+| `N` | Nieuw gesprek |
+| `D` | Donker of licht |
+| `?` | Dit overzicht |
 
 ---
 
 ## Goed om te weten
 
-- **Er wordt niets bewaard behalve je API-sleutel.** Opname, transcript, verslag,
-  overwegingen en versies bestaan alleen in het geheugen van dit tabblad. Ververs je de
-  pagina of sluit je hem, dan is alles weg — er is geen "vorige sessie terughalen".
+- **Van het gesprek zelf wordt niets bewaard.** Opname, transcript, verslag, tip en
+  versies bestaan alleen in het geheugen van dit tabblad. Ververs je de pagina of sluit je
+  hem, dan is alles weg — er is geen "vorige sessie terughalen".
   **Kopieer je verslag dus voordat je afsluit.** (Dat is meteen de prettige kant: er blijft
-  ook niets van een cliëntgesprek op je computer achter.)
-- **Je instellingen resetten bij het herladen** van de pagina: type gesprek, geslacht,
-  uitvoerformaat, microfoonkeuze en de vinkjes staan dan weer op hun beginwaarde. Alleen de
-  API-sleutel blijft bewaard.
-- **`Nieuw gesprek` maakt niet alles leeg.** Transcript, verslag, versies, geslacht,
+  ook niets van een cliëntgesprek op je computer achter.) Probeer je een tabblad met een
+  lopende opname of een transcript erin te sluiten, dan waarschuwt de browser je eerst.
+- **Je keuzes blijven wél bewaard**, in deze browser: type gesprek, uitvoerformaat,
+  microfoonkeuze, opnamebron, de vinkjes, welke panelen openstaan, en licht of donker.
+  Cliëntinhoud nadrukkelijk niet — voorinformatie, extra instructie, transcript en verslag
+  gaan nooit naar de opslag van de browser. Het geslacht van de cliënt hoort daar ook bij
+  en staat na het herladen weer op "Niet opgegeven".
+- **`Nieuw gesprek` maakt niet alles leeg.** Transcript, verslag, tip, versies, geslacht,
   voorinformatie en extra instructie worden gewist; het gesprekstype, de drie vinkjes en je
   API-sleutel blijven staan — meestal precies wat je wilt bij een volgende cliënt.
 - **De app vraagt bij het openen meteen microfoontoestemming.** Dat is nodig om de
@@ -328,6 +376,11 @@ Met **Nieuw gesprek** maak je het scherm leeg voor de volgende sessie.
   stem van de ander; zonder die filters wordt het transcript beter.
 - **Er valt niets te kiezen aan modellen.** De app gebruikt altijd `voxtral-mini-latest`
   voor transcriptie en `mistral-large-latest` voor het verslag.
+- **Het verkeer gaat naar het Europese endpoint** van Mistral, `api.eu.mistral.ai`. Je
+  aanvragen verlaten de EU dus niet.
+- **Op een telefoon blijft het scherm aan zolang je opneemt.** Zonder dat valt de opname
+  stil zodra het scherm uitgaat. Weigert je toestel dat (bijvoorbeeld door
+  batterijbesparing), dan loopt de opname gewoon door — houd het scherm dan zelf wakker.
 
 ---
 
@@ -342,8 +395,9 @@ Met **Nieuw gesprek** maak je het scherm leeg voor de volgende sessie.
 | **"Mistral API-limiet bereikt"** | Je zit tegen een snelheidslimiet aan. Wacht even en probeer het opnieuw. |
 | **"Mistral kon de aanvraag niet verwerken"** | Meestal een audiobestand in een formaat dat Voxtral niet aankan. Zet het om naar `.mp3` of `.wav` en probeer opnieuw. |
 | **"Mistral antwoordde met status …"** | Vaak een ontbrekende betaalmethode of een tijdelijke storing. Controleer je account op [console.mistral.ai](https://console.mistral.ai) en probeer het later nog eens. |
-| **"Opname starten mislukt: …"** | Meestal een geweigerde microfoon (zie hierboven). Staat er iets over een niet-ondersteund formaat, dan gebruik je waarschijnlijk **Safari**; die kan niet opnemen in het formaat dat de app gebruikt. Gebruik Chrome of Edge, of neem elders op en **upload** het bestand. |
-| **Schermdeling geeft geen geluid in Firefox** | Firefox deelt geen tabbladaudio. Gebruik Chrome of Edge voor online gesprekken. |
+| **"Opname starten mislukt: …"** | Meestal een geweigerde microfoon (zie hierboven), of een andere toepassing die het apparaat vasthoudt. |
+| **De opname valt stil op de telefoon** | De app houdt het scherm aan tijdens de opname, maar batterijbesparing kan dat blokkeren. Zet batterijbesparing uit, of houd het scherm zelf aan. |
+| **Schermdeling geeft geen geluid in Firefox of Safari** | Die browsers delen geen tabbladaudio. Gebruik Chrome of Edge voor online gesprekken. |
 | **Het gedownloade bestand opent als tekst** | De bestandsnaam eindigt niet op `.html`. Hernoem het bestand (bijvoorbeeld `sessienotitie.html`) en open het opnieuw. |
 | **Je sleutel is na het herladen weg** | Je zit in een privé- of incognitovenster, of je browser wist site-gegevens bij afsluiten. Gebruik een gewoon venster. |
 | **Het verslag klopt inhoudelijk niet** | Gebruik **Verslag herzien** en zeg in gewone taal wat er anders moet, in plaats van zelf te knippen en plakken. Blijft het misgaan, controleer dan het transcript — bij slechte audio valt er weinig te redden. |
@@ -374,8 +428,9 @@ Raadpleeg [mistral.ai/pricing](https://mistral.ai/pricing) voor actuele tarieven
 
 ## Privacy & verantwoordelijkheid
 
-Korte versie: audio en transcript gaan **rechtstreeks** van jouw browser naar Mistral
-(EU). De maker van deze tool en een eventuele host zien je gegevens niet. Mistral verwerkt
+Korte versie: audio en transcript gaan **rechtstreeks** van jouw browser naar het
+Europese endpoint van Mistral (`api.eu.mistral.ai`). De maker van deze tool en een
+eventuele host zien je gegevens niet. Mistral verwerkt
 in de EU en is **ISO 27001-gecertificeerd** — een internationaal erkende beveiligingsnorm,
 net als bij veel andere transcriptiediensten. Dat is een serieuze, geruststellende basis.
 Zonder ZDR bewaart Mistral API-verkeer wel standaard ~30 dagen voor misbruikdetectie (niet
@@ -404,18 +459,22 @@ NEN 7510, AVG, eigen risico) staat in **[PRIVACY.md](PRIVACY.md)**.
 
 - Eén zelfstandig `index.html`-bestand: HTML, CSS en JavaScript inline. Geen build, geen
   dependencies, geen server.
-- Opname met `MediaRecorder` (`audio/webm`); bij schermdeling wordt de tabbladaudio uit
-  `getDisplayMedia` via een `AudioContext` gemengd met de microfoon en het videospoor
-  meteen gestopt.
+- Opname met `MediaRecorder`. Het opnameformaat wordt gekozen uit wat de browser aankan
+  (`audio/webm`, `audio/mp4`, `audio/ogg`) in plaats van vastgelegd — met `audio/webm` hard
+  erin begint een opname op een iPhone niet eens. Tijdens de opname houdt een
+  `WakeLock` het scherm aan. Bij schermdeling wordt de tabbladaudio uit `getDisplayMedia`
+  via een `AudioContext` gemengd met de microfoon en het videospoor meteen gestopt.
 - Spraakherkenning met sprekerherkenning:
-  `POST https://api.mistral.ai/v1/audio/transcriptions` (`voxtral-mini-latest`, met
+  `POST https://api.eu.mistral.ai/v1/audio/transcriptions` (`voxtral-mini-latest`, met
   `diarize=true` en `timestamp_granularities=segment`). Opeenvolgende segmenten van
   dezelfde spreker worden samengevoegd tot "Spreker 1", "Spreker 2", …; herhalingsloops in
   het transcript worden eruit gefilterd.
-- Verslag: `POST https://api.mistral.ai/v1/chat/completions` (`mistral-large-latest`,
-  streaming via server-sent events).
-- Alle status — transcript, verslag, overwegingen en de versiegeschiedenis — leeft in het
-  geheugen van de pagina. Alleen de API-sleutel gaat naar `localStorage`.
+- Verslag: `POST https://api.eu.mistral.ai/v1/chat/completions` (`mistral-large-latest`,
+  streaming via server-sent events). Beide aanroepen gaan naar het Europese endpoint.
+- Alle status — transcript, verslag, tip en de versiegeschiedenis — leeft in het geheugen
+  van de pagina. Naar `localStorage` gaan alleen de API-sleutel, de themakeuze en de
+  instellingen (gesprekstype, uitvoerformaat, microfoon, opnamebron, vinkjes) — nooit
+  cliëntinhoud.
 - De Mistral API stuurt CORS-headers mee, waardoor de browser rechtstreeks mag aanroepen.
 
 ## Licentie
