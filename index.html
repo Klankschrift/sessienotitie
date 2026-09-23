@@ -554,7 +554,7 @@
   [data-thema="donker"] .geslacht-man { color: #7cc0dd; }
   [data-thema="donker"] .geslacht-vrouw { color: #e6a0c0; }
 
-  /* ── Collegiale tip ──────────────────────────────────────── */
+  /* ── Betrekkingsniveau ────────────────────────────────────── */
   .tip-card { border-color: var(--ok-rand); display: none; }
   .tip-card.show { display: block; animation: opkomen 0.4s ease both; }
   .tip-card .card-label { color: var(--ok); }
@@ -626,6 +626,13 @@
   }
   .error-msg.visible { display: flex; animation: opkomen 0.3s ease both; }
   .error-msg svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+  .error-msg .retry {
+    margin-left: 0.75rem; flex-shrink: 0; cursor: pointer; font: inherit; font-weight: 600;
+    background: none; border: 1px solid var(--danger-rand); color: inherit; border-radius: var(--r-sm, 6px);
+    padding: 0.15rem 0.6rem;
+  }
+  .error-msg .retry:hover { background: var(--danger-rand); }
+  .error-msg .retry[hidden] { display: none; }
   .error-msg .sluit { margin-left: auto; cursor: pointer; opacity: 0.6; background: none; border: none; color: inherit; padding: 0 0 0 0.5rem; }
   .error-msg .sluit:hover { opacity: 1; }
 
@@ -913,15 +920,15 @@
         </div>
         <div class="opties">
           <div class="optie-rij">
-            <input type="checkbox" id="optEmoji" checked>
+            <input type="checkbox" id="optEmoji">
             <label for="optEmoji">Emoji bij kopjes voor betere leesbaarheid</label>
           </div>
           <div class="optie-rij">
             <input type="checkbox" id="optFeedback" checked>
-            <label for="optFeedback">Tip van een collega toevoegen (apart venster)</label>
+            <label for="optFeedback">Betrekkingsniveau met suggestie toevoegen (apart venster)</label>
           </div>
           <div class="optie-rij">
-            <input type="checkbox" id="optTitel" checked>
+            <input type="checkbox" id="optTitel">
             <label for="optTitel">Titel voor het gespreksonderwerp verzinnen</label>
           </div>
         </div>
@@ -968,6 +975,7 @@
   <div class="error-msg" id="errorMsg">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
     <span id="errorTekst"></span>
+    <button class="retry" id="btnErrorRetry" hidden onclick="probeerOpnieuw()">Opnieuw proberen</button>
     <button class="sluit" onclick="hideError()" aria-label="Melding sluiten">✕</button>
   </div>
 
@@ -1053,11 +1061,11 @@
     </div>
   </div>
 
-  <!-- Collegiale tip -->
+  <!-- Betrekkingsniveau -->
   <div class="card tip-card" id="tipCard">
     <div class="card-label">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V16h8v-1.3A7 7 0 0 0 12 2z"/></svg>
-      Tip van een collega
+      Betrekkingsniveau
       <span id="tipSpinner" class="spinner hidden"></span>
     </div>
     <div class="tip-box" id="tipBox"></div>
@@ -1127,6 +1135,10 @@ const MISTRAL_CHAT_URL       = 'https://api.eu.mistral.ai/v1/chat/completions';
 const TRANSCRIBE_MODEL       = 'voxtral-mini-latest';
 const CHAT_MODEL             = 'mistral-large-latest';
 const TEMPERATUUR            = 0.3;
+
+// Vaktermen die de spraakherkenning anders vaak verkeerd verstaat. Gaat naar
+// Voxtral mee als `context_bias` (tot honderd termen).
+const VAKTERMEN = ['EMDR'];
 
 // ── Systeemprompt ─────────────────────────────────────────────
 // Een behandelgesprek krijgt alleen de opdracht mee en kiest zelf de indeling
@@ -1419,25 +1431,25 @@ function bouwSysteemprompt(gesprekType, emoji, feedback, titel) {
   }
 
   if (feedback) {
-    prompt += "\n\nCOLLEGIALE TIP:\n"
+    prompt += "\n\nBETREKKINGSNIVEAU:\n"
       + "Nadat je het volledige verslag hebt geschreven, voeg je een scheidingslijn "
       + "toe die letterlijk en exact zo luidt (geen markdown-kopje, geen ##, geen aanhalingstekens — "
-      + "gewoon deze tekst op een lege regel): ===TIP===\n"
-      + "Daarna schrijf je één tip, alsof een collega heeft meegekeken en er na afloop "
-      + "één ding uit meegeeft. Dit is niet voor het cliëntdossier en de cliënt leest "
-      + "het niet mee — het is bedoeld voor de behandelaar zelf.\n\n"
-      + "De tip gaat over het gesprek zelf of over het volgende gesprek: een vraag die "
-      + "bleef liggen, een signaal waar niet op is doorgegaan, een interventie die geen "
-      + "ruimte kreeg om te landen, iets wat een volgende keer gerichter kan. Geen "
-      + "samenvatting van het verslag en geen compliment — een collega die alleen maar "
-      + "bevestigt heeft niets toe te voegen.\n\n"
-      + "Eén tip, gericht aan de behandelaar en dus in de je-vorm ('je zou kunnen', "
-      + "'het zou de moeite waard zijn om'). Begin bij een concrete waarneming uit het "
-      + "gesprek en eindig bij wat die suggereert. Hoogstens twee zinnen, ongeveer "
-      + "dertig tot veertig woorden — kort genoeg om in één oogopslag te lezen.\n"
-      + "Schrijf de tip als lopende tekst, zonder streepje of opsomming ervoor.\n"
-      + "Blijf bij het gesprek — speculeer niet over wat er niet in het transcript "
-      + "staat, en stel geen diagnoses.";
+      + "gewoon deze tekst op een lege regel): ===BETREKKING===\n"
+      + "Daarna volgt geen verslagtekst meer, maar een apart stukje tekst, alleen voor "
+      + "de behandelaar zelf. Dit is niet voor het cliëntdossier en de cliënt leest "
+      + "het niet mee.\n\n"
+      + "Elk gesprek heeft een inhoud — waar het over gaat, en dat staat al in het "
+      + "verslag — en een betrekking: hoe de gesprekspartners zich, los van dat "
+      + "onderwerp, in dit gesprek tot elkaar verhielden. Beschrijf eerst in één "
+      + "waarneming iets dat je op dat betrekkingsniveau ziet gebeuren. Geef daarna "
+      + "één suggestie voor hoe de behandelaar daar in een volgend gesprek op zou "
+      + "kunnen inspelen — die suggestie moet rechtstreeks uit de waarneming "
+      + "voortkomen, geen los advies dat er niet uit volgt. Geen samenvatting van de "
+      + "inhoud en geen compliment.\n\n"
+      + "Baseer de waarneming uitsluitend op wat er in het transcript daadwerkelijk "
+      + "gebeurt, niet op een aanname over wat iemand voelt of bedoelt, en stel geen "
+      + "diagnose. Samen hoogstens drie à vier zinnen, als lopende tekst, zonder "
+      + "streepje of opsomming ervoor.";
   }
 
   return prompt;
@@ -1466,8 +1478,9 @@ function bouwGebruikerPrompt(transcript, gesprekType, geslacht, customPrompt, vo
   }
 
   const tipReminder = feedback
-    ? "\nSluit af met de scheidingslijn ===TIP=== gevolgd door één tip die een collega "
-      + "je zou meegeven bij dit gesprek, in de je-vorm."
+    ? "\nSluit af met de scheidingslijn ===BETREKKING=== gevolgd door één waarneming "
+      + "over de betrekking tussen de gesprekspartners in dit gesprek, met een suggestie "
+      + "die daar rechtstreeks uit volgt."
     : '';
 
   const kernReminder = gesprekType === 'intakegesprek' ? INTAKE_REMINDER : '';
@@ -1674,7 +1687,7 @@ let mediaRecorder = null, audioChunks = [], timerInterval = null;
 let opnameType = '';
 let secondsElapsed = 0, isRecording = false;
 let finalVerslag = '', verslagMarkdown = '', huidigeTitel = '', huidigTranscript = '';
-let collegaTip = '';
+let betrekkingTekst = '';
 // Het gesprekstype waarmee het verslag dat je nu ziet is uitgewerkt. Bepaalt of de
 // secties een eigen kopieerknop krijgen en wat de knop 'opnieuw uitwerken' aanbiedt.
 let huidigGesprekType = '';
@@ -1695,6 +1708,7 @@ const tipCard = $('tipCard'), titelRegel = $('titelRegel');
 const btnKopieer = $('btnKopieer'), btnRegen = $('btnRegen');
 const regenPanel = $('regenPanel'), regenType = $('regenType'), regenGeslacht = $('regenGeslacht');
 const errorMsg = $('errorMsg'), errorTekst = $('errorTekst'), statusDot = $('statusDot'), statusText = $('statusText');
+const btnErrorRetry = $('btnErrorRetry');
 const transcriptSpinner = $('transcriptSpinner'), verslagSpinner = $('verslagSpinner'), tipSpinner = $('tipSpinner');
 const verslagBadge = $('verslagBadge'), micSelect = $('micSelect'), micNote = $('micNote');
 const gesprekTypeSelect = $('gesprekType'), geslachtSelect = $('geslacht');
@@ -1729,8 +1743,23 @@ function toast(msg, soort) {
   while (toasts.children.length > 3) toasts.firstChild.remove();
 }
 const toonKopieBevestiging = msg => toast(msg || 'Gekopieerd naar klembord');
-const showError = msg => { errorTekst.textContent = msg; errorMsg.classList.add('visible'); };
+// Bij een mislukte netwerkactie (bv. "Failed to fetch" na een opname) is het al
+// gedane werk vaak nog in het geheugen — dan is opnieuw proberen zinvoller dan
+// alleen een foutmelding tonen.
+let laatstePoging = null;
+const showError = (msg, poging = null) => {
+  errorTekst.textContent = msg;
+  laatstePoging = poging;
+  btnErrorRetry.hidden = !poging;
+  errorMsg.classList.add('visible');
+};
 const hideError = () => errorMsg.classList.remove('visible');
+async function probeerOpnieuw() {
+  const poging = laatstePoging;
+  if (!poging) return;
+  hideError();
+  await poging();
+}
 const formatTime = s => [Math.floor(s/3600), Math.floor((s%3600)/60), s%60].map(n => String(n).padStart(2,'0')).join(':');
 
 // Statuspil met een meelopende teller: bij het wachten op transcriptie of
@@ -1853,10 +1882,15 @@ async function foutUitAntwoord(resp) {
 const INSTEL_SLEUTEL = 'sessienotitie.instellingen';
 const KEUZES = { gesprekType: gesprekTypeSelect, outputFormat: outputFormat };
 const VINKJES = { optEmoji, optFeedback, optTitel };
+// Versie 2: emoji bij kopjes en titel verzinnen staan standaard uit. Een eerder
+// bewaard vinkje komt nog uit de tijd dat ze standaard aanstonden, en wordt
+// eenmalig vergeten.
+const INSTEL_VERSIE = 2;
 
 function bewaarInstellingen() {
   try {
-    const data = { bron: opnameBron, mic: micSelect.value, opties: uitklapOpties.open, voorbereiding: uitklapVoorbereiding.open };
+    const data = { versie: INSTEL_VERSIE, bron: opnameBron, mic: micSelect.value,
+                   opties: uitklapOpties.open, voorbereiding: uitklapVoorbereiding.open };
     for (const [k, el] of Object.entries(KEUZES)) data[k] = el.value;
     for (const [k, el] of Object.entries(VINKJES)) data[k] = el.checked;
     localStorage.setItem(INSTEL_SLEUTEL, JSON.stringify(data));
@@ -1866,6 +1900,7 @@ function bewaarInstellingen() {
 function laadInstellingen() {
   let data = {};
   try { data = JSON.parse(localStorage.getItem(INSTEL_SLEUTEL) || '{}'); } catch {}
+  if (data.versie !== INSTEL_VERSIE) { delete data.optEmoji; delete data.optTitel; }
   for (const [k, el] of Object.entries(KEUZES)) {
     if (data[k] && [...el.options].some(o => o.value === data[k])) el.value = data[k];
   }
@@ -2285,6 +2320,7 @@ async function transcribeer(blob, bestandsnaam = 'opname.webm') {
     // Sprekerherkenning (diarisatie): Voxtral labelt wie wanneer spreekt.
     form.append('diarize', 'true');
     form.append('timestamp_granularities', 'segment');
+    for (const term of VAKTERMEN) form.append('context_bias', term);
     const resp = await fetch(MISTRAL_TRANSCRIBE_URL, {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + getApiKey() },
@@ -2301,7 +2337,7 @@ async function transcribeer(blob, bestandsnaam = 'opname.webm') {
                       customPromptInput.value.trim(), voorinformatieInput.value.trim());
   } catch (err) {
     transcriptSpinner.classList.add('hidden');
-    showError('Transcriptie mislukt: ' + err.message);
+    showError('Transcriptie mislukt: ' + err.message, () => transcribeer(blob, bestandsnaam));
     setStatus('err', 'Transcriptie fout');
     recordStatus.textContent = 'Klaar voor nieuw gesprek';
     // Ook zonder verslag het regen-paneel tonen mits er een transcript is
@@ -2337,7 +2373,7 @@ function bewaarVersie(suggestie) {
   // Een nieuwe versie komt altijd achteraan, ook als je eerst bent teruggebladerd:
   // teruggaan is bedoeld om te vergelijken, niet om werk weg te gooien.
   versies.push({
-    verslagMarkdown, finalVerslag, huidigeTitel, collegaTip,
+    verslagMarkdown, finalVerslag, huidigeTitel, betrekkingTekst,
     gesprekType: huidigGesprekType,
     suggestie: suggestie || ''
   });
@@ -2363,7 +2399,7 @@ function stapVersie(richting) {
   verslagMarkdown = v.verslagMarkdown;
   finalVerslag = v.finalVerslag;
   huidigeTitel = v.huidigeTitel;
-  collegaTip = v.collegaTip;
+  betrekkingTekst = v.betrekkingTekst;
   huidigGesprekType = v.gesprekType || huidigGesprekType;
   outputBox.innerHTML = convertMarkdownToHtml(verslagMarkdown);
   zetSectieKnoppen();
@@ -2372,7 +2408,7 @@ function stapVersie(richting) {
   verslagTelling.textContent = telZin(woorden(finalVerslag));
   titelRegel.textContent = huidigeTitel;
   titelRegel.classList.toggle('show', !!huidigeTitel);
-  if (collegaTip) { renderTip(); tipCard.classList.add('show'); }
+  if (betrekkingTekst) { renderBetrekking(); tipCard.classList.add('show'); }
   else { tipCard.classList.remove('show'); }
   werkVersieBalkBij();
   autoKopieerVerslag();
@@ -2485,7 +2521,8 @@ async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '',
     recordStatus.textContent = 'Verslag voltooid';
   } catch (err) {
     verslagSpinner.classList.add('hidden');
-    showError('Verslag genereren mislukt: ' + err.message + ' — gebruik de knop hieronder om het opnieuw te proberen.');
+    showError('Verslag genereren mislukt: ' + err.message, () =>
+      maakVerslag(transcript, gesprekType, geslacht, customPrompt, voorinformatie, suggestie, vorigVerslag));
     setStatus('err', 'Taalmodel fout');
     toonRegenPaneel(gesprekType, geslacht);
     uitklapRegen.open = true;
@@ -2495,9 +2532,9 @@ async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '',
   }
 }
 
-// ── Output verwerken: titel + verslag + collegiale tip splitsen ─
+// ── Output verwerken: titel + verslag + betrekkingsniveau splitsen ─
 function verwerkOutput(ruweTekst) {
-  huidigeTitel = ''; collegaTip = '';
+  huidigeTitel = ''; betrekkingTekst = '';
   let werk = ruweTekst;
 
   // Het model zet er soms een invulplaatshouder in ("de 26e [datum onbekend]")
@@ -2512,11 +2549,11 @@ function verwerkOutput(ruweTekst) {
   werk = werk.replace(/^(#{1,6})[ \t]+#{1,6}[ \t]*/gm, '$1 ')
              .replace(/^(#{1,6}[ \t]*)`+([^\n`]+?)`+[ \t]*$/gm, '$1$2');
 
-  werk = werk.replace(/(?:^|\n)#{1,6}[^\S\n]*(?:collegiale[^\S\n]+)?tip[^\n]*/gi, '\n===TIP===');
-  const delen = werk.split(/===\s*TIP\s*===/i);
+  werk = werk.replace(/(?:^|\n)#{1,6}[^\S\n]*betrekking[^\n]*/gi, '\n===BETREKKING===');
+  const delen = werk.split(/===\s*BETREKKING\s*===/i);
   if (delen.length > 1) {
     werk = delen[0];
-    collegaTip = parseTip(delen.slice(1).join('\n').trim());
+    betrekkingTekst = parseBetrekking(delen.slice(1).join('\n').trim());
   }
 
   const titelMatch = werk.match(/^===TITEL===\s*\n([^\n]+)/i);
@@ -2546,29 +2583,29 @@ function verwerkOutput(ruweTekst) {
     titelRegel.classList.add('show');
   }
 
-  if (collegaTip) {
-    renderTip();
+  if (betrekkingTekst) {
+    renderBetrekking();
     tipCard.classList.add('show');
   }
 }
 
-// ── Collegiale tip: parsen tot platte tekst ───────────────────
-// Eén tip, geen lijst — een eventueel streepje ervoor is opmaak van het model
-// en geen opsomming, dus die halen we eraf; regeleindes worden spaties.
-function parseTip(raw) {
+// ── Betrekkingsniveau: parsen tot platte tekst ────────────────
+// Eén waarneming, geen lijst — een eventueel streepje ervoor is opmaak van
+// het model en geen opsomming, dus die halen we eraf; regeleindes worden spaties.
+function parseBetrekking(raw) {
   return raw.split('\n')
     .map(regel => inline(regel.replace(/^\s*[-*+]\s+/, '').replace(/^#{1,6}\s*/, '').trim()))
     .filter(t => t)
     .join(' ');
 }
 
-function renderTip() {
-  tipBox.innerHTML = collegaTip;
+function renderBetrekking() {
+  tipBox.innerHTML = betrekkingTekst;
 }
 
 // ── Kopieerteksten samenstellen (per formaat) ──────────────────
-// De collegiale tip staat in zijn eigen venster en gaat nooit mee in wat
-// hier wordt opgebouwd — dat is precies waar dat venster voor is.
+// De waarneming op betrekkingsniveau staat in zijn eigen venster en gaat nooit
+// mee in wat hier wordt opgebouwd — dat is precies waar dat venster voor is.
 function buildPlain() {
   return (huidigeTitel ? huidigeTitel + '\n\n' : '') + finalVerslag;
 }
@@ -2709,7 +2746,7 @@ function herstelNieuwKnop() {
 }
 
 function resetAll() {
-  finalVerslag = ''; verslagMarkdown = ''; collegaTip = ''; huidigeTitel = ''; huidigTranscript = '';
+  finalVerslag = ''; verslagMarkdown = ''; betrekkingTekst = ''; huidigeTitel = ''; huidigTranscript = '';
   transcriptBox.textContent = 'Het transcript verschijnt hier zodra de opname is uitgewerkt.';
   transcriptBox.classList.remove('filled', 'uit');
   btnTranscriptUit.textContent = 'Uitklappen';

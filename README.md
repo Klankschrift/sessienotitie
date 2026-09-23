@@ -79,8 +79,8 @@ Het hele programma is één bestand: `index.html`.
 
 **Overnemen in het dossier**
 
-- Een **tip van een collega** in een apart venster: één ding dat opviel aan het gesprek —
-  bedoeld voor jezelf, niet voor het dossier.
+- Een waarneming op **betrekkingsniveau** in een apart venster: hoe de gesprekspartners
+  zich tot elkaar verhielden, met een suggestie — bedoeld voor jezelf, niet voor het dossier.
 - **Kopiëren naar klembord** als platte tekst, Markdown of opgemaakte (HTML) tekst;
   het formaat mag je ook achteraf nog wisselen.
 - Bij een intake krijgt **elke sectiekop een eigen kopieerknop**, die alleen de inhoud van
@@ -238,7 +238,7 @@ De **microfoonkeuze** staat een paneel hoger, bij **Opname** — daar hoort hij 
   Kies wat je dossiersysteem het beste aankan; achteraf wisselen mag ook.
 - **Emoji bij kopjes** — maakt het verslag sneller scanbaar. Zet uit als je dossier daar
   niet van houdt.
-- **Tip van een collega** — laat het model in een apart venster meedenken (zie stap 5).
+- **Betrekkingsniveau** — laat het model in een apart venster meedenken (zie stap 5).
 - **Titel verzinnen** — een korte omschrijving van het gespreksonderwerp boven het verslag.
 
 Deze keuzes blijven bewaard voor de volgende keer; wat je in de tekstvelden typt niet.
@@ -302,12 +302,12 @@ aanwijzing die versie opleverde. Herzien gaat verder vanaf de versie die je op d
 bekijkt, en de nieuwe versie komt altijd achteraan. Elke versie die je bekijkt, wordt
 meteen naar het klembord gekopieerd.
 
-### 5. Tip van een collega
+### 5. Betrekkingsniveau
 
-Staat het vinkje aan, dan verschijnt onder het verslag een apart venster met één **tip**,
-alsof een collega heeft meegekeken en er na afloop één ding uit meegeeft: een vraag die
-bleef liggen, een signaal waar niet op is doorgegaan, iets wat een volgende keer gerichter
-kan. Die tip is voor jou en gaat **nooit mee in wat je kopieert** — daar is dat aparte
+Staat het vinkje aan, dan verschijnt onder het verslag een apart venster met een
+waarneming op **betrekkingsniveau**: hoe de gesprekspartners zich, los van het onderwerp,
+in dit gesprek tot elkaar verhielden, met één suggestie die daar rechtstreeks uit volgt.
+Die tekst is voor jou en gaat **nooit mee in wat je kopieert** — daar is dat aparte
 venster voor.
 
 ### 6. Kopiëren en controleren
