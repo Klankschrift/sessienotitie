@@ -352,12 +352,25 @@ achter de toetsenbordknop rechtsboven, of achter **?**:
 
 ## Goed om te weten
 
-- **Van het gesprek zelf wordt niets bewaard.** Opname, transcript, verslag, tip en
+- **Van het gesprek zelf wordt zo weinig mogelijk bewaard.** Transcript, verslag, tip en
   versies bestaan alleen in het geheugen van dit tabblad. Ververs je de pagina of sluit je
-  hem, dan is alles weg — er is geen "vorige sessie terughalen".
-  **Kopieer je verslag dus voordat je afsluit.** (Dat is meteen de prettige kant: er blijft
-  ook niets van een cliëntgesprek op je computer achter.) Probeer je een tabblad met een
-  lopende opname of een transcript erin te sluiten, dan waarschuwt de browser je eerst.
+  hem, dan zijn die weg. **Kopieer je verslag dus voordat je afsluit.** Probeer je een
+  tabblad met een lopende opname of een transcript erin te sluiten, dan waarschuwt de
+  browser je eerst.
+- **De opname zelf heeft een vangnet.** Zodra je stopt, zet de pagina een reservekopie van
+  de audio in de opslag van de browser (IndexedDB, op je schijf). De kopie verdwijnt zodra
+  er een verslag van is, als je hem weggooit, bij **Nieuw gesprek**, en anders zodra je het
+  tabblad sluit (de browser waarschuwt eerst). Alleen na een crash van browser of computer
+  staat de opname er bij het volgende openen nog, om alsnog te verwerken of te downloaden.
+- **Een wegvallende microfoon hoor je meteen, en de opname loopt door.** Valt de verbinding
+  met de microfoon weg (bijvoorbeeld een Bluetooth-headset), dan klinkt er één zacht
+  pingetje op het standaardgeluidsapparaat van je computer, met een rode balk en een
+  knipperende tabtitel die blijven staan tot je ze uitzet. Stilte in het gesprek geeft
+  geen alarm. De opname loopt intussen door; verbind de microfoon opnieuw en klik op
+  **Vervolgen** onder de opnameknop. Het blijft één opname met één transcript, dus de
+  sprekerlabels blijven kloppen; het ontbrekende stuk wordt gemeld met begin- en eindtijd.
+  Met **Alarmtoon testen** onder de microfoonkeuze hoor je vooraf hoe het klinkt. Stilte in het gesprek geeft
+  geen alarm. Met **Alarmtoon testen** onder de microfoonkeuze hoor je vooraf hoe het klinkt.
 - **Je keuzes blijven wél bewaard**, in deze browser: type gesprek, uitvoerformaat,
   microfoonkeuze, opnamebron, de vinkjes, welke panelen openstaan, en licht of donker.
   Cliëntinhoud nadrukkelijk niet — voorinformatie, extra instructie, transcript en verslag
@@ -401,7 +414,7 @@ achter de toetsenbordknop rechtsboven, of achter **?**:
 | **Het gedownloade bestand opent als tekst** | De bestandsnaam eindigt niet op `.html`. Hernoem het bestand (bijvoorbeeld `sessienotitie.html`) en open het opnieuw. |
 | **Je sleutel is na het herladen weg** | Je zit in een privé- of incognitovenster, of je browser wist site-gegevens bij afsluiten. Gebruik een gewoon venster. |
 | **Het verslag klopt inhoudelijk niet** | Gebruik **Verslag herzien** en zeg in gewone taal wat er anders moet, in plaats van zelf te knippen en plakken. Blijft het misgaan, controleer dan het transcript — bij slechte audio valt er weinig te redden. |
-| **Alles is weg na het herladen** | Dat klopt: er wordt niets bewaard (zie [Goed om te weten](#goed-om-te-weten)). Kopieer het verslag voortaan vóór je de pagina verlaat. |
+| **Alles is weg na het herladen** | Transcript en verslag worden niet bewaard (zie [Goed om te weten](#goed-om-te-weten)); kopieer het verslag voortaan vóór je de pagina verlaat. Een opname waar nog geen verslag van was, staat bovenaan klaar om opnieuw te verwerken. |
 
 ---
 
@@ -472,7 +485,10 @@ NEN 7510, AVG, eigen risico) staat in **[PRIVACY.md](PRIVACY.md)**.
 - Verslag: `POST https://api.eu.mistral.ai/v1/chat/completions` (`mistral-large-latest`,
   streaming via server-sent events). Beide aanroepen gaan naar het Europese endpoint.
 - Alle status — transcript, verslag, tip en de versiegeschiedenis — leeft in het geheugen
-  van de pagina. Naar `localStorage` gaan alleen de API-sleutel, de themakeuze en de
+  van de pagina. De enige uitzondering is de reservekopie van de opname in IndexedDB
+  (`sessienotitie-vangnet`), die na een verslag, bij Nieuw gesprek of bij het sluiten van het
+  tabblad wordt verwijderd (via een briefje in `localStorage` en een Web Lock per tabblad, zodat
+  het ook lukt als de browser het opruimen tijdens het sluiten niet afmaakt). Naar `localStorage` gaan alleen de API-sleutel, de themakeuze en de
   instellingen (gesprekstype, uitvoerformaat, microfoon, opnamebron, vinkjes) — nooit
   cliëntinhoud.
 - De Mistral API stuurt CORS-headers mee, waardoor de browser rechtstreeks mag aanroepen.

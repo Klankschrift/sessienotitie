@@ -743,9 +743,52 @@
       transition-duration: 0.001ms !important; scroll-behavior: auto !important;
     }
   }
+  /* ── Opnamealarm en vangnet ──────────────────────────────── */
+  /* Het alarm moet opvallen, ook vanuit je ooghoek tijdens een gesprek: vol
+     rood over de hele breedte, in beide thema's hetzelfde. */
+  .opname-alarm {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    display: flex; align-items: center; gap: 0.6rem 1rem; flex-wrap: wrap;
+    padding: 0.95rem 1.25rem; background: #c62828; color: #fff;
+    font-size: 0.95rem; line-height: 1.45; box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+    animation: alarmPuls 0.9s ease-in-out infinite alternate;
+  }
+  .opname-alarm[hidden] { display: none; }
+  .opname-alarm strong { font-size: 1.05rem; }
+  .opname-alarm .alarm-tijd { opacity: 0.9; font-variant-numeric: tabular-nums; }
+  .opname-alarm button {
+    margin-left: auto; background: #fff; color: #b71c1c; border: none; border-radius: 8px;
+    padding: 0.5rem 1rem; font: inherit; font-weight: 700; cursor: pointer;
+  }
+  @keyframes alarmPuls { from { background: #c62828; } to { background: #8e1616; } }
+  @media (prefers-reduced-motion: reduce) { .opname-alarm { animation: none; } }
+
+  .vangnet {
+    background: var(--danger-soft); border: 1px solid var(--danger-rand); border-radius: var(--r-lg);
+    padding: 0.85rem 1.1rem; font-size: 0.86rem; color: var(--text); line-height: 1.5;
+  }
+  .vangnet[hidden] { display: none; }
+  .vangnet-titel { font-weight: 600; color: var(--danger); }
+  .vangnet-uitleg { font-size: 0.79rem; color: var(--text-soft); margin-top: 0.3rem; }
+  .vangnet-rij {
+    display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+    margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid var(--danger-rand);
+  }
+  .vangnet-rij span { margin-right: auto; font-variant-numeric: tabular-nums; }
+  .alarm-test { margin-top: 0.45rem; }
+  .onderbroken {
+    margin-top: 0.9rem; background: var(--danger-soft); border: 1px solid var(--danger-rand);
+    border-radius: var(--r-md); padding: 0.7rem 0.85rem; font-size: 0.8rem; line-height: 1.5; color: var(--text);
+  }
+  .onderbroken-knoppen { display: flex; gap: 0.5rem; margin-top: 0.55rem; }
 </style>
 </head>
 <body>
+<div class="opname-alarm" id="opnameAlarm" role="alert" hidden>
+  <strong id="alarmReden"></strong>
+  <span class="alarm-tijd" id="alarmTijd"></span>
+  <button type="button" onclick="alarmUit()">Alarm uitzetten</button>
+</div>
 
 <header class="topbar">
   <div class="topbar-inner">
@@ -839,6 +882,13 @@
       </div>
     </div>
 
+    <div class="onderbroken hidden" id="onderbroken" role="status">
+      <span id="onderbrokenTekst"></span>
+      <div class="onderbroken-knoppen">
+        <button type="button" class="btn primary btn-klein" onclick="vervolgOpname()">Vervolgen</button>
+      </div>
+    </div>
+
     <div class="golf-wrap"><canvas id="golfCanvas" aria-hidden="true"></canvas></div>
 
     <div class="niveau-meters hidden" id="niveauMeters">
@@ -863,6 +913,8 @@
       <label for="micSelect">Microfoon</label>
       <select id="micSelect"><option value="">Bezig met laden...</option></select>
       <div class="field-note" id="micNote">Microfoons worden geladen...</div>
+      <button type="button" class="btn ghost btn-klein alarm-test" id="btnAlarmTest" onclick="testAlarm()"
+              title="Het pingetje dat klinkt als de microfoon tijdens een opname wegvalt">Alarmtoon testen</button>
       <div class="field-note">Een losse vergadermicrofoon (usb of bluetooth) geeft duidelijk
         betere resultaten dan de ingebouwde laptopmicrofoon — en dus een nauwkeuriger verslag.</div>
     </div>
@@ -977,6 +1029,16 @@
     <span id="errorTekst"></span>
     <button class="retry" id="btnErrorRetry" hidden onclick="probeerOpnieuw()">Opnieuw proberen</button>
     <button class="sluit" onclick="hideError()" aria-label="Melding sluiten">✕</button>
+  </div>
+
+  <!-- Vangnet: opnames die nog geen verslag hebben opgeleverd -->
+  <div class="vangnet" id="vangnet" hidden>
+    <div class="vangnet-titel" id="vangnetTitel"></div>
+    <div class="vangnet-uitleg">
+      Deze audio staat in de opslag van de browser op deze computer. Hij verdwijnt zodra er een
+      verslag van is, als je hem hier weggooit of op Nieuw gesprek klikt, en anders zodra je dit tabblad sluit.
+    </div>
+    <div id="vangnetLijst"></div>
   </div>
 
   <!-- Transcript -->
@@ -1727,6 +1789,10 @@ const transcriptTelling = $('transcriptTelling'), verslagTelling = $('verslagTel
 const btnTranscriptUit = $('btnTranscriptUit'), btnNieuw = $('btnNieuw');
 const uitklapRegen = $('uitklapRegen'), uitklapOpties = $('uitklapOpties'), uitklapVoorbereiding = $('uitklapVoorbereiding');
 const btnThema = $('btnThema');
+const opnameAlarmEl = $('opnameAlarm'), alarmReden = $('alarmReden'), alarmTijd = $('alarmTijd');
+const btnAlarmTest = $('btnAlarmTest');
+const vangnetEl = $('vangnet'), vangnetTitel = $('vangnetTitel'), vangnetLijst = $('vangnetLijst');
+const onderbrokenEl = $('onderbroken'), onderbrokenTekst = $('onderbrokenTekst');
 const apiKeyInput = $('apiKey'), btnSaveKey = $('btnSaveKey'), btnClearKey = $('btnClearKey');
 const sleutelStatus = $('sleutelStatus'), sleutelStatusTekst = $('sleutelStatusTekst');
 
@@ -2130,17 +2196,24 @@ const onbewerkt = deviceId => {
 
 function opnameUIStart(statusTekst) {
   isRecording = true;
+  // Een nieuw gesprek. Was de vorige opname nog niet verwerkt, dan blijft hij
+  // in de melding van het vangnet.
+  vangnetParkeer();
   btnRecord.classList.add('recording');
   btnRecord.setAttribute('aria-label', 'Opname stoppen');
   recordStatus.textContent = statusTekst;
   recordStatus.classList.add('active');
   secondsElapsed = 0;
+  storing = null; dodeBronnen.clear();
+  // Een alarmbalk van een eerdere opname hoort niet bij deze.
+  if (alarmActief()) alarmUit();
+  toonOnderbroken();
   recordTimer.textContent = formatTime(0);
   timerInterval = setInterval(() => {
     secondsElapsed++;
     recordTimer.textContent = formatTime(secondsElapsed);
     recordTimer.classList.add('active');
-    document.title = '\u25cf ' + formatTime(secondsElapsed).replace(/^00:/, '') + ' — Sessienotitie';
+    if (!alarmActief()) document.title = '\u25cf ' + formatTime(secondsElapsed).replace(/^00:/, '') + ' — Sessienotitie';
   }, 1000);
   setStep(1);
   setStatus('busy', 'Opname actief', false);
@@ -2148,7 +2221,7 @@ function opnameUIStart(statusTekst) {
 
 function opnameUIStop(statusTekst) {
   clearInterval(timerInterval);
-  document.title = 'Sessienotitie';
+  if (!alarmActief()) document.title = 'Sessienotitie';
   isRecording = false;
   btnRecord.classList.remove('recording');
   btnRecord.setAttribute('aria-label', 'Opname starten of stoppen');
@@ -2199,91 +2272,517 @@ function opnameExtensie(type) {
 async function startRecording() {
   hideError();
   try {
-    let stream;
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioContext.state === 'suspended') await audioContext.resume();
+    opnameBestemming = audioContext.createMediaStreamDestination();
     if (opnameBron === 'scherm') {
-      schermStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-      const schermAudio = schermStream.getAudioTracks();
-      if (schermAudio.length === 0) {
-        schermStream.getTracks().forEach(t => t.stop());
-        schermStream = null;
-        throw new Error('Geen audio gedeeld. Vink "Audio delen" aan bij het delen van het tabblad of venster.');
-      }
-      schermStream.getVideoTracks().forEach(t => t.stop());
-
-      try {
-        micStream = await navigator.mediaDevices.getUserMedia({ audio: gedeeldeMic(micSelect.value) });
-        const track = micStream.getAudioTracks()[0];
-        console.log('Actieve microfoon (scherm+mic modus):', track.label);
-        console.log('Microfoon instellingen:', JSON.stringify(track.getSettings()));
-      } catch (e) {
-        micStream = null;
-      }
-
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const destination = audioContext.createMediaStreamDestination();
-      const schermBron = audioContext.createMediaStreamSource(new MediaStream(schermAudio));
-      schermBron.connect(destination);
-      niveauSchermRij.classList.remove('hidden');
-      meterBronToevoegen('De gedeelde audio is', schermBron, niveauScherm);
-      if (micStream) {
-        const micBron = audioContext.createMediaStreamSource(micStream);
-        micBron.connect(destination);
-        meterBronToevoegen('Je microfoon is', micBron, niveauMic);
-      }
-      stream = destination.stream;
-
-      if (!micStream) {
-        showError('Let op: microfoon niet beschikbaar — alleen de audio van de ander wordt opgenomen.');
-      }
+      await verbindScherm();
+      try { await verbindMic(); }
+      catch (e) { showError('Let op: microfoon niet beschikbaar — alleen de audio van de ander wordt opgenomen.'); }
     } else {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: onbewerkt(micSelect.value) });
-      const track = stream.getAudioTracks()[0];
-      console.log('Actieve microfoon:', track.label);
-      console.log('Microfoon instellingen:', JSON.stringify(track.getSettings()));
-
-      // Alleen om mee te luisteren; de opname loopt over de onbewerkte stream.
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      meterBronToevoegen('Je microfoon is', audioContext.createMediaStreamSource(stream), niveauMic);
+      await verbindMic();
     }
 
     opnameType = kiesOpnameType();
-    mediaRecorder = new MediaRecorder(stream, opnameType ? { mimeType: opnameType } : {});
+    mediaRecorder = new MediaRecorder(opnameBestemming.stream, opnameType ? { mimeType: opnameType } : {});
     audioChunks = [];
-    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+    mediaRecorder.ondataavailable = chunkBinnen;
     mediaRecorder.onstop = handleStop;
+    mediaRecorder.onerror = e => opnameAlarm('De opname is vastgelopen' + (e.error?.name ? ' (' + e.error.name + ').' : '.'), 'hard', null);
     mediaRecorder.start(1000);
+    startBewaking();
     startMeters();
     wakeLockAanvragen();
 
     opnameUIStart(opnameBron === 'scherm' ? 'Opname bezig (scherm + audio)...' : 'Opname bezig...');
   } catch (err) {
-    stopMeters();
-    wakeLockLoslaten();
-    [schermStream, micStream].forEach(s => s?.getTracks().forEach(t => t.stop()));
-    schermStream = null; micStream = null;
-    if (audioContext && audioContext.state !== 'closed') audioContext.close();
-    audioContext = null;
+    ruimOpnameOp();
     showError('Opname starten mislukt: ' + err.message);
     setStatus('err', 'Opname fout');
   }
 }
 
-function stopRecording() {
+// Alles van de lopende opname loslaten: bewaking, meters, bronnen, AudioContext.
+function ruimOpnameOp() {
+  stopBewaking();
   stopMeters();
   wakeLockLoslaten();
-  if (mediaRecorder?.state !== 'inactive') mediaRecorder.stop();
-  mediaRecorder?.stream.getTracks().forEach(t => t.stop());
-  schermStream?.getTracks().forEach(t => t.stop());
-  micStream?.getTracks().forEach(t => t.stop());
+  [schermStream, micStream].forEach(s => s?.getTracks().forEach(t => t.stop()));
+  schermStream = null; micStream = null; micBron = null; schermBron = null; opnameBestemming = null;
   if (audioContext && audioContext.state !== 'closed') audioContext.close();
-  schermStream = null; micStream = null; audioContext = null;
+  audioContext = null;
+}
+
+function stopRecording() {
+  if (mediaRecorder?.state !== 'inactive') mediaRecorder.stop();
+  ruimOpnameOp();
   opnameUIStop('Opname gestopt — bezig met verwerken...');
 }
 
 async function handleStop() {
+  // Stopt de recorder terwijl de opname nog loopt, dan is hij zelf vastgelopen.
+  // Een weggevallen microfoon doet dat niet meer: die opname loopt door.
+  const onverwacht = isRecording;
+  if (onverwacht) {
+    stopRecording();
+    opnameAlarm('De opname is onverwacht gestopt.', 'gestopt', null);
+    setStatus('err', 'Opname onderbroken');
+  }
+  storing = null; dodeBronnen.clear();
   const type = opnameType || 'audio/webm';
   const blob = new Blob(audioChunks, { type });
-  await transcribeer(blob, 'opname.' + opnameExtensie(type));
+  const naam = 'opname.' + opnameExtensie(type);
+  audioChunks = [];
+  if (blob.size === 0) {
+    showError('De opname bevat geen audio. Er is niets opgenomen; de verbinding met de microfoon is waarschijnlijk weggevallen.');
+    setStatus('err', 'Lege opname');
+    recordStatus.textContent = 'Lege opname';
+    return;
+  }
+  // Ruwe ondergrens: zelfs stilte levert bij Opus ruim meer dan 500 bytes per seconde op.
+  if (blob.size < secondsElapsed * 500) {
+    showError(`Let op: de opname is kleiner dan verwacht (${Math.round(blob.size / 1024)} kB bij ${formatTime(secondsElapsed)}). Mogelijk is een deel van het gesprek niet opgenomen.`);
+  }
+  const vangnetId = await bewaarAudioLokaal(blob, naam, secondsElapsed);
+  await verwerkOpname(blob, naam, secondsElapsed, vangnetId);
+}
+
+// ── Bronnen verbinden ─────────────────────────────────────────
+// Eén doorlopende opname: microfoon en gedeelde audio gaan via de AudioContext
+// naar één bestemming, en die wordt opgenomen. Valt een bron weg, dan loopt de
+// opname door (met stilte op die plek) en sluit Vervolgen een nieuwe verbinding
+// aan op dezelfde bestemming. Zo blijft het één bestand en één transcript, met
+// dezelfde sprekerlabels van begin tot eind.
+let opnameBestemming = null, micBron = null, schermBron = null;
+
+// Vraagt de gekozen microfoon op en hangt hem aan de opname; bij vervolgen
+// vervangt dit de weggevallen verbinding. Met deviceId exact valt het nooit
+// stilletjes terug op een andere microfoon: is die er niet, dan mislukt het.
+async function verbindMic() {
+  const instelling = opnameBron === 'scherm' ? gedeeldeMic : onbewerkt;
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: instelling(micSelect.value) });
+  const track = stream.getAudioTracks()[0];
+  console.log('Actieve microfoon:', track.label);
+  console.log('Microfoon instellingen:', JSON.stringify(track.getSettings()));
+  micStream?.getTracks().forEach(t => { t.onended = t.onmute = t.onunmute = null; t.stop(); });
+  micBron?.disconnect();
+  micStream = stream;
+  micBron = audioContext.createMediaStreamSource(stream);
+  micBron.connect(opnameBestemming);
+  micNul = audioContext.createAnalyser();
+  micNul.fftSize = 2048;
+  micBron.connect(micNul);
+  meterBronnen = meterBronnen.filter(b => b.balk !== niveauMic);
+  meterBronToevoegen('Je microfoon is', micBron, niveauMic);
+  bewaakTrack(track, 'mic');
+}
+
+async function verbindScherm() {
+  const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+  const audio = stream.getAudioTracks();
+  if (!audio.length) {
+    stream.getTracks().forEach(t => t.stop());
+    throw new Error('Geen audio gedeeld. Vink "Audio delen" aan bij het delen van het tabblad of venster.');
+  }
+  stream.getVideoTracks().forEach(t => t.stop());
+  schermStream?.getTracks().forEach(t => { t.onended = null; t.stop(); });
+  schermBron?.disconnect();
+  schermStream = stream;
+  schermBron = audioContext.createMediaStreamSource(new MediaStream(audio));
+  schermBron.connect(opnameBestemming);
+  niveauSchermRij.classList.remove('hidden');
+  meterBronnen = meterBronnen.filter(b => b.balk !== niveauScherm);
+  meterBronToevoegen('De gedeelde audio is', schermBron, niveauScherm);
+  bewaakTrack(audio[0], 'scherm');
+}
+
+// ── Opnamebewaking ────────────────────────────────────────────
+// Een weggevallen (Bluetooth-)microfoon merk je niet aan de timer: die loopt
+// gewoon door. Bewaakt worden de audiotrack zelf, of de microfoon nog signaal
+// levert, en de datastroom van de recorder. Nooit het geluidsniveau: stilte
+// hoort bij een gesprek en mag geen alarm geven.
+const BEWAKING_START_MS = 5000;   // zo lang mag de eerste chunk op zich laten wachten
+const BEWAKING_STILTE_MS = 8000;  // bij start(1000) komt er normaal elke seconde een chunk
+const NUL_SECONDEN = 5;           // zo lang exact nul voordat de microfoon dood heet
+let laatsteChunkTijd = 0, bewakingStart = 0, bewakingTimer = null, stilteGemeld = false;
+let bewaakteTracks = [], micNul = null, nulTeller = 0;
+
+function chunkBinnen(e) {
+  if (e.data.size > 0) {
+    audioChunks.push(e.data);
+    laatsteChunkTijd = Date.now();
+    stilteGemeld = false;
+  }
+}
+
+function bewaakTrack(track, soort) {
+  bewaakteTracks.push(track);
+  if (soort === 'scherm') {
+    track.onended = () => opnameAlarm('Het delen van de audio is gestopt; de gesprekspartner wordt niet meer opgenomen.', 'hard', 'scherm');
+    return;
+  }
+  track.onended = () => opnameAlarm('De verbinding met de microfoon is verbroken.', 'hard', 'mic');
+  track.onmute = () => opnameAlarm('De microfoon levert geen geluid meer.', 'herstelbaar', 'mic');
+  track.onunmute = () => storingVoorbij('De microfoon doet het weer.');
+}
+
+function startBewaking() {
+  clearInterval(bewakingTimer);
+  laatsteChunkTijd = 0; stilteGemeld = false; nulTeller = 0;
+  bewakingStart = Date.now();
+  const monster = new Float32Array(2048);
+  bewakingTimer = setInterval(() => {
+    if (!isRecording) return;
+    const nu = Date.now();
+    // De recorder zelf: levert hij nog data?
+    if (!laatsteChunkTijd) {
+      if (!stilteGemeld && nu - bewakingStart > BEWAKING_START_MS) {
+        stilteGemeld = true;
+        opnameAlarm('Er komt geen audio binnen. Controleer de microfoon en start opnieuw.', 'hard', 'mic');
+      }
+    } else if (!stilteGemeld && nu - laatsteChunkTijd > BEWAKING_STILTE_MS) {
+      stilteGemeld = true;
+      const weg = Math.round((nu - laatsteChunkTijd) / 1000);
+      opnameAlarm('Er komt al ' + weg + ' seconden geen audio meer binnen. De opname is vastgelopen.', 'hard', null, weg);
+    }
+    // De microfoon: een dode verbinding levert letterlijk nullen, echte stilte
+    // in een kamer heeft altijd wat ruis. Alleen voor de microfoon: gedeelde
+    // audio uit een tabblad is bij stilte wél digitaal nul.
+    if (micNul) {
+      micNul.getFloatTimeDomainData(monster);
+      const nul = monster.every(v => v === 0);
+      nulTeller = nul ? nulTeller + 1 : 0;
+      if (nulTeller === NUL_SECONDEN) opnameAlarm('De microfoon levert geen signaal meer.', 'herstelbaar', 'mic', NUL_SECONDEN);
+      if (!nul && storing === 'herstelbaar' && !micStream?.getAudioTracks()[0]?.muted) storingVoorbij('De microfoon doet het weer.');
+    }
+  }, 1000);
+}
+
+function stopBewaking() {
+  clearInterval(bewakingTimer); bewakingTimer = null;
+  bewaakteTracks.forEach(t => { t.onended = t.onmute = t.onunmute = null; });
+  bewaakteTracks = [];
+  micNul = null;
+}
+
+// ── Storing en vervolgen ──────────────────────────────────────
+// `storing`: 'herstelbaar' (de microfoon kan vanzelf terugkomen) of 'hard', met
+// het moment op de opnameklok waarop hij begon. `dodeBronnen`: wat Vervolgen
+// opnieuw moet verbinden.
+let storing = null, storingVan = 0;
+const dodeBronnen = new Set();
+
+// Na een storing kies je zelf het moment: de microfoon opnieuw verbinden en
+// vervolgen. Stoppen kan ook gewoon; dan wordt verwerkt wat er is.
+function toonOnderbroken() {
+  const zichtbaar = isRecording && !!storing;
+  onderbrokenEl.classList.toggle('hidden', !zichtbaar);
+  if (!zichtbaar) return;
+  const wat = dodeBronnen.has('scherm') && !dodeBronnen.has('mic') ? 'de gedeelde audio' : 'de microfoon';
+  onderbrokenTekst.textContent = `Storing sinds ${formatTime(storingVan)}. De opname loopt door, maar zonder `
+    + `${wat}. Verbind ${wat} opnieuw en klik op Vervolgen.`;
+}
+
+async function vervolgOpname() {
+  if (!isRecording) return;
+  try {
+    if (dodeBronnen.has('scherm')) await verbindScherm();
+    if (dodeBronnen.has('mic') || !dodeBronnen.size) await verbindMic();
+  } catch (err) {
+    showError('Vervolgen mislukt; is de microfoon weer verbonden? (' + err.message + ')');
+    return;
+  }
+  const van = storingVan;
+  storing = null; dodeBronnen.clear(); nulTeller = 0; stilteGemeld = false;
+  if (alarmActief()) alarmUit();
+  setStatus('busy', 'Opname actief', false);
+  toonOnderbroken();
+  toast('De opname loopt weer');
+  showError(`Tussen ${formatTime(van)} en ${formatTime(secondsElapsed)} is er geen geluid opgenomen; daar ontbreekt een stuk van het gesprek.`);
+}
+
+// De microfoon komt vanzelf terug: de storing is voorbij. Het gat in de opname
+// moet je wel weten.
+function storingVoorbij(melding) {
+  if (storing !== 'herstelbaar') return;
+  storing = null; dodeBronnen.clear(); nulTeller = 0;
+  if (alarmActief()) alarmUit();
+  if (isRecording) setStatus('busy', 'Opname actief', false);
+  toonOnderbroken();
+  toast(melding);
+  showError(`Tussen ${formatTime(storingVan)} en ${formatTime(secondsElapsed)} leverde de microfoon geen geluid; dat deel van het gesprek ontbreekt in de opname.`);
+}
+
+// ── Alarm ─────────────────────────────────────────────────────
+// Eén storing, één zacht pingetje: herkenbaar voor jou, niet om van te
+// schrikken voor de cliënt, en geen herhaling die een kritiek moment verstoort.
+// De rode balk en de knipperende tabtitel blijven staan tot je ze wegklikt;
+// wanneer je naar de microfoon loopt, bepaal je zelf. Valt een
+// Bluetooth-headset weg, dan is dat vaak ook je geluidsuitgang; de toon gaat
+// daarom expliciet naar het standaardapparaat van het systeem.
+let alarmToon = null, alarmTikker = null, alarmSinds = 0;
+let alarmToonUrl = null;
+
+// Twee zachte klokjestonen (A5, dan E6) die snel wegsterven, als WAV in het
+// geheugen gemaakt.
+function alarmWavUrl() {
+  if (alarmToonUrl) return alarmToonUrl;
+  const sr = 22050, n = Math.round(sr * 1.3);
+  const buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+  const tekst = (o, t) => [...t].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  tekst(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); tekst(8, 'WAVE');
+  tekst(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  tekst(36, 'data'); v.setUint32(40, n * 2, true);
+  const noten = [{ start: 0, f: 880 }, { start: 0.16, f: 1318.5 }];
+  for (let i = 0; i < n; i++) {
+    const t = i / sr;
+    let som = 0;
+    for (const { start, f } of noten) {
+      const d = t - start;
+      if (d < 0) continue;
+      const omhulling = Math.min(1, d / 0.008) * Math.exp(-d / 0.28);
+      som += omhulling * (Math.sin(2 * Math.PI * f * d) + 0.2 * Math.sin(4 * Math.PI * f * d));
+    }
+    v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, som * 0.22)) * 32767, true);
+  }
+  alarmToonUrl = URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+  return alarmToonUrl;
+}
+
+async function speelAlarmToon() {
+  const el = new Audio(alarmWavUrl());
+  try { if (el.setSinkId) await el.setSinkId('default'); } catch (e) {}
+  el.play().catch(() => {});
+  return el;
+}
+
+const alarmActief = () => !opnameAlarmEl.hidden;
+
+// `ernst`: 'herstelbaar', 'hard', of 'gestopt' (komt pas na het einde van de
+// opname binnen). `bron`: wat er weg is, voor Vervolgen. `terug`: hoeveel
+// seconden de storing al liep voordat hij opviel.
+async function opnameAlarm(reden, ernst = 'hard', bron = 'mic', terug = 0) {
+  if (!isRecording && ernst !== 'gestopt') return;
+  const nieuweStoring = !storing;
+  if (nieuweStoring) { storingVan = Math.max(0, secondsElapsed - terug); alarmSinds = Date.now() - terug * 1000; }
+  storing = ernst === 'herstelbaar' && storing !== 'hard' ? 'herstelbaar' : 'hard';
+  if (bron) dodeBronnen.add(bron);
+  alarmReden.textContent = reden;
+  setStatus('err', 'Opnamestoring');
+  toonOnderbroken();
+  if (!alarmActief()) {
+    opnameAlarmEl.hidden = false;
+    let knipper = false;
+    const tik = () => {
+      const s = Math.round((Date.now() - alarmSinds) / 1000);
+      alarmTijd.textContent = `bij ${formatTime(storingVan)} in de opname · ${s < 60 ? s + ' s' : Math.floor(s / 60) + ' min ' + (s % 60) + ' s'} geleden`;
+      knipper = !knipper;
+      document.title = knipper ? '⚠ MICROFOON — opname in gevaar' : '⚠ ⚠ ⚠';
+    };
+    tik();
+    alarmTikker = setInterval(tik, 1000);
+  }
+  if (!nieuweStoring) return;
+  if (navigator.vibrate) navigator.vibrate(200);
+  alarmToon?.pause();
+  alarmToon = await speelAlarmToon();
+}
+
+function alarmUit() {
+  clearInterval(alarmTikker); alarmTikker = null;
+  alarmToon?.pause(); alarmToon = null;
+  if (navigator.vibrate) navigator.vibrate(0);
+  opnameAlarmEl.hidden = true;
+  document.title = isRecording ? '● ' + formatTime(secondsElapsed).replace(/^00:/, '') + ' — Sessienotitie' : 'Sessienotitie';
+}
+
+// Vóór een sessie even horen of het alarm hoorbaar is, en waar het klinkt.
+function testAlarm() { speelAlarmToon(); }
+
+// ── Vangnet ───────────────────────────────────────────────────
+// Een opname gaat naar IndexedDB vóór de transcriptiepoging, zodat een crash
+// van browser of computer het gesprek niet kost. Dat is gespreksaudio van
+// cliënten op schijf, dus het blijft er zo kort mogelijk: weg zodra er een
+// verslag van is, bij wissen, als je het in de melding weggooit, en anders
+// zodra je het tabblad sluit.
+//
+// Opruimen tijdens het sluiten maakt de browser niet altijd af. Daarom houdt
+// elke opname bij bij welk tabblad hij hoort, en laat een tabblad dat netjes
+// sluit een briefje achter in localStorage (dat lukt wél altijd). Bij het
+// openen geldt: hoort een opname bij een tabblad dat nog openstaat, dan blijft
+// hij daar; is dat tabblad netjes gesloten, dan gaat hij alsnog weg; anders is
+// het gecrasht en wordt hij aangeboden. Welke tabbladen openstaan, blijkt uit
+// hun Web Lock: dat laat de browser los bij sluiten én bij een crash.
+const VANGNET_DB = 'sessienotitie-vangnet', VANGNET_STORE = 'opnames';
+const VANGNET_GESLOTEN = 'vangnet.gesloten';
+const TAB_ID = crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2);
+navigator.locks?.request('vangnet-' + TAB_ID, () => new Promise(() => {})).catch(() => {});
+// Hoeveel opnames van of via dit tabblad er nog staan; en welke dit tabblad nu
+// verwerkt (die staat al in beeld en hoeft niet in de melding).
+let vangnetAantal = 0, vangnetHuidig = null;
+
+function vangnetDb() {
+  return new Promise((ok, fout) => {
+    const req = indexedDB.open(VANGNET_DB, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(VANGNET_STORE, { keyPath: 'id', autoIncrement: true });
+    req.onsuccess = () => ok(req.result);
+    req.onerror = () => fout(req.error);
+  });
+}
+
+async function vangnet(modus, actie) {
+  const db = await vangnetDb();
+  return new Promise((ok, fout) => {
+    const tx = db.transaction(VANGNET_STORE, modus);
+    const req = actie(tx.objectStore(VANGNET_STORE));
+    tx.oncomplete = () => { db.close(); ok(req?.result); };
+    tx.onerror = tx.onabort = () => { db.close(); fout(tx.error); };
+  });
+}
+
+const leesGesloten = () => { try { return JSON.parse(localStorage.getItem(VANGNET_GESLOTEN) || '[]'); } catch { return []; } };
+const schrijfGesloten = lijst => { try { localStorage.setItem(VANGNET_GESLOTEN, JSON.stringify(lijst.slice(-100))); } catch {} };
+
+async function openTabbladen() {
+  try { return new Set((await navigator.locks.query()).held.map(l => l.name)); } catch { return null; }
+}
+const vanAnderOpenTab = (o, open) => o.tab !== TAB_ID && !!open?.has('vangnet-' + o.tab);
+
+window.addEventListener('pagehide', () => {
+  const lijst = leesGesloten();
+  if (!lijst.includes(TAB_ID)) schrijfGesloten([...lijst, TAB_ID]);
+  vangnetWis(o => o.tab === TAB_ID).catch(() => {});
+});
+// Uit de terugknop-cache teruggekomen: toch niet gesloten.
+window.addEventListener('pageshow', e => {
+  if (e.persisted) schrijfGesloten(leesGesloten().filter(t => t !== TAB_ID));
+});
+
+async function vangnetWis(welke) {
+  const weg = (await vangnet('readonly', s => s.getAll())).filter(welke);
+  if (weg.length) await vangnet('readwrite', s => weg.forEach(o => s.delete(o.id)));
+}
+
+async function bewaarAudioLokaal(blob, bestandsnaam, audioSeconden) {
+  try {
+    const id = await vangnet('readwrite', s => s.add({ blob, bestandsnaam, audioSeconden, tijdstip: Date.now(), tab: TAB_ID }));
+    vangnetAantal++;
+    return id;
+  } catch (e) {
+    toast('De opname kon niet als reservekopie worden bewaard', 'fout');
+    return null;
+  }
+}
+
+async function vangnetVerwijder(id) {
+  try { await vangnet('readwrite', s => s.delete(id)); } catch {}
+  vangnetToon();
+}
+
+// Wissen: alles van dit tabblad en wat van een gecrasht tabblad is overgebleven;
+// niet wat bij een ander open tabblad hoort.
+async function vangnetLeeg() {
+  vangnetHuidig = null;
+  const open = await openTabbladen();
+  try { await vangnetWis(o => !vanAnderOpenTab(o, open)); } catch {}
+  vangnetToon();
+}
+
+// Deze opname wordt nu verwerkt. Stond er nog een andere onverwerkt in dit
+// tabblad, dan gaat die naar de melding in plaats van uit beeld te raken.
+function vangnetWordtHuidig(id) {
+  if (vangnetHuidig != null && vangnetHuidig !== id) vangnetParkeer();
+  vangnetHuidig = id;
+}
+
+async function vangnetParkeer() {
+  const id = vangnetHuidig;
+  vangnetHuidig = null;
+  if (id == null) return;
+  try {
+    const o = await vangnet('readonly', s => s.get(id));
+    if (o) await vangnet('readwrite', s => s.put({ ...o, aangeboden: true }));
+  } catch {}
+  vangnetToon();
+}
+
+// Er is een verslag: de audio heeft zijn werk gedaan.
+function ruimVangnetOp() {
+  const id = vangnetHuidig;
+  if (id == null) return;
+  vangnetHuidig = null;
+  vangnetVerwijder(id);
+}
+
+async function vangnetToon() {
+  let zichtbaar = [];
+  try {
+    const open = await openTabbladen();
+    const gesloten = leesGesloten();
+    const opnames = await vangnet('readonly', s => s.getAll());
+    const wees = opnames.filter(o => o.tab !== TAB_ID && !vanAnderOpenTab(o, open));
+    const opruimen = wees.filter(o => gesloten.includes(o.tab));
+    // Overgebleven na een crash: dit tabblad neemt ze over, zodat ze bij het
+    // sluiten hiervan alsnog verdwijnen.
+    const overnemen = wees.filter(o => !gesloten.includes(o.tab)).map(o => ({ ...o, tab: TAB_ID, aangeboden: true }));
+    if (opruimen.length || overnemen.length) {
+      await vangnet('readwrite', s => { opruimen.forEach(o => s.delete(o.id)); overnemen.forEach(o => s.put(o)); });
+    }
+    const nogNodig = new Set(opnames.filter(o => !opruimen.includes(o)).map(o => o.tab));
+    schrijfGesloten(leesGesloten().filter(t => nogNodig.has(t)));
+    const eigen = [...opnames.filter(o => o.tab === TAB_ID), ...overnemen];
+    vangnetAantal = eigen.length;
+    zichtbaar = eigen.filter(o => o.aangeboden && o.id !== vangnetHuidig);
+  } catch {}
+  vangnetEl.hidden = !zichtbaar.length;
+  vangnetTitel.textContent = zichtbaar.length === 1
+    ? 'Er staat een opname klaar waar nog geen verslag van is'
+    : `Er staan ${zichtbaar.length} opnames klaar waar nog geen verslag van is`;
+  vangnetLijst.replaceChildren(...zichtbaar.map(o => {
+    const rij = document.createElement('div');
+    rij.className = 'vangnet-rij';
+    const d = new Date(o.tijdstip);
+    const info = document.createElement('span');
+    info.textContent = d.toLocaleString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+      + ' · ' + formatTime(o.audioSeconden || 0) + ' · '
+      + (o.blob.size < 1048576 ? Math.round(o.blob.size / 1024) + ' kB'
+                               : (o.blob.size / 1048576).toFixed(1).replace('.', ',') + ' MB');
+    const knop = (tekst, actie, primair = false) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn btn-klein' + (primair ? ' primary' : '');
+      b.textContent = tekst;
+      b.onclick = actie;
+      return b;
+    };
+    const verwerk = knop('Verwerken', () => {
+      if (isRecording) { toast('Stop eerst de lopende opname.', 'fout'); return; }
+      hideError();
+      const p = verwerkOpname(o.blob, o.bestandsnaam, o.audioSeconden, o.id);
+      vangnetToon();
+      return p;
+    }, true);
+    const download = knop('Downloaden', () => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(o.blob);
+      const stempel = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}-${String(d.getHours()).padStart(2, '0')}${String(d.getMinutes()).padStart(2, '0')}`;
+      a.download = `opname-${stempel}.${o.bestandsnaam.split('.').pop()}`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    });
+    const weg = knop('Weggooien', () => {
+      if (!weg.dataset.bevestig) {
+        weg.dataset.bevestig = '1';
+        weg.textContent = 'Zeker weten?';
+        setTimeout(() => { delete weg.dataset.bevestig; weg.textContent = 'Weggooien'; }, 4000);
+        return;
+      }
+      vangnetVerwijder(o.id);
+    });
+    rij.append(info, verwerk, download, weg);
+    return rij;
+  }));
 }
 
 // ── Audiobestand uploaden ─────────────────────────────────────
@@ -2304,7 +2803,9 @@ audioUpload.addEventListener('change', async (e) => {
 });
 
 // ── Transcriptie ──────────────────────────────────────────────
-async function transcribeer(blob, bestandsnaam = 'opname.webm') {
+// `vangnetId`: de reservekopie in IndexedDB, die weg mag zodra er een verslag is.
+async function transcribeer(blob, bestandsnaam = 'opname.webm', vangnetId = null) {
+  vangnetWordtHuidig(vangnetId);
   if (sleutelOntbreekt()) { recordStatus.textContent = 'Klaar voor nieuw gesprek'; return; }
   setStep(2);
   setStatus('busy', 'Transcriptie bezig');
@@ -2337,12 +2838,17 @@ async function transcribeer(blob, bestandsnaam = 'opname.webm') {
                       customPromptInput.value.trim(), voorinformatieInput.value.trim());
   } catch (err) {
     transcriptSpinner.classList.add('hidden');
-    showError('Transcriptie mislukt: ' + err.message, () => transcribeer(blob, bestandsnaam));
+    showError('Transcriptie mislukt: ' + err.message, () => transcribeer(blob, bestandsnaam, vangnetId));
     setStatus('err', 'Transcriptie fout');
     recordStatus.textContent = 'Klaar voor nieuw gesprek';
     // Ook zonder verslag het regen-paneel tonen mits er een transcript is
     toonRegenPaneel(gesprekTypeSelect.value, geslachtSelect.value);
   }
+}
+
+// Een opname (net gestopt, of uit het vangnet) naar transcriptie en verslag.
+function verwerkOpname(blob, bestandsnaam, audioSeconden, vangnetId) {
+  return transcribeer(blob, bestandsnaam, vangnetId);
 }
 
 // ── Transcript: uitklappen en kopiëren ────────────────────────
@@ -2504,6 +3010,7 @@ async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '',
     huidigGesprekType = gesprekType;
     verwerkOutput(ruweTekst);
     bewaarVersie(suggestie);
+    ruimVangnetOp();
 
     toonRegenPaneel(gesprekType, geslacht);
     suggestiePaneel.classList.remove('hidden');
@@ -2725,10 +3232,10 @@ async function kopieerVerslag() {
 let bevestigTimer = null;
 function nieuwGesprek() {
   if (isRecording) { toast('Stop eerst de lopende opname.', 'fout'); return; }
-  const erIsWerk = huidigTranscript || verslagMarkdown;
+  const erIsWerk = huidigTranscript || verslagMarkdown || vangnetAantal;
   if (erIsWerk && !btnNieuw.dataset.bevestig) {
     btnNieuw.dataset.bevestig = '1';
-    btnNieuw.innerHTML = 'Zeker weten? Klik nogmaals';
+    btnNieuw.innerHTML = vangnetAantal ? 'Ook bewaarde opnames wissen? Klik nogmaals' : 'Zeker weten? Klik nogmaals';
     btnNieuw.classList.add('primary');
     clearTimeout(bevestigTimer);
     bevestigTimer = setTimeout(herstelNieuwKnop, 4000);
@@ -2746,6 +3253,9 @@ function herstelNieuwKnop() {
 }
 
 function resetAll() {
+  // Een nieuw gesprek geldt ook voor de reservekopieën op schijf.
+  vangnetHuidig = null;
+  vangnetLeeg();
   finalVerslag = ''; verslagMarkdown = ''; betrekkingTekst = ''; huidigeTitel = ''; huidigTranscript = '';
   transcriptBox.textContent = 'Het transcript verschijnt hier zodra de opname is uitgewerkt.';
   transcriptBox.classList.remove('filled', 'uit');
@@ -2801,6 +3311,8 @@ document.addEventListener('keydown', e => {
     return;
   }
   if (e.key === 'Escape') {
+    // Eerst het alarm uit; de opname stoppen is dan een tweede, bewuste Escape.
+    if (alarmActief()) { e.preventDefault(); alarmUit(); return; }
     if (overlayOpen()) { sluitOverlay(); return; }
     if (inTekstveld(document.activeElement)) { document.activeElement.blur(); return; }
     if (isRecording) { e.preventDefault(); stopRecording(); }
@@ -2856,7 +3368,8 @@ document.addEventListener('click', e => {
 
 // Een lopende opname mag niet ongemerkt verdwijnen bij het sluiten van het tabblad.
 window.addEventListener('beforeunload', e => {
-  if (isRecording || huidigTranscript) { e.preventDefault(); e.returnValue = ''; }
+  // Ook een opname waar nog geen verslag van is: die verdwijnt bij het sluiten.
+  if (isRecording || huidigTranscript || vangnetAantal) { e.preventDefault(); e.returnValue = ''; }
 });
 
 // ── Init ──────────────────────────────────────────────────────
@@ -2865,6 +3378,7 @@ toonSleutelStatus();
 formatNote.textContent = FORMAT_NOTES[outputFormat.value];
 uitklapRegen.classList.add('hidden');
 laadMicrofoons();
+vangnetToon();
 updateGeslachtBadge();
 maatGolf();
 // Webfonts verschuiven de opbouw iets; daarna nog eens opmeten.

@@ -44,7 +44,7 @@ transcript en verslag passeren die host niet.
 |---|---|---|
 | **API-sleutel** | `localStorage` van deze browser | Tot je op **Wissen** klikt (of je browsergegevens opschoont) |
 | **Je instellingen** (gesprekstype, uitvoerformaat, microfoonkeuze, opnamebron, vinkjes, licht of donker) | `localStorage` van deze browser | Tot je je browsergegevens opschoont. Bevat geen cliëntgegevens: wat je in voorinformatie of extra instructie typt gaat hier nooit heen |
-| **Opname (audio)** | Alleen in het werkgeheugen van het tabblad | Tot je de pagina sluit of ververst — er wordt nooit een audiobestand op je schijf geschreven |
+| **Opname (audio)** | In het werkgeheugen van het tabblad, plus een **reservekopie in IndexedDB** van deze browser (op je schijf) zodra je de opname stopt | De reservekopie verdwijnt zodra er een verslag van is, als je hem weggooit in de melding "Er staat een opname klaar", als je op **Nieuw gesprek** klikt, en anders zodra je het tabblad sluit. Alleen na een crash van browser of computer blijft hij staan tot je de pagina weer opent; dan wordt hij aangeboden om alsnog te verwerken |
 | **Transcript, verslag, tip, versiegeschiedenis** | Alleen in het werkgeheugen van het tabblad | Tot je de pagina sluit, ververst of op **Nieuw gesprek** klikt |
 | **Wat dan ook bij de maker of een host** | Nergens — er is geen server van deze applicatie | — |
 
