@@ -22,6 +22,9 @@ alarmerend, maar ook niet mooier dan het is.
   hoe je de rest inricht.
 - Dit is een **hulpmiddel**, geen kant-en-klare NEN 7510-conforme oplossing. Je blijft
   zelf verwerkingsverantwoordelijke.
+- De **supervisiefunctie** (betrekking, onuitgesprokene, roos van Leary) heeft een eigen
+  verwerkingsdoel en bevat interpretatie, geen vaststaande feiten — zie
+  [hieronder](#supervisie-een-apart-verwerkingsdoel).
 - Gebruik is **voor eigen risico en verantwoordelijkheid**.
 
 ## Hoe de gegevens stromen
@@ -31,8 +34,11 @@ Alles draait in je eigen browser. Wanneer je opneemt of een bestand uploadt:
 1. De audio wordt rechtstreeks naar de transcriptie-API van Mistral gestuurd.
 2. Het transcript komt terug en wordt — opnieuw rechtstreeks — naar het tekstmodel van
    Mistral gestuurd om het verslag te genereren.
+3. Staat het vinkje voor supervisie aan, dan gaat het transcript in een aparte, gelijktijdige
+   aanroep nogmaals naar het tekstmodel van Mistral, voor de betrekking, het onuitgesprokene
+   en de roos van Leary.
 
-Beide aanroepen gaan naar het **Europese endpoint** van Mistral, `api.eu.mistral.ai`.
+Alle aanroepen gaan naar het **Europese endpoint** van Mistral, `api.eu.mistral.ai`.
 
 Er is geen backend van deze applicatie. Ook als je `index.html` via een statische host
 (zoals GitHub Pages) opent, wordt alleen het kale HTML-bestand geserveerd; je audio,
@@ -60,6 +66,31 @@ stem van je gesprekspartner) gemengd met je eigen microfoon en als één opname 
 gestuurd. Het videospoor wordt direct gestopt: er wordt geen beeld opgenomen of verstuurd.
 Dat je de ander opneemt, is een verwerking waarvan je hen op de hoogte moet stellen — zie
 [hieronder](#nen-7510-en-de-avg).
+
+### Supervisie: een apart verwerkingsdoel
+
+De supervisiefunctie (het vinkje boven het verslag: betrekking, onuitgesprokene, roos van
+Leary) is iets anders dan het verslag zelf, en dat heeft gevolgen voor hoe je hem gebruikt:
+
+- **Een eigen verwerkingsdoel.** Waar het verslag bedoeld is voor het cliëntdossier, is de
+  supervisie bedoeld voor jou: reflectie en voorbereiding op een volgend gesprek of op
+  supervisie. Dat is een ander doel dan "een dossierverslag maken", en de AVG vraagt om
+  doelbinding (art. 5.1.b): de informatie die je cliënten geeft over waarom je opneemt en
+  wat je met de opname doet, dekt niet vanzelfsprekend ook deze verwerking. Overweeg dit
+  apart te benoemen, zeker als je de supervisie standaard laat meelopen.
+- **Ook gegevens over jou als behandelaar.** De roos van Leary plaatst niet alleen de
+  cliënt, maar ook jezelf, en de suggesties gaan over jouw eigen interactiegedrag. Zolang
+  je dit alleen zelf bekijkt — zoals de app het nu toepast: los venster, nooit opgeslagen,
+  nooit in het dossier — is dat vergelijkbaar met een aantekening voor jezelf. Deel je dit
+  ooit met een supervisor, leidinggevende of team, dan verwerk je daarmee gegevens over je
+  eigen functioneren, en dat kan binnen een praktijk of organisatie een eigen kader vragen
+  (bijvoorbeeld instemming van de OR bij een personeelsvolgsysteem, art. 27 WOR).
+- **Interpretatie, geen vaststaand feit.** Vooral het onderdeel "onuitgesproken" is een
+  door het taalmodel gegenereerd vermoeden over wat een cliënt niet zegt — geen
+  transcriptie van iets dat daadwerkelijk gezegd is. Dat is inherent foutgevoeliger dan het
+  verslag zelf. Behandel het als een denkrichting voor jezelf, nooit als een vaststaand
+  gegeven, en neem het nooit over in het dossier — de app doet dat ook niet automatisch:
+  de supervisie gaat nooit mee in wat je kopieert.
 
 ## Mistral: dataretentie en training
 

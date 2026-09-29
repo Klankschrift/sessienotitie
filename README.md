@@ -79,8 +79,8 @@ Het hele programma is één bestand: `index.html`.
 
 **Overnemen in het dossier**
 
-- Een waarneming op **betrekkingsniveau** in een apart venster: hoe de gesprekspartners
-  zich tot elkaar verhielden, met een suggestie — bedoeld voor jezelf, niet voor het dossier.
+- Een **supervisie** in een apart venster: betrekking, het onuitgesprokene en de roos van
+  Leary — bedoeld voor jezelf, niet voor het dossier.
 - **Kopiëren naar klembord** als platte tekst, Markdown of opgemaakte (HTML) tekst;
   het formaat mag je ook achteraf nog wisselen.
 - Bij een intake krijgt **elke sectiekop een eigen kopieerknop**, die alleen de inhoud van
@@ -238,7 +238,7 @@ De **microfoonkeuze** staat een paneel hoger, bij **Opname** — daar hoort hij 
   Kies wat je dossiersysteem het beste aankan; achteraf wisselen mag ook.
 - **Emoji bij kopjes** — maakt het verslag sneller scanbaar. Zet uit als je dossier daar
   niet van houdt.
-- **Betrekkingsniveau** — laat het model in een apart venster meedenken (zie stap 5).
+- **Supervisie** — laat het model in een apart venster meedenken (zie stap 5).
 - **Titel verzinnen** — een korte omschrijving van het gespreksonderwerp boven het verslag.
 
 Deze keuzes blijven bewaard voor de volgende keer; wat je in de tekstvelden typt niet.
@@ -302,11 +302,15 @@ aanwijzing die versie opleverde. Herzien gaat verder vanaf de versie die je op d
 bekijkt, en de nieuwe versie komt altijd achteraan. Elke versie die je bekijkt, wordt
 meteen naar het klembord gekopieerd.
 
-### 5. Betrekkingsniveau
+### 5. Supervisie
 
-Staat het vinkje aan, dan verschijnt onder het verslag een apart venster met een
-waarneming op **betrekkingsniveau**: hoe de gesprekspartners zich, los van het onderwerp,
-in dit gesprek tot elkaar verhielden, met één suggestie die daar rechtstreeks uit volgt.
+Staat het vinkje aan, dan verschijnt onder het verslag een apart venster met de blik van
+een supervisor op het gesprek: een **betrekking** (hoe de gesprekspartners zich, los van
+het onderwerp, tot elkaar verhielden), iets **onuitgesprokens** dat er lijkt te liggen,
+één **suggestie** die daar rechtstreeks uit volgt, en de **roos van Leary** — een plaatje
+van hoe iedere gesprekspartner zich in dit gesprek tegenover de ander opstelde, met een
+korte toelichting per persoon en, waar dat kan, een aanwijzing hoe je als behandelaar naar
+een meer helpende positie kunt bewegen. Dit loopt als een eigen aanroep naast het verslag.
 Die tekst is voor jou en gaat **nooit mee in wat je kopieert** — daar is dat aparte
 venster voor.
 

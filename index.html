@@ -50,6 +50,9 @@
     --ok: #1d8a72;
     --ok-soft: rgba(29,138,114,0.10);
     --ok-rand: rgba(29,138,114,0.28);
+    --leary-behandelaar: #26708f;
+    --leary-client: #b0612a;
+    --leary-anders: #7e65a8;
     --rec: #d8453d;
     --rec-soft: rgba(216,69,61,0.13);
     --schaduw-1: 0 1px 2px rgba(12,26,42,0.05), 0 1px 3px rgba(12,26,42,0.04);
@@ -89,6 +92,9 @@
     --ok: #4dc7a6;
     --ok-soft: rgba(77,199,166,0.12);
     --ok-rand: rgba(77,199,166,0.30);
+    --leary-behandelaar: #5cb8d6;
+    --leary-client: #e39a5f;
+    --leary-anders: #b39ce0;
     --rec: #f2685f;
     --rec-soft: rgba(242,104,95,0.16);
     --schaduw-1: 0 1px 2px rgba(0,0,0,0.4);
@@ -554,7 +560,7 @@
   [data-thema="donker"] .geslacht-man { color: #7cc0dd; }
   [data-thema="donker"] .geslacht-vrouw { color: #e6a0c0; }
 
-  /* ── Betrekkingsniveau ────────────────────────────────────── */
+  /* ── Supervisie ───────────────────────────────────────────── */
   .tip-card { border-color: var(--ok-rand); display: none; }
   .tip-card.show { display: block; animation: opkomen 0.4s ease both; }
   .tip-card .card-label { color: var(--ok); }
@@ -562,6 +568,29 @@
     background: var(--ok-soft); border: 1px solid var(--ok-rand); border-radius: var(--r-md);
     padding: 0.6rem 1.2rem; font-size: 0.9rem; line-height: 1.7;
   }
+  .tip-box h4 {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--ok); margin: 0.7rem 0 0.1rem;
+  }
+  .tip-box p { margin: 0 0 0.3rem; }
+  .tip-box .wacht { color: var(--text-muted); font-style: italic; }
+  .leary { display: flex; flex-wrap: wrap; gap: 0.6rem 1.4rem; align-items: center; margin: 0.4rem 0 0.5rem; }
+  .leary svg { width: 330px; max-width: 100%; height: auto; flex-shrink: 0; }
+  .leary .ring { fill: none; stroke: var(--border-strong); stroke-width: 1; }
+  .leary .spaak { stroke: var(--border); stroke-width: 1; }
+  .leary .as { stroke: var(--border-strong); stroke-width: 1.2; }
+  .leary .octant { fill: var(--text-muted); font-size: 8.5px; font-family: var(--font); }
+  .leary .aslabel { fill: var(--text-soft); font-size: 10px; font-weight: 700; font-family: var(--font);
+                    text-transform: uppercase; letter-spacing: 0.06em; }
+  .leary-legenda { flex: 1 1 220px; min-width: 0; }
+  .leary-legenda .persoon { display: flex; gap: 0.5rem; align-items: baseline; margin: 0.35rem 0; font-size: 0.85rem; line-height: 1.5; }
+  .leary-legenda .stip { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; transform: translateY(1px); }
+  .leary-legenda strong { font-weight: 600; }
+  .leary-legenda details { margin-top: 0.15rem; font-size: 0.8rem; color: var(--text-soft); }
+  .leary-legenda summary { cursor: pointer; color: var(--text-muted); font-size: 0.74rem; }
+  .leary-legenda ul { margin: 0.25rem 0 0.2rem 1rem; padding: 0; }
+  .leary-legenda li { margin: 0.2rem 0; }
+  .leary-legenda .positie { font-size: 0.7rem; color: var(--text-muted); font-style: italic; }
 
   /* ── Knoppen ─────────────────────────────────────────────── */
   .btn {
@@ -977,7 +1006,7 @@
           </div>
           <div class="optie-rij">
             <input type="checkbox" id="optFeedback" checked>
-            <label for="optFeedback">Betrekkingsniveau met suggestie toevoegen (apart venster)</label>
+            <label for="optFeedback">Supervisie: betrekking, het onuitgesprokene en de roos van Leary (apart venster)</label>
           </div>
           <div class="optie-rij">
             <input type="checkbox" id="optTitel">
@@ -1123,11 +1152,11 @@
     </div>
   </div>
 
-  <!-- Betrekkingsniveau -->
+  <!-- Supervisie -->
   <div class="card tip-card" id="tipCard">
     <div class="card-label">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V16h8v-1.3A7 7 0 0 0 12 2z"/></svg>
-      Betrekkingsniveau
+      Supervisie
       <span id="tipSpinner" class="spinner hidden"></span>
     </div>
     <div class="tip-box" id="tipBox"></div>
@@ -1215,6 +1244,8 @@ Begin meteen met het verslag zelf. Zet er geen briefhoofd boven met datum, aanwe
 Sluit ook niet af met een ondertekening: geen naam van de behandelaar, geen paraaf, geen invulregel voor een volgende afspraak. Een afspraak die in het gesprek werkelijk gemaakt is hoort gewoon in het verslag zelf. Het verslag eindigt bij de laatste inhoudelijke regel.
 
 Vul nergens een vierkant haakje met een invulaanduiding in ("[Datum gesprek]", "[Naam]"). Wat je niet uit het gesprek weet, laat je weg.
+
+Verdeel het verslag in secties met een kort kopje erboven, in Markdown (## vóór het kopje). Welke secties dat zijn en hoeveel bepaal jij, aan de hand van dit specifieke gesprek.
 `;
 
 const INTAKE_ALGEMEEN = `Je schrijft dossierverslagen voor een psycholoog, op basis van het transcript van een
@@ -1469,7 +1500,9 @@ const GESLACHT_TEKST = {
   vrouw: "De cliënt is een vrouw. Je mag 'zij', 'haar' gebruiken naast 'cliënt', maar gebruik dit consistent en professioneel.",
 };
 // ── Systeemprompt samenstellen ────────────────────────────────
-function bouwSysteemprompt(gesprekType, emoji, feedback, titel) {
+// De waarneming op betrekkingsniveau zat hier vroeger als staart in deze prompt;
+// die heeft nu een eigen aanroep (zie SUPERVISIE_SYSTEEM).
+function bouwSysteemprompt(gesprekType, emoji, titel) {
   let prompt = gesprekType === 'intakegesprek'
     ? INTAKE_ALGEMEEN + INTAKE_STRUCTUUR + INTAKE_AFSPRAKEN + INTAKE_VEILIGHEID
     : V3_ALGEMEEN;
@@ -1492,34 +1525,12 @@ function bouwSysteemprompt(gesprekType, emoji, feedback, titel) {
       + "Gebruik emoji uitsluitend bij de hoofdkopjes, niet in de lopende tekst.";
   }
 
-  if (feedback) {
-    prompt += "\n\nBETREKKINGSNIVEAU:\n"
-      + "Nadat je het volledige verslag hebt geschreven, voeg je een scheidingslijn "
-      + "toe die letterlijk en exact zo luidt (geen markdown-kopje, geen ##, geen aanhalingstekens — "
-      + "gewoon deze tekst op een lege regel): ===BETREKKING===\n"
-      + "Daarna volgt geen verslagtekst meer, maar een apart stukje tekst, alleen voor "
-      + "de behandelaar zelf. Dit is niet voor het cliëntdossier en de cliënt leest "
-      + "het niet mee.\n\n"
-      + "Elk gesprek heeft een inhoud — waar het over gaat, en dat staat al in het "
-      + "verslag — en een betrekking: hoe de gesprekspartners zich, los van dat "
-      + "onderwerp, in dit gesprek tot elkaar verhielden. Beschrijf eerst in één "
-      + "waarneming iets dat je op dat betrekkingsniveau ziet gebeuren. Geef daarna "
-      + "één suggestie voor hoe de behandelaar daar in een volgend gesprek op zou "
-      + "kunnen inspelen — die suggestie moet rechtstreeks uit de waarneming "
-      + "voortkomen, geen los advies dat er niet uit volgt. Geen samenvatting van de "
-      + "inhoud en geen compliment.\n\n"
-      + "Baseer de waarneming uitsluitend op wat er in het transcript daadwerkelijk "
-      + "gebeurt, niet op een aanname over wat iemand voelt of bedoelt, en stel geen "
-      + "diagnose. Samen hoogstens drie à vier zinnen, als lopende tekst, zonder "
-      + "streepje of opsomming ervoor.";
-  }
-
   return prompt;
 }
 
 // ── Gebruiker-prompt samenstellen ─────────────────────────────
 function bouwGebruikerPrompt(transcript, gesprekType, geslacht, customPrompt, voorinformatie,
-                             voorinfoInVerslag, feedback, suggestie = '', vorigVerslag = '') {
+                             voorinfoInVerslag, suggestie = '', vorigVerslag = '') {
   const geslachtInstructie = GESLACHT_TEKST[geslacht] || GESLACHT_TEKST.onbekend;
   const extraInstructie = customPrompt ? `\nExtra instructie voor dit gesprek: ${customPrompt}` : '';
 
@@ -1539,12 +1550,6 @@ function bouwGebruikerPrompt(transcript, gesprekType, geslacht, customPrompt, vo
       + "tenzij die in het transcript bevestigd wordt:\n" + voorinformatie;
   }
 
-  const tipReminder = feedback
-    ? "\nSluit af met de scheidingslijn ===BETREKKING=== gevolgd door één waarneming "
-      + "over de betrekking tussen de gesprekspartners in dit gesprek, met een suggestie "
-      + "die daar rechtstreeks uit volgt."
-    : '';
-
   const kernReminder = gesprekType === 'intakegesprek' ? INTAKE_REMINDER : '';
 
   // Een behandelgesprek krijgt alleen te horen wát voor gesprek het is: de
@@ -1554,10 +1559,151 @@ function bouwGebruikerPrompt(transcript, gesprekType, geslacht, customPrompt, vo
     ? `Maak een professioneel dossierverslag van het onderstaande transcript van een ${gesprekType}.\n`
     : `Het gesprek hieronder is een ${gesprekType}.\n`;
 
-  return `${opdrachtregel}${geslachtInstructie}${extraInstructie}${tipReminder}${kernReminder}`
+  return `${opdrachtregel}${geslachtInstructie}${extraInstructie}${kernReminder}`
     + `${voorinfoBlok}${bouwHerzieningBlok(suggestie, vorigVerslag)}\n\n`
     + `Het transcript staat hieronder tussen <<< en >>>.\n\n`
     + `TRANSCRIPT:\n<<<\n${transcript}\n>>>`;
+}
+
+// ── Supervisie: een eigen aanroep naast het verslag ───────────
+// Tot voor kort schreef het model de waarneming op betrekkingsniveau als staart
+// onder het verslag. Nu kijkt een aparte aanroep alleen naar het transcript, met
+// een eigen opdracht: die van een supervisor.
+//
+// Het antwoord is JSON, want de roos van Leary wordt in de pagina getekend. Het
+// model verdeelt per spreker tien punten over de acht posities in plaats van één
+// positie te kiezen: in een gesprek wisselt iemand van positie, en een verdeling
+// laat dat zien. De volgorde hieronder is die van de roos, met de klok mee vanaf
+// boven; de pagina rekent de hoeken eruit.
+const LEARY_POSITIES = ['leidend', 'helpend', 'meewerkend', 'volgend',
+                        'teruggetrokken', 'opstandig', 'aanvallend', 'concurrerend'];
+const LEARY_KLEUR = { behandelaar: 'var(--leary-behandelaar)', 'cliënt': 'var(--leary-client)',
+                      anders: 'var(--leary-anders)' };
+
+// Sprekerslabels komen van Voxtral-diarisatie: 'Spreker N:'. Zonder labels moet
+// het model wie wat zei uit de inhoud afleiden.
+const SPREKERLABEL = /^Spreker (\d+|\?):/m;
+
+const SUPERVISIE_SYSTEEM = `Je kijkt als supervisor mee met een psycholoog. Je krijgt het transcript van een gesprek dat die behandelaar heeft gevoerd. Het verslag voor het dossier wordt elders gemaakt; wat jij schrijft is alleen voor de behandelaar zelf, ter voorbereiding op het volgende gesprek of op supervisie. De cliënt leest het niet. Je spreekt de behandelaar aan met 'je'.
+
+Een supervisor kijkt niet naar wát er besproken is — dat weet de behandelaar zelf — maar naar wat er tussen de mensen in het gesprek gebeurt, en naar wat er níet gezegd wordt. De behandelaar is daarbij geen toeschouwer maar een van de twee partijen: hoe de cliënt zich opstelt, is mede een antwoord op hoe de behandelaar zich opstelt, en andersom.
+
+Je schrijft drie korte stukken:
+
+Betrekking. Elk gesprek heeft een inhoud en een betrekking: hoe de gesprekspartners zich, los van het onderwerp, tot elkaar verhouden. Beschrijf wat je daarvan in dit gesprek ziet gebeuren, en waar dat zichtbaar wordt. Twee à drie zinnen.
+
+Onuitgesproken. Wat komt er in dit gesprek niet op tafel, terwijl het er wel lijkt te liggen? Denk aan iets wat wordt aangeraakt en weer losgelaten, een vraag die niet beantwoord of niet gesteld wordt, een gevoel dat in de woorden doorklinkt zonder benoemd te worden, een wending waarmee het gesprek ergens omheen gaat. Dit is een interpretatie, en daarom gelden twee eisen: maak haar vast aan een moment dat in het transcript aan te wijzen is, en schrijf haar als vraag of vermoeden, niet als vaststelling. Liever één onderbouwd vermoeden dan drie losse. Is er niets wat je aan een moment kunt vastmaken, zeg dat dan in één zin. Twee à drie zinnen.
+
+Suggestie. Eén suggestie voor het volgende gesprek, die rechtstreeks volgt uit wat je hierboven zag. Geen los advies dat er niet uit voortkomt. Eén à twee zinnen.
+
+Daarnaast plaats je iedere gesprekspartner op de roos van Leary. De roos heeft twee assen: boven–onder (invloed nemen of invloed laten) en samen–tegen (toenadering of afstand). Dat geeft acht posities, met de klok mee vanaf boven: leidend (boven, samen), helpend (samen, boven), meewerkend (samen, onder), volgend (onder, samen), teruggetrokken (onder, tegen), opstandig (tegen, onder), aanvallend (tegen, boven) en concurrerend (boven, tegen). Gedrag lokt gedrag uit: boven roept onder op en onder roept boven op, samen roept samen op en tegen roept tegen op.
+
+De roos gaat hier uitsluitend over de interactie in dit gesprek: hoe iemand zich opstelt tegenover de ander in de kamer, hier en nu. Wat iemand vertelt over anderen telt niet mee. Een cliënt die vertelt over een conflict met iemand buiten het gesprek, en dat met de behandelaar openhartig onderzoekt, staat tegenover de behandelaar aan de samen-kant, niet aan de tegen-kant: het conflict is inhoud, het openhartig vertellen is betrekking. Kijk dus naar wat iemand met de ander doet — vragen stellen, onderbreken, instemmen, afwijzen, het initiatief nemen of laten, ingaan op wat de ander zegt of er langs gaan — en niet naar waar het verhaal over gaat.
+
+Een positie op de roos is altijd een antwoord op de ander. Wat een uitspraak betekent, zie je pas aan wat eraan voorafging: uitgebreid vertellen na een open vraag is meewerken, uitgebreid doorpraten terwijl de ander probeert bij te sturen is iets anders. Beoordeel dus nooit een losse uitspraak, maar altijd een wisseling.
+
+Zoek daarom per gesprekspartner eerst twee à drie momenten, voordat je punten geeft. Een moment is een paar: wat de ander deed, en hoe deze persoon daarop reageerde — bijvoorbeeld "de ander stelt een verdiepende vraag" en "gaat erlangs door over iets anders te beginnen". Kies momenten die kenmerkend zijn voor het gesprek, niet de opvallendste zinnen. Een uitspraak over iemand buiten het gesprek is nooit een moment.
+
+Verdeel daarna per gesprekspartner tien punten over de acht posities, op grond van die momenten. Een positie krijgt alleen punten als er een moment bij hoort dat haar laat zien; alle andere posities krijgen nul. Het is gewoon dat punten op twee of drie posities terechtkomen. Sluit af met één zin toelichting per persoon die samenvat hoe die zich tegenover de ander opstelde — gedrag in het gesprek, niet een karaktertrek en niet de inhoud van wat er verteld werd.
+
+Voor alles geldt: baseer je op wat er in het transcript daadwerkelijk gebeurt, niet op een aanname over wat iemand voelt of bedoelt. Geen diagnose, geen samenvatting van de inhoud en geen compliment. Het transcript komt uit automatische spraakherkenning; zinnen lopen soms niet af en woorden kunnen verkeerd verstaan zijn. Bouw geen waarneming op één woord dat verminkt kan zijn.
+
+Tot slot kijk je vanuit de roos vooruit. In een behandelgesprek is 'helpend' (samen, boven) de voorkeurspositie van de behandelaar en 'meewerkend' (samen, onder) die van de cliënt; die twee roepen elkaar op. Schrijf twee korte stukken:
+- Voor de behandelaar: hoe je vanuit waar je in dit gesprek stond meer naar helpend kunt bewegen. Stond je daar al vooral, zeg dat dan in één zin en noem wat je vasthoudt.
+- Voor de cliënt: welke interventies van de behandelaar de cliënt kunnen uitnodigen om meer meewerkend te worden. Denk vanuit de wisselwerking: welk gedrag van de behandelaar roept meewerken op, en welk gedrag in dit gesprek riep juist iets anders op?
+Beide stukken bouwen voort op de momenten die je hierboven vond, en noemen er waar het kan één bij naam. Concreet genoeg om in het volgende gesprek te doen, niet algemeen advies dat bij elk gesprek past. Herhaal de suggestie uit het eerste deel niet. Elk twee à drie zinnen.
+
+Je antwoord is uitsluitend een JSON-object, zonder tekst eromheen, in deze vorm:
+{
+  "betrekking": "...",
+  "onuitgesproken": "...",
+  "suggestie": "...",
+  "leary": [
+    {"spreker": "Spreker 1", "rol": "behandelaar",
+     "momenten": [
+       {"ander": "wat de ander deed", "reactie": "hoe deze persoon reageerde", "positie": "een van de acht posities"}
+     ],
+     "punten": {"leidend": 0, "helpend": 0, "meewerkend": 0, "volgend": 0, "teruggetrokken": 0, "opstandig": 0, "aanvallend": 0, "concurrerend": 0},
+     "toelichting": "..."}
+  ],
+  "richting": {"behandelaar": "...", "client": "..."}
+}
+Schrijf de velden in deze volgorde: per persoon eerst de momenten, dan de punten, dan de toelichting; 'richting' komt na de roos. Is 'leary' leeg, laat 'richting' dan ook leeg.
+'spreker' is het label uit het transcript ('Spreker 1', 'Spreker 2', ...); staan er geen labels in, dan 'Behandelaar' en 'Cliënt'. 'rol' is 'behandelaar', 'cliënt' of 'anders'. Zijn de gesprekspartners in het transcript niet van elkaar te onderscheiden, laat 'leary' dan leeg.
+`;
+
+function bouwSupervisieVraag(transcript, geslacht, gesprekType) {
+  const sprekers = SPREKERLABEL.test(transcript)
+    ? "Het transcript is door de spraakherkenning per spreker ingedeeld. Welk label bij "
+      + "de behandelaar hoort, zegt het label niet: dat blijkt uit de inhoud. De indeling "
+      + "kan hier en daar misgaan."
+    : "Het transcript heeft geen sprekerslabels. Wie wat zegt, moet je uit de inhoud "
+      + "afleiden; is dat op een plek niet zeker, bouw daar dan niets op.";
+  const geslachtInstructie = GESLACHT_TEKST[geslacht] || GESLACHT_TEKST.onbekend;
+  return "Het transcript van het gesprek staat hieronder tussen <<< en >>>.\n\n"
+    + `TRANSCRIPT:\n<<<\n${transcript}\n>>>\n\n`
+    + `Het gesprek hierboven is een ${gesprekType}. ${sprekers}\n`
+    + `${geslachtInstructie}\n`
+    + "Geef je antwoord als JSON-object, zoals in de opdracht beschreven.";
+}
+
+// Het JSON-antwoord van het model, gecontroleerd en gelijkgetrokken. Een
+// ontbrekend veld wordt leeg, onbekende posities vallen weg en punten worden
+// niet-negatieve getallen.
+function leesSupervisie(tekst) {
+  tekst = tekst.trim().replace(/^```(?:json)?\s*|\s*```$/g, '');
+  const data = JSON.parse(tekst);
+  if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('geen JSON-object');
+
+  const tekstveld = w => typeof w === 'string' ? w.trim() : '';
+
+  const personen = [];
+  for (const p of (Array.isArray(data.leary) ? data.leary : [])) {
+    if (!p || typeof p !== 'object') continue;
+    const momenten = [];
+    for (const m of (Array.isArray(p.momenten) ? p.momenten : [])) {
+      if (!m || typeof m !== 'object') continue;
+      let positie = tekstveld(m.positie).toLowerCase();
+      const kort = positie.slice(0, 5);
+      positie = (kort && LEARY_POSITIES.find(n => n.startsWith(kort))) || positie;
+      if (tekstveld(m.reactie)) {
+        momenten.push({ ander: tekstveld(m.ander), reactie: tekstveld(m.reactie), positie });
+      }
+    }
+    const ruw = (p.punten && typeof p.punten === 'object') ? p.punten : {};
+    const punten = {};
+    for (const positie of LEARY_POSITIES) {
+      const v = parseFloat(ruw[positie]);
+      punten[positie] = Number.isFinite(v) ? Math.max(0, v) : 0;
+    }
+    // Een positie zonder moment dat haar laat zien krijgt geen punten, ook als
+    // het model ze toch toekende: dat vraagt de prompt, en in code gaat het
+    // altijd goed. Zonder momenten (een ouder antwoordformaat) blijft de
+    // verdeling zoals hij is.
+    const onderbouwd = new Set(momenten.map(m => m.positie));
+    if (LEARY_POSITIES.some(n => onderbouwd.has(n))) {
+      for (const k of LEARY_POSITIES) if (!onderbouwd.has(k)) punten[k] = 0;
+    }
+    if (!Object.values(punten).some(v => v > 0)) continue;
+    const rol = tekstveld(p.rol).toLowerCase();
+    personen.push({
+      spreker: tekstveld(p.spreker) || 'Onbekend',
+      rol: (rol === 'behandelaar' || rol === 'cliënt') ? rol : 'anders',
+      punten, momenten,
+      toelichting: tekstveld(p.toelichting),
+    });
+  }
+  const richting = (data.richting && typeof data.richting === 'object') ? data.richting : {};
+  return {
+    betrekking: tekstveld(data.betrekking),
+    onuitgesproken: tekstveld(data.onuitgesproken),
+    suggestie: tekstveld(data.suggestie),
+    leary: personen,
+    richting: {
+      behandelaar: personen.length ? tekstveld(richting.behandelaar) : '',
+      client: personen.length ? tekstveld(richting.client || richting['cliënt']) : '',
+    },
+  };
 }
 
 // ── Herziening op aanwijzing ──────────────────────────────────
@@ -1749,7 +1895,11 @@ let mediaRecorder = null, audioChunks = [], timerInterval = null;
 let opnameType = '';
 let secondsElapsed = 0, isRecording = false;
 let finalVerslag = '', verslagMarkdown = '', huidigeTitel = '', huidigTranscript = '';
-let betrekkingTekst = '';
+// De supervisie die nu in beeld is: { status: 'bezig' | 'klaar' | 'fout', data, fout },
+// of null. Hij komt uit een eigen aanroep die tegelijk met het verslag loopt en
+// kan dus ook pas na het verslag binnenkomen; elke versie houdt daarom een
+// verwijzing naar zijn eigen houder, die gevuld wordt zodra het antwoord er is.
+let huidigeSupervisie = null;
 // Het gesprekstype waarmee het verslag dat je nu ziet is uitgewerkt. Bepaalt of de
 // secties een eigen kopieerknop krijgen en wat de knop 'opnieuw uitwerken' aanbiedt.
 let huidigGesprekType = '';
@@ -2879,7 +3029,8 @@ function bewaarVersie(suggestie) {
   // Een nieuwe versie komt altijd achteraan, ook als je eerst bent teruggebladerd:
   // teruggaan is bedoeld om te vergelijken, niet om werk weg te gooien.
   versies.push({
-    verslagMarkdown, finalVerslag, huidigeTitel, betrekkingTekst,
+    verslagMarkdown, finalVerslag, huidigeTitel,
+    supervisie: huidigeSupervisie,
     gesprekType: huidigGesprekType,
     suggestie: suggestie || ''
   });
@@ -2905,7 +3056,7 @@ function stapVersie(richting) {
   verslagMarkdown = v.verslagMarkdown;
   finalVerslag = v.finalVerslag;
   huidigeTitel = v.huidigeTitel;
-  betrekkingTekst = v.betrekkingTekst;
+  huidigeSupervisie = v.supervisie || null;
   huidigGesprekType = v.gesprekType || huidigGesprekType;
   outputBox.innerHTML = convertMarkdownToHtml(verslagMarkdown);
   zetSectieKnoppen();
@@ -2914,8 +3065,7 @@ function stapVersie(richting) {
   verslagTelling.textContent = telZin(woorden(finalVerslag));
   titelRegel.textContent = huidigeTitel;
   titelRegel.classList.toggle('show', !!huidigeTitel);
-  if (betrekkingTekst) { renderBetrekking(); tipCard.classList.add('show'); }
-  else { tipCard.classList.remove('show'); }
+  renderSupervisie();
   werkVersieBalkBij();
   autoKopieerVerslag();
 }
@@ -2945,15 +3095,22 @@ async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '',
   outputBox.textContent = 'Het taalmodel is bezig met het uitwerken van het verslag...';
   verslagTelling.textContent = '';
   titelRegel.classList.remove('show');
-  tipCard.classList.remove('show');
+  // De supervisie gaat over het gesprek en niet over het verslag: bij een
+  // herziening blijft die van de versie waar je van uitging staan. Anders een
+  // nieuwe, tegelijk met het verslag.
+  const basisVersie = versies[huidigeVersie];
+  if (!optFeedback.checked) huidigeSupervisie = null;
+  else if (suggestie && basisVersie?.supervisie) huidigeSupervisie = basisVersie.supervisie;
+  else huidigeSupervisie = haalSupervisie(verwijderHerhalingen(transcript), gesprekType, geslacht);
+  renderSupervisie();
   btnKopieer.disabled = true; btnRegen.disabled = true;
   btnHerzie.disabled = true;
 
   try {
-    const systeemPrompt   = bouwSysteemprompt(gesprekType, optEmoji.checked, optFeedback.checked, optTitel.checked);
+    const systeemPrompt   = bouwSysteemprompt(gesprekType, optEmoji.checked, optTitel.checked);
     const gebruikerPrompt = bouwGebruikerPrompt(verwijderHerhalingen(transcript), gesprekType, geslacht,
                                                 customPrompt, voorinformatie, optVoorinfoInVerslag.checked,
-                                                optFeedback.checked, suggestie, vorigVerslag);
+                                                suggestie, vorigVerslag);
 
     const resp = await fetch(MISTRAL_CHAT_URL, {
       method: 'POST',
@@ -3039,9 +3196,9 @@ async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '',
   }
 }
 
-// ── Output verwerken: titel + verslag + betrekkingsniveau splitsen ─
+// ── Output verwerken: titel en verslag splitsen ───────────────
 function verwerkOutput(ruweTekst) {
-  huidigeTitel = ''; betrekkingTekst = '';
+  huidigeTitel = '';
   let werk = ruweTekst;
 
   // Het model zet er soms een invulplaatshouder in ("de 26e [datum onbekend]")
@@ -3055,13 +3212,6 @@ function verwerkOutput(ruweTekst) {
   // is twee keer eerder via de prompt bestreden en kwam terug; hier gaat het altijd goed.
   werk = werk.replace(/^(#{1,6})[ \t]+#{1,6}[ \t]*/gm, '$1 ')
              .replace(/^(#{1,6}[ \t]*)`+([^\n`]+?)`+[ \t]*$/gm, '$1$2');
-
-  werk = werk.replace(/(?:^|\n)#{1,6}[^\S\n]*betrekking[^\n]*/gi, '\n===BETREKKING===');
-  const delen = werk.split(/===\s*BETREKKING\s*===/i);
-  if (delen.length > 1) {
-    werk = delen[0];
-    betrekkingTekst = parseBetrekking(delen.slice(1).join('\n').trim());
-  }
 
   const titelMatch = werk.match(/^===TITEL===\s*\n([^\n]+)/i);
   if (titelMatch) {
@@ -3089,30 +3239,196 @@ function verwerkOutput(ruweTekst) {
     titelRegel.textContent = huidigeTitel;
     titelRegel.classList.add('show');
   }
+}
 
-  if (betrekkingTekst) {
-    renderBetrekking();
-    tipCard.classList.add('show');
+// ── Supervisie ────────────────────────────────────────────────
+// Een eigen, niet-gestreamde aanroep naar Mistral, tegelijk met het verslag.
+// Geeft meteen de houder terug; die wordt gevuld zodra het antwoord er is, en
+// alleen opnieuw getekend als hij dan nog in beeld is.
+function haalSupervisie(transcript, gesprekType, geslacht) {
+  const houder = { status: 'bezig', data: null, fout: '' };
+  fetch(MISTRAL_CHAT_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + getApiKey(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: CHAT_MODEL,
+      temperature: TEMPERATUUR,
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: SUPERVISIE_SYSTEEM },
+        { role: 'user',   content: bouwSupervisieVraag(transcript, geslacht, gesprekType) },
+      ],
+    }),
+  })
+    .then(async resp => {
+      if (!resp.ok) throw await foutUitAntwoord(resp);
+      const antwoord = await resp.json();
+      const inhoud = antwoord?.choices?.[0]?.message?.content;
+      if (!inhoud) throw new Error('Leeg antwoord van het taalmodel ontvangen.');
+      Object.assign(houder, { status: 'klaar', data: leesSupervisie(inhoud) });
+    })
+    .catch(err => Object.assign(houder, { status: 'fout', fout: err.message }))
+    .finally(() => { if (huidigeSupervisie === houder) renderSupervisie(); });
+  return houder;
+}
+
+// De tekst komt rechtstreeks uit het taalmodel en gaat daarom via inlineHtml, dat
+// eerst alles escapet en daarna alleen de nadruk (*...*, **...**) omzet.
+function renderSupervisie() {
+  const s = huidigeSupervisie;
+  tipCard.classList.toggle('show', !!s);
+  tipSpinner.classList.toggle('hidden', s?.status !== 'bezig');
+  tipBox.replaceChildren();
+  if (!s) return;
+  const melding = tekst => {
+    const p = document.createElement('p');
+    p.textContent = tekst;
+    p.className = 'wacht';
+    tipBox.appendChild(p);
+  };
+  if (s.status === 'bezig') { melding('De supervisor kijkt mee…'); return; }
+  if (s.status === 'fout') { melding('Supervisie mislukt: ' + s.fout); return; }
+  const kop = tekst => {
+    const h = document.createElement('h4');
+    h.textContent = tekst;
+    tipBox.appendChild(h);
+  };
+  // Een witregel in de modeltekst wordt een nieuwe alinea; een eventueel label
+  // ('Voor de behandelaar:') komt vet vooraan in de eerste.
+  const alineas = (tekst, label = '') => {
+    tekst.split(/\n\s*\n/).forEach(stuk => {
+      const regel = stuk.replace(/^\s*[-*+]\s+/gm, '').replace(/\s*\n\s*/g, ' ').trim();
+      if (!regel) return;
+      const p = document.createElement('p');
+      p.innerHTML = (label ? `<strong>${escapeHtml(label)}</strong> ` : '') + inlineHtml(regel);
+      label = '';
+      tipBox.appendChild(p);
+    });
+  };
+  const d = s.data;
+  for (const [titel, tekst] of [['Betrekking', d.betrekking], ['Onuitgesproken', d.onuitgesproken],
+                                ['Suggestie', d.suggestie]]) {
+    if (!tekst) continue;
+    kop(titel);
+    alineas(tekst);
+  }
+  if (d.leary?.length) {
+    kop('Roos van Leary');
+    tipBox.appendChild(tekenLeary(d.leary));
+  }
+  const r = d.richting || {};
+  if (r.behandelaar || r.client) {
+    kop('Naar helpend en meewerkend');
+    if (r.behandelaar) alineas(r.behandelaar, 'Jij, naar helpend:');
+    if (r.client) alineas(r.client, 'Cliënt, naar meewerkend:');
   }
 }
 
-// ── Betrekkingsniveau: parsen tot platte tekst ────────────────
-// Eén waarneming, geen lijst — een eventueel streepje ervoor is opmaak van
-// het model en geen opsomming, dus die halen we eraf; regeleindes worden spaties.
-function parseBetrekking(raw) {
-  return raw.split('\n')
-    .map(regel => inline(regel.replace(/^\s*[-*+]\s+/, '').replace(/^#{1,6}\s*/, '').trim()))
-    .filter(t => t)
-    .join(' ');
-}
+// De roos: boven–onder verticaal, tegen–samen horizontaal (samen rechts), acht
+// posities met de klok mee vanaf boven, in dezelfde volgorde als LEARY_POSITIES.
+// Per persoon een taartpunt per positie (de lengte = het aantal punten,
+// geschaald op het hoogste aantal in de roos) en een stip op het zwaartepunt:
+// waar iemand gemiddeld stond.
+function tekenLeary(personen) {
+  const NS = 'http://www.w3.org/2000/svg';
+  const M = 150, R = 100;
+  const el = (naam, attrs, tekst) => {
+    const e = document.createElementNS(NS, naam);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+    if (tekst != null) e.textContent = tekst;
+    return e;
+  };
+  // Hoek in graden, met de klok mee vanaf boven.
+  const punt = (hoek, r) => {
+    const rad = hoek * Math.PI / 180;
+    return [M + r * Math.sin(rad), M - r * Math.cos(rad)];
+  };
+  const svg = el('svg', { viewBox: '-40 -12 380 324', role: 'img',
+                          'aria-label': 'Roos van Leary met de posities van de gesprekspartners' });
+  [1/3, 2/3, 1].forEach(f => svg.appendChild(el('circle', { cx: M, cy: M, r: R * f, class: 'ring' })));
+  for (let i = 0; i < 8; i++) {
+    const [x, y] = punt(i * 45 + 22.5, R);
+    svg.appendChild(el('line', { x1: M, y1: M, x2: x, y2: y, class: 'spaak' }));
+  }
+  [[0, 180], [90, 270]].forEach(([a, b]) => {
+    const [x1, y1] = punt(a, R + 8), [x2, y2] = punt(b, R + 8);
+    svg.appendChild(el('line', { x1, y1, x2, y2, class: 'as' }));
+  });
+  [['Boven', 0, 0, -4], ['Samen', 90, 4, 3], ['Onder', 180, 0, 11], ['Tegen', 270, -4, 3]]
+    .forEach(([t, hoek, dx, dy]) => {
+      const [x, y] = punt(hoek, R + 12);
+      svg.appendChild(el('text', { x: x + dx, y: y + dy, class: 'aslabel',
+        'text-anchor': hoek === 90 ? 'start' : hoek === 270 ? 'end' : 'middle' }, t));
+    });
+  // De namen van de posities buiten de ring, zodat de vlakken ze niet bedekken.
+  LEARY_POSITIES.forEach((naam, i) => {
+    const [x, y] = punt(i * 45 + 22.5, R + 8);
+    svg.appendChild(el('text', { x, y: y + 3, class: 'octant',
+                                 'text-anchor': x > M ? 'start' : 'end' }, naam));
+  });
 
-function renderBetrekking() {
-  tipBox.innerHTML = betrekkingTekst;
+  const hoogste = Math.max(1, ...personen.flatMap(p => LEARY_POSITIES.map(n => p.punten[n] || 0)));
+  const legenda = document.createElement('div');
+  legenda.className = 'leary-legenda';
+  personen.forEach(p => {
+    const kleur = LEARY_KLEUR[p.rol] || LEARY_KLEUR.anders;
+    const hoeken = LEARY_POSITIES.map((n, i) => [i * 45 + 22.5, p.punten[n] || 0]);
+    // Per positie een taartpunt, zo lang als het aantal punten. Een vlak door de
+    // spaken heen klapt bij punten op maar één positie in tot een streep.
+    const punten = hoeken.filter(([, w]) => w > 0).map(([h, w]) => {
+      const r = R * w / hoogste;
+      const [x1, y1] = punt(h - 20, r), [x2, y2] = punt(h + 20, r);
+      return `M${M},${M} L${x1},${y1} A${r},${r} 0 0 1 ${x2},${y2} Z`;
+    }).join(' ');
+    svg.appendChild(el('path', { d: punten, fill: kleur, 'fill-opacity': 0.22,
+                                 stroke: kleur, 'stroke-width': 1.6, 'stroke-linejoin': 'round' }));
+    const totaal = hoeken.reduce((s, [, w]) => s + w, 0) || 1;
+    const zx = hoeken.reduce((s, [h, w]) => s + w * Math.sin(h * Math.PI / 180), 0) / totaal;
+    const zy = hoeken.reduce((s, [h, w]) => s + w * Math.cos(h * Math.PI / 180), 0) / totaal;
+    svg.appendChild(el('circle', { cx: M + R * zx, cy: M - R * zy, r: 5, fill: kleur,
+                                   stroke: 'var(--surface)', 'stroke-width': 1.5 }));
+
+    const rij = document.createElement('div');
+    rij.className = 'persoon';
+    const stip = document.createElement('span');
+    stip.className = 'stip';
+    stip.style.background = kleur;
+    const tekst = document.createElement('div');
+    const naam = document.createElement('strong');
+    naam.textContent = p.spreker;
+    tekst.append(naam);
+    if (p.toelichting) tekst.insertAdjacentHTML('beforeend', ' — ' + inlineHtml(p.toelichting));
+    // De momenten waarop de punten rusten: ingeklapt, om na te lopen waar een
+    // plaatsing vandaan komt.
+    if (p.momenten?.length) {
+      const details = document.createElement('details');
+      const samenvatting = document.createElement('summary');
+      samenvatting.textContent = 'Waarop dit rust';
+      const lijst = document.createElement('ul');
+      p.momenten.forEach(m => {
+        const li = document.createElement('li');
+        li.innerHTML = inlineHtml((m.ander ? m.ander + ' → ' : '') + m.reactie)
+                     + (m.positie ? ` <span class="positie">${escapeHtml(m.positie)}</span>` : '');
+        lijst.appendChild(li);
+      });
+      details.append(samenvatting, lijst);
+      tekst.appendChild(details);
+    }
+    rij.append(stip, tekst);
+    legenda.appendChild(rij);
+  });
+
+  const wrap = document.createElement('div');
+  wrap.className = 'leary';
+  wrap.append(svg, legenda);
+  return wrap;
 }
 
 // ── Kopieerteksten samenstellen (per formaat) ──────────────────
-// De waarneming op betrekkingsniveau staat in zijn eigen venster en gaat nooit
-// mee in wat hier wordt opgebouwd — dat is precies waar dat venster voor is.
+// De supervisie staat in zijn eigen venster en gaat nooit
 function buildPlain() {
   return (huidigeTitel ? huidigeTitel + '\n\n' : '') + finalVerslag;
 }
@@ -3256,7 +3572,7 @@ function resetAll() {
   // Een nieuw gesprek geldt ook voor de reservekopieën op schijf.
   vangnetHuidig = null;
   vangnetLeeg();
-  finalVerslag = ''; verslagMarkdown = ''; betrekkingTekst = ''; huidigeTitel = ''; huidigTranscript = '';
+  finalVerslag = ''; verslagMarkdown = ''; huidigeSupervisie = null; huidigeTitel = ''; huidigTranscript = '';
   transcriptBox.textContent = 'Het transcript verschijnt hier zodra de opname is uitgewerkt.';
   transcriptBox.classList.remove('filled', 'uit');
   btnTranscriptUit.textContent = 'Uitklappen';
@@ -3264,7 +3580,7 @@ function resetAll() {
   outputBox.innerHTML = 'Het verslag verschijnt hier zodra het taalmodel het heeft uitgewerkt.';
   outputBox.classList.remove('formatted'); outputBox.classList.add('placeholder');
   titelRegel.classList.remove('show'); titelRegel.textContent = '';
-  tipCard.classList.remove('show'); tipBox.innerHTML = '';
+  renderSupervisie();
   uploadFilename.textContent = '';
   btnKopieer.disabled = true;
   recordTimer.textContent = '00:00:00'; recordTimer.classList.remove('active');
