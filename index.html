@@ -203,7 +203,14 @@
   }
   /* min-width: 0 houdt brede inhoud (lange apparaatnamen in een keuzelijst)
      binnen de kolom in plaats van eroverheen te laten groeien. */
-  .sidebar { display: grid; gap: 1.1rem; position: sticky; top: 5.2rem; min-width: 0; }
+  /* De zijbalk blijft staan bij scrollen. Is hij hoger dan het venster (instellingen
+     open), dan scrolt hij zelf, anders valt de onderkant buiten beeld. De extra
+     opvulling houdt de kaartschaduwen binnen het scrollvak. */
+  .sidebar {
+    display: grid; gap: 1.1rem; position: sticky; top: 4.7rem; min-width: 0;
+    max-height: calc(100vh - 4.7rem); overflow-y: auto; overscroll-behavior: contain;
+    scrollbar-width: thin; margin: -0.5rem; padding: 0.5rem 0.5rem 1.5rem;
+  }
   .sidebar > * { min-width: 0; }
   .main { display: grid; gap: 1.1rem; min-width: 0; }
   .main > * { min-width: 0; }
@@ -224,7 +231,8 @@
     display: flex; align-items: center; gap: 0.55rem;
   }
   .card-label svg { width: 14px; height: 14px; opacity: 0.75; flex-shrink: 0; }
-  .card-label .rechts { margin-left: auto; display: flex; align-items: center; gap: 0.4rem; }
+  .card-label .rechts { margin-left: auto; display: flex; align-items: center; gap: 0.4rem;
+                       flex-wrap: wrap; justify-content: flex-end; min-width: 0; }
 
   /* ── Velden ──────────────────────────────────────────────── */
   .config-grid { display: grid; grid-template-columns: 1fr; gap: 0.95rem; }
@@ -292,6 +300,7 @@
   textarea::placeholder { color: var(--text-muted); opacity: 0.85; }
   #customPrompt { min-height: 104px; }
   #voorinformatie { min-height: 118px; }
+  #behandeldoel { min-height: 72px; }
 
   /* ── Aanvinkvakjes ───────────────────────────────────────── */
   .opties { display: flex; flex-direction: column; gap: 0.7rem; }
@@ -310,6 +319,20 @@
     width: 4px; height: 9px; border: solid var(--op-accent);
     border-width: 0 2px 2px 0; transform: rotate(43deg);
   }
+  .optie-rij input[type="radio"] {
+    appearance: none; width: 18px; height: 18px; flex-shrink: 0; margin: 0;
+    border: 1.5px solid var(--border-strong); border-radius: 50%;
+    background: var(--surface); cursor: pointer; position: relative;
+    transition: border-color var(--vlot), transform 0.1s;
+  }
+  .optie-rij input[type="radio"]:hover, .optie-rij input[type="radio"]:checked { border-color: var(--accent); }
+  .optie-rij input[type="radio"]:active { transform: scale(0.9); }
+  .optie-rij input[type="radio"]:checked::after {
+    content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--accent);
+  }
+  .optie-rij input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .keuze-rondjes { display: flex; flex-wrap: wrap; gap: 0.45rem 1.1rem; padding-top: 0.3rem; }
+  .keuze-rondjes .optie-rij { align-items: center; gap: 0.45rem; }
   .optie-rij label, .prompt-area .optie-rij label {
     font-size: 0.845rem; color: var(--text-soft); cursor: pointer; line-height: 1.45;
     text-transform: none; letter-spacing: normal; font-weight: 400; margin-bottom: 0;
@@ -322,7 +345,7 @@
     border-radius: var(--r-md); padding: 0.25rem;
   }
   .bron-btn {
-    flex: 1 1 auto; min-width: 96px; padding: 0.52rem 0.6rem;
+    flex: 1 1 0; min-width: 0; padding: 0.52rem 0.4rem;
     font-family: var(--font); font-size: 0.755rem; font-weight: 600;
     border: 1px solid transparent; border-radius: 8px; background: transparent;
     color: var(--text-muted); cursor: pointer; transition: all var(--vlot);
@@ -438,35 +461,47 @@
   details.uitklap > summary .pijl { margin-left: auto; transition: transform var(--vlot); }
   details.uitklap[open] > summary .pijl { transform: rotate(180deg); }
   details.uitklap > summary .pijl svg { width: 13px; height: 13px; display: block; }
+  details.uitklap > summary .kaart-icoon { width: 14px; height: 14px; opacity: 0.75; flex-shrink: 0; }
+  /* Dichtgeklapt zegt de kop wat erin staat; opengeklapt zie je dat zelf. */
+  .uitklap-samenvatting {
+    min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size: 0.74rem; font-weight: 500; text-transform: none; letter-spacing: normal;
+    color: var(--text-muted); margin-left: 0.35rem;
+  }
+  details.uitklap[open] > summary .uitklap-samenvatting { display: none; }
+  /* In de smalle zijbalk past de samenvatting niet naast de kop: eronder. */
+  #uitklapOpties > summary { flex-wrap: wrap; row-gap: 0.2rem; }
+  #uitklapOpties > summary .pijl { order: 2; }
+  #instellingenSamenvatting { order: 3; flex-basis: 100%; margin-left: calc(14px + 0.5rem); }
+  .gesprek-grid {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0.95rem 1.4rem; margin-bottom: 1.1rem; align-items: start;
+  }
   .uitklap-inhoud { padding: 0.35rem 0 0.4rem; animation: zak 0.22s ease; }
   @keyframes zak { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 
-  /* ── Stappenbalk ─────────────────────────────────────────── */
-  .progress-wrap {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r-xl); box-shadow: var(--schaduw-2), var(--glans); overflow: hidden;
-  }
-  .progress-steps { display: flex; align-items: center; padding: 1rem 1.4rem; }
+  /* ── Stappen in de kopbalk ───────────────────────────────── */
+  .progress-steps { display: flex; align-items: center; margin: 0 auto; min-width: 0; }
   .step {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.45rem;
-    position: relative; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.09em;
-    font-weight: 700; color: var(--text-muted); transition: color var(--traag); text-align: center;
+    display: flex; align-items: center; gap: 0.45rem; flex: none;
+    font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.09em;
+    font-weight: 700; color: var(--text-muted); transition: color var(--traag);
   }
+  /* Het verbindingsstreepje naar de volgende stap. */
   .step:not(:last-child)::after {
-    content: ''; position: absolute; left: calc(50% + 18px); width: calc(100% - 36px);
-    top: 14px; height: 2px; border-radius: 2px;
-    background: var(--border); transition: background var(--traag); z-index: 0;
+    content: ''; width: 2.2rem; height: 2px; border-radius: 2px; margin: 0 0.3rem 0 0.25rem;
+    background: var(--border); transition: background var(--traag);
   }
   .step-dot {
-    width: 30px; height: 30px; border-radius: 50%;
+    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
     border: 1.5px solid var(--border-strong); background: var(--surface-2);
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.74rem; font-weight: 700; transition: all var(--traag); position: relative; z-index: 1;
+    font-size: 0.6rem; font-weight: 700; transition: all var(--traag); position: relative;
   }
-  .step-label { line-height: 1; }
+  .step-label { line-height: 1; white-space: nowrap; }
   .step.active .step-dot {
     border-color: var(--accent); background: var(--accent-soft); color: var(--accent-strong);
-    box-shadow: 0 0 0 4px var(--accent-soft);
+    box-shadow: 0 0 0 3px var(--accent-soft);
   }
   .step.active { color: var(--accent-strong); }
   .step.active .step-dot::before {
@@ -479,12 +514,14 @@
   }
   .step.done .step-dot { border-color: var(--accent); background: var(--accent); color: transparent; font-size: 0; }
   .step.done .step-dot::after {
-    content: ''; width: 5px; height: 10px; border: solid var(--op-accent);
+    content: ''; width: 3.5px; height: 7px; border: solid var(--op-accent);
     border-width: 0 2px 2px 0; transform: rotate(43deg) translate(-1px,-1px);
   }
   .step.done { color: var(--accent); }
   .step.done::after { background: var(--accent); }
 
+  /* De bezigbalk loopt over de onderrand van de kopbalk. */
+  .topbar .bezig-balk { position: absolute; left: 0; right: 0; bottom: -1px; }
   .bezig-balk { height: 2px; background: var(--surface-3); overflow: hidden; }
   .bezig-balk::after {
     content: ''; display: block; height: 100%; width: 40%;
@@ -502,6 +539,20 @@
   }
   .transcript-box.filled { color: var(--text); }
   .transcript-box.uit { max-height: 60vh; }
+  /* Het transcriptveld is ook een invoerveld: je kunt er een transcript uit een
+     ander programma in plakken, of een uitgewerkte opname nog bijschaven voordat
+     het verslag eruit geschreven wordt. */
+  .transcript-box[contenteditable="true"] { cursor: text; }
+  .transcript-box[contenteditable="true"]:focus {
+    outline: none; border-color: var(--accent); background: var(--surface);
+  }
+  .transcript-box.leeg::before { content: attr(data-leeg); color: var(--text-muted); }
+  /* Zodra er een verslag is, is het transcript naslag: het schuift onder verslag en
+     supervisie en klapt in tot een kopregel. Tonen opent het meteen ruim. */
+  .main > #transcriptKaart.achtergrond { order: 1; padding-top: 1.05rem; padding-bottom: 1.05rem; }
+  .main > #privacyKaart { order: 2; }
+  #transcriptKaart.achtergrond:not(.getoond) .transcript-box { display: none; }
+  #transcriptKaart.achtergrond:not(.getoond) .card-label { margin-bottom: 0; }
 
   .titel-regel {
     font-family: var(--serif); font-size: 1.42rem; line-height: 1.3; color: var(--text);
@@ -549,7 +600,7 @@
   .output-box.formatted hr { border: none; border-top: 1px solid var(--border); margin: 1.2rem 0; }
   .output-box.formatted code { font-size: 0.86em; background: var(--surface-3); padding: 0.1em 0.35em; border-radius: 4px; }
 
-  .telling { font-size: 0.7rem; color: var(--text-muted); font-weight: 500; font-variant-numeric: tabular-nums; text-transform: none; letter-spacing: normal; }
+  .telling { white-space: nowrap; font-size: 0.7rem; color: var(--text-muted); font-weight: 500; font-variant-numeric: tabular-nums; text-transform: none; letter-spacing: normal; }
 
   .geslacht-badge {
     display: inline-block; font-size: 0.64rem; font-weight: 700; text-transform: uppercase;
@@ -574,6 +625,7 @@
   }
   .tip-box p { margin: 0 0 0.3rem; }
   .tip-box .wacht { color: var(--text-muted); font-style: italic; }
+  .tips-rij { margin: 0.6rem 0 0.4rem; }
   .leary { display: flex; flex-wrap: wrap; gap: 0.6rem 1.4rem; align-items: center; margin: 0.4rem 0 0.5rem; }
   .leary svg { width: 330px; max-width: 100%; height: auto; flex-shrink: 0; }
   .leary .ring { fill: none; stroke: var(--border-strong); stroke-width: 1; }
@@ -622,15 +674,11 @@
   .output-actions .links { margin-right: auto; }
 
   /* ── Panelen ─────────────────────────────────────────────── */
-  .regen-panel, .suggestie-paneel {
+  .suggestie-paneel {
     background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-md);
     padding: 0.85rem 0.95rem; margin-top: 0.85rem;
   }
-  .regen-panel { display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; }
-  .regen-panel-label { font-size: 0.71rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-soft); }
-  .regen-panel select {
-    background-color: var(--surface); padding: 0.38rem 1.9rem 0.38rem 0.65rem; font-size: 0.8rem;
-  }
+  #btnRegen.gewijzigd { border-color: var(--accent-rand); color: var(--accent); background: var(--accent-soft); }
   .suggestie-paneel label { display: block; font-size: 0.79rem; color: var(--text-soft); margin-bottom: 0.5rem; line-height: 1.5; }
   .suggestie-paneel textarea { min-height: 74px; background: var(--surface); font-size: 0.85rem; }
   .suggestie-acties { margin-top: 0.6rem; display: flex; justify-content: flex-end; align-items: center; gap: 0.6rem; }
@@ -638,14 +686,14 @@
   /* Versiegeschiedenis en herziening. De versies blijven alleen in het geheugen
      van dit tabblad: er staat cliëntinformatie in en die hoort niet op schijf. */
   .versie-balk {
-    display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
-    margin-top: 0.9rem; font-size: 0.79rem; color: var(--text-soft);
-    background: var(--surface-2); border: 1px solid var(--border);
-    border-radius: var(--r-md); padding: 0.45rem 0.6rem;
+    display: flex; align-items: center; gap: 0.4rem; min-width: 0;
+    font-size: 0.74rem; font-weight: 500; color: var(--text-soft);
+    text-transform: none; letter-spacing: normal;
   }
-  .versie-balk .btn-klein { padding: 0.2rem 0.55rem; }
-  #versieLabel { font-weight: 600; font-variant-numeric: tabular-nums; }
-  .versie-suggestie { font-style: italic; opacity: 0.85; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .versie-balk .btn-klein { padding: 0.15rem 0.5rem; }
+  #versieLabel { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .versie-suggestie { font-style: italic; opacity: 0.85; min-width: 0; max-width: 14rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .versie-balk + .telling { margin-left: 0.4rem; }
 
   /* ── Meldingen ───────────────────────────────────────────── */
   .error-msg {
@@ -749,13 +797,22 @@
   @media (max-width: 940px) {
     .topbar-inner { padding: 0.75rem 1rem; }
     .layout { grid-template-columns: 1fr; gap: 1.1rem; padding: 1.1rem 1rem 3rem; }
-    .sidebar { position: static; top: auto; }
+    .sidebar { position: static; top: auto; max-height: none; overflow: visible; margin: 0; padding: 0; }
     .statuspil { max-width: 11rem; }
   }
+  /* Te smal voor drie labels: alleen de stap die bezig is houdt zijn naam. */
+  @media (max-width: 1060px) {
+    .step:not(.active) .step-label { display: none; }
+    .step:not(:last-child)::after { width: 1.3rem; }
+  }
   @media (max-width: 560px) {
+    .gesprek-grid { grid-template-columns: 1fr; }
+    .versie-suggestie { display: none; }
+    .card-label { flex-wrap: wrap; }
     .card { padding: 1.1rem; border-radius: var(--r-lg); }
-    .progress-steps { padding: 0.9rem 0.5rem; }
-    .step-label { font-size: 0.57rem; letter-spacing: 0.06em; }
+    .topbar-inner { flex-wrap: wrap; row-gap: 0.55rem; }
+    .progress-steps { order: 3; flex-basis: 100%; justify-content: center; }
+    .step:not(.active) .step-label { display: inline; }   /* eigen regel: ruimte genoeg */
     .record-timer { font-size: 1.5rem; }
     .merk .ondertitel { display: none; }
     .statuspil { max-width: none; padding: 0.34rem 0.5rem; }
@@ -804,12 +861,66 @@
     margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid var(--danger-rand);
   }
   .vangnet-rij span { margin-right: auto; font-variant-numeric: tabular-nums; }
-  .alarm-test { margin-top: 0.45rem; }
   .onderbroken {
     margin-top: 0.9rem; background: var(--danger-soft); border: 1px solid var(--danger-rand);
     border-radius: var(--r-md); padding: 0.7rem 0.85rem; font-size: 0.8rem; line-height: 1.5; color: var(--text);
   }
   .onderbroken-knoppen { display: flex; gap: 0.5rem; margin-top: 0.55rem; }
+
+  /* Opname stoppen met het toetsenbord vraagt een tweede druk. */
+  .record-hint.bevestig { color: var(--rec); font-weight: 600; }
+
+  /* Het verslag is bewerkbaar, net als het transcript. */
+  .output-box[contenteditable="true"] { cursor: text; }
+  .output-box[contenteditable="true"]:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+
+  /* Veiligheidssignalen: alleen in beeld als er iets is (of als de controle mislukte). */
+  .veiligheid {
+    background: var(--danger-soft); border: 1px solid var(--danger-rand); border-radius: var(--r-md);
+    padding: 0.75rem 0.95rem; margin-bottom: 0.9rem; font-size: 0.84rem; line-height: 1.5; color: var(--text);
+  }
+  .veiligheid[hidden] { display: none; }
+  .veiligheid-kop { font-weight: 600; color: var(--danger); }
+  .veiligheid.fout .veiligheid-kop { font-weight: 500; color: var(--text-soft); }
+  .veiligheid.fout { background: var(--surface-2); border-color: var(--border); }
+  .veiligheid-item { margin-top: 0.45rem; }
+  .veiligheid-item strong { font-weight: 600; }
+  .veiligheid .btn-link, .bron-melding .btn-link {
+    background: none; border: none; padding: 0; font: inherit; color: var(--accent);
+    text-decoration: underline; text-underline-offset: 2px; cursor: pointer; white-space: nowrap;
+  }
+  .veiligheid-noot { margin-top: 0.45rem; font-size: 0.76rem; color: var(--text-soft); }
+
+  /* Waar staat dit? */
+  .bron-knop {
+    position: absolute; z-index: 50; font: inherit; font-size: 0.76rem; font-weight: 600;
+    padding: 0.35rem 0.7rem; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--accent-rand); background: var(--surface); color: var(--accent);
+    box-shadow: var(--schaduw-2);
+  }
+  .bron-knop[hidden] { display: none; }
+  .bron-knop:hover { background: var(--accent-soft); }
+  .bron-melding {
+    display: flex; gap: 0.6rem; align-items: flex-start; margin-bottom: 0.7rem;
+    background: var(--accent-soft); border: 1px solid var(--accent-rand); border-radius: var(--r-md);
+    padding: 0.6rem 0.8rem; font-size: 0.8rem; line-height: 1.5; color: var(--text);
+  }
+  .bron-melding[hidden] { display: none; }
+  .bron-melding.deels { background: var(--danger-soft); border-color: var(--danger-rand); }
+  .bron-inhoud { flex: 1; min-width: 0; }
+  .bron-passage { color: var(--text-soft); font-style: italic; }
+  .bron-melding .sluit { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.9rem; }
+  /* De markering zelf: zonder de tekst in het bewerkbare veld te veranderen. */
+  .transcript-box::highlight(bron) { background-color: rgba(224,169,75,0.38); color: inherit; }
+  #transcriptKaart.achtergrond.getoond:has(.bron-melding:not([hidden])) .card-label { margin-bottom: 0.7rem; }
+
+  /* Brief en samenvatting voor de cliënt. */
+  details.documenten { margin-top: 0.85rem; }
+  details.documenten.hidden { display: none; }
+  .document-knoppen { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+  .document-box { margin-top: 0.75rem; }
+  .document-acties { display: flex; gap: 0.6rem; align-items: center; justify-content: space-between; margin-top: 0.55rem; }
+  .document-acties .field-note { margin-top: 0; }
 </style>
 </head>
 <body>
@@ -832,6 +943,12 @@
         <div class="ondertitel">Klinische documentatie</div>
       </div>
     </div>
+    <!-- Voortgang: naast de status, waar je ook kijkt of iets nog loopt. -->
+    <div class="progress-steps" aria-label="Voortgang">
+      <div class="step" id="step1" title="Opname"><span class="step-dot">1</span><span class="step-label">Opname</span></div>
+      <div class="step" id="step2" title="Transcriptie"><span class="step-dot">2</span><span class="step-label">Transcriptie</span></div>
+      <div class="step" id="step3" title="Verslag"><span class="step-dot">3</span><span class="step-label">Verslag</span></div>
+    </div>
     <div class="topbar-acties">
       <div class="statuspil" title="Status">
         <span class="dot-status" id="statusDot"></span>
@@ -849,6 +966,7 @@
       </button>
     </div>
   </div>
+  <div class="bezig-balk hidden" id="bezigBalk"></div>
 </header>
 
 <div class="layout"><aside class="sidebar">
@@ -892,7 +1010,7 @@
       </button>
       <button class="bron-btn" id="bronScherm" onclick="kiesBron('scherm')" title="Voor een online gesprek: gedeelde audio plus je eigen microfoon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-        Scherm + audio
+        Scherm
       </button>
     </div>
 
@@ -907,7 +1025,7 @@
       <div class="record-info">
         <div class="record-status" id="recordStatus">Klaar om op te nemen</div>
         <div class="record-timer" id="recordTimer">00:00:00</div>
-        <div class="record-hint"><kbd>Spatie</kbd> starten en stoppen</div>
+        <div class="record-hint" id="recordHint"><kbd>Spatie</kbd> starten, 2× stoppen</div>
       </div>
     </div>
 
@@ -918,7 +1036,7 @@
       </div>
     </div>
 
-    <div class="golf-wrap"><canvas id="golfCanvas" aria-hidden="true"></canvas></div>
+    <div class="golf-wrap hidden" id="golfWrap"><canvas id="golfCanvas" aria-hidden="true"></canvas></div>
 
     <div class="niveau-meters hidden" id="niveauMeters">
       <div class="niveau-rij">
@@ -942,8 +1060,6 @@
       <label for="micSelect">Microfoon</label>
       <select id="micSelect"><option value="">Bezig met laden...</option></select>
       <div class="field-note" id="micNote">Microfoons worden geladen...</div>
-      <button type="button" class="btn ghost btn-klein alarm-test" id="btnAlarmTest" onclick="testAlarm()"
-              title="Het pingetje dat klinkt als de microfoon tijdens een opname wegvalt">Alarmtoon testen</button>
       <div class="field-note">Een losse vergadermicrofoon (usb of bluetooth) geeft duidelijk
         betere resultaten dan de ingebouwde laptopmicrofoon — en dus een nauwkeuriger verslag.</div>
     </div>
@@ -960,37 +1076,26 @@
     </div>
   </div>
 
-  <!-- Instellingen -->
-  <div class="card opkomst">
-    <div class="card-label">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Instellingen
-    </div>
-    <div class="config-grid">
-      <div class="field">
-        <label for="gesprekType">Type gesprek</label>
-        <select id="gesprekType">
-          <option value="intakegesprek">Intakegesprek</option>
-          <option value="behandelgesprek" selected>Behandelgesprek</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="geslacht">Geslacht cliënt</label>
-        <select id="geslacht" onchange="updateGeslachtBadge()">
-          <option value="onbekend" selected>Niet opgegeven</option>
-          <option value="man">Man</option>
-          <option value="vrouw">Vrouw</option>
-        </select>
-      </div>
-    </div>
-
-    <details class="uitklap" id="uitklapOpties">
+  <!-- Instellingen: wat je eenmalig kiest en zelden verandert. Wat per gesprek
+       verschilt (type gesprek, geslacht) staat bij de voorbereiding. -->
+  <div class="card opkomst rustig">
+    <details class="uitklap los" id="uitklapOpties">
       <summary>
-        Uitvoer en opties
+        <svg class="kaart-icoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Instellingen
+        <span class="uitklap-samenvatting" id="instellingenSamenvatting"></span>
         <span class="pijl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span>
       </summary>
-      <div class="uitklap-inhoud">
-        <div class="field" style="margin-bottom: 1rem;">
+      <div class="uitklap-inhoud config-grid">
+        <div class="field">
+          <label for="taalModel">Taalmodel</label>
+          <select id="taalModel">
+            <option value="mistral-large-2512" selected>Mistral Large 3</option>
+            <option value="mistral-large-4-denken">Mistral Large 4, met nadenken (proef)</option>
+          </select>
+          <div class="field-note" id="modelNote"></div>
+        </div>
+        <div class="field">
           <label for="outputFormat">Uitvoerformaat (kopiëren)</label>
           <select id="outputFormat">
             <option value="plat" selected>Platte tekst</option>
@@ -1006,7 +1111,7 @@
           </div>
           <div class="optie-rij">
             <input type="checkbox" id="optFeedback" checked>
-            <label for="optFeedback">Supervisie: betrekking, het onuitgesprokene en de roos van Leary (apart venster)</label>
+            <label for="optFeedback">Supervisie: het onuitgesprokene, doelgerichtheid en de roos van Leary (apart venster)</label>
           </div>
           <div class="optie-rij">
             <input type="checkbox" id="optTitel">
@@ -1019,15 +1124,43 @@
 
 </aside><div class="main">
 
-  <!-- Voorbereiding -->
+  <!-- Voorbereiding: alles wat over dit ene gesprek gaat. Klapt vanzelf dicht zodra
+       er een transcript staat; de kop zegt dan wat er is ingevuld. -->
   <div class="card opkomst">
     <details class="uitklap los" id="uitklapVoorbereiding" open>
       <summary>
-        Voorbereiding — voorinformatie en extra instructie
+        Voorbereiding
+        <span class="uitklap-samenvatting" id="voorbereidingSamenvatting"></span>
         <span class="pijl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span>
       </summary>
       <div class="uitklap-inhoud">
-        <div class="prompt-area first">
+        <div class="gesprek-grid">
+          <div class="field">
+            <label for="gesprekType">Type gesprek</label>
+            <select id="gesprekType">
+              <option value="intakegesprek">Intakegesprek</option>
+              <option value="behandelgesprek" selected>Behandelgesprek</option>
+            </select>
+          </div>
+          <div class="field">
+            <label id="geslachtLabel">Geslacht cliënt</label>
+            <div class="keuze-rondjes" role="radiogroup" aria-labelledby="geslachtLabel">
+              <div class="optie-rij">
+                <input type="radio" name="geslacht" id="geslachtOnbekend" value="onbekend" checked>
+                <label for="geslachtOnbekend">Niet opgegeven</label>
+              </div>
+              <div class="optie-rij">
+                <input type="radio" name="geslacht" id="geslachtMan" value="man">
+                <label for="geslachtMan">Man</label>
+              </div>
+              <div class="optie-rij">
+                <input type="radio" name="geslacht" id="geslachtVrouw" value="vrouw">
+                <label for="geslachtVrouw">Vrouw</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="prompt-area">
           <label for="voorinformatie">Voorinformatie (optioneel) <kbd>V</kbd></label>
           <textarea id="voorinformatie" placeholder="Achtergrond die het model mag meenemen, bijv. uitkomsten van een vragenlijst of een eerder gespreksverslag."></textarea>
           <div class="optie-rij" style="margin-top: 0.7rem;">
@@ -1036,21 +1169,15 @@
           </div>
         </div>
         <div class="prompt-area" style="margin-top: 1.1rem;">
+          <label for="behandeldoel">Behandeldoel (optioneel)</label>
+          <textarea id="behandeldoel" placeholder="Plak hier het behandeldoel uit het dossier. Gaat alleen naar de supervisie, voor de reflectie op doelgerichtheid."></textarea>
+        </div>
+        <div class="prompt-area" style="margin-top: 1.1rem;">
           <label for="customPrompt">Extra instructie (optioneel) <kbd>I</kbd></label>
           <textarea id="customPrompt" placeholder="Bijv: Er waren meerdere gesprekspartners aanwezig. Richt je vooral op de bespreking van de thuisopdracht."></textarea>
         </div>
       </div>
     </details>
-  </div>
-
-  <!-- Voortgang -->
-  <div class="progress-wrap opkomst">
-    <div class="progress-steps">
-      <div class="step" id="step1"><span class="step-dot">1</span><span class="step-label">Opname</span></div>
-      <div class="step" id="step2"><span class="step-dot">2</span><span class="step-label">Transcriptie</span></div>
-      <div class="step" id="step3"><span class="step-dot">3</span><span class="step-label">Verslag</span></div>
-    </div>
-    <div class="bezig-balk hidden" id="bezigBalk"></div>
   </div>
 
   <div class="error-msg" id="errorMsg">
@@ -1070,8 +1197,9 @@
     <div id="vangnetLijst"></div>
   </div>
 
-  <!-- Transcript -->
-  <div class="card opkomst">
+  <!-- Transcript: werkblad zolang er geen verslag is, daarna naslag (zie
+       werkTranscriptKaartBij). -->
+  <div class="card opkomst" id="transcriptKaart">
     <div class="card-label">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 6h16M4 11h16M4 16h9"/></svg>
       Transcript
@@ -1080,9 +1208,17 @@
         <span class="telling" id="transcriptTelling"></span>
         <button class="btn ghost" id="btnTranscriptUit" onclick="transcriptUitklappen()" title="Volledig tonen">Uitklappen</button>
         <button class="btn ghost" id="btnKopieerTranscript" onclick="kopieerTranscript()" title="Transcript kopiëren (T)">Kopiëren <kbd>T</kbd></button>
+        <button class="btn primary hidden" id="btnMaakVerslag" onclick="maakVerslagUitTranscript()"
+                title="Een verslag schrijven uit het transcript hierboven (Ctrl + Enter)">Verslag maken</button>
       </span>
     </div>
-    <div class="transcript-box" id="transcriptBox">Het transcript verschijnt hier zodra de opname is uitgewerkt.</div>
+    <div class="bron-melding" id="bronMelding" role="status" hidden>
+      <div class="bron-inhoud"><div class="bron-passage" id="bronPassage"></div><div id="bronUitkomst"></div></div>
+      <button class="sluit" type="button" onclick="wisBron()" aria-label="Markering weghalen">✕</button>
+    </div>
+    <div class="transcript-box leeg" id="transcriptBox" contenteditable="true" spellcheck="false"
+         role="textbox" aria-multiline="true" aria-label="Transcript"
+         data-leeg="Het transcript verschijnt hier zodra de opname is uitgewerkt — of plak hier een transcript uit een ander programma."></div>
   </div>
 
   <!-- Verslag -->
@@ -1092,20 +1228,41 @@
       Gespreksverslag
       <span id="verslagBadge"></span>
       <span id="verslagSpinner" class="spinner hidden"></span>
-      <span class="rechts"><span class="telling" id="verslagTelling"></span></span>
+      <span class="rechts">
+        <span class="versie-balk hidden" id="versieBalk">
+          <span class="versie-suggestie" id="versieSuggestie"></span>
+          <button class="btn btn-klein" id="btnVorigeVersie" onclick="stapVersie(-1)" title="Vorige versie (←)">←</button>
+          <span id="versieLabel">Versie 1 van 1</span>
+          <button class="btn btn-klein" id="btnVolgendeVersie" onclick="stapVersie(1)" title="Volgende versie (→)">→</button>
+        </span>
+        <span class="telling" id="verslagTelling"></span>
+      </span>
     </div>
     <div class="titel-regel" id="titelRegel"></div>
-    <div class="output-box placeholder" id="outputBox">Het verslag verschijnt hier zodra het taalmodel het heeft uitgewerkt.</div>
+    <div class="veiligheid" id="veiligheid" role="status" hidden></div>
+    <div class="output-box placeholder" id="outputBox" spellcheck="false" aria-label="Gespreksverslag">Het verslag verschijnt hier zodra het taalmodel het heeft uitgewerkt.</div>
 
-    <div class="versie-balk hidden" id="versieBalk">
-      <button class="btn btn-klein" id="btnVorigeVersie" onclick="stapVersie(-1)" title="Vorige versie">←</button>
-      <span id="versieLabel">Versie 1 van 1</span>
-      <button class="btn btn-klein" id="btnVolgendeVersie" onclick="stapVersie(1)" title="Volgende versie">→</button>
-      <span class="versie-suggestie" id="versieSuggestie"></span>
+    <div class="output-actions">
+      <button class="btn ghost links" id="btnNieuw" onclick="nieuwGesprek()" title="Alles wissen (N)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Nieuw gesprek <kbd>N</kbd>
+      </button>
+      <!-- Opnieuw genereren gebruikt de instellingen zoals ze nu staan (voorbereiding
+           en zijbalk). Wijken die af van waarmee het verslag hierboven gemaakt is,
+           dan zegt de knop dat. -->
+      <button class="btn hidden" id="btnRegen" onclick="regenereerVerslag()"
+              title="Opnieuw schrijven met de huidige instellingen (G)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+        <span id="regenLabel">Opnieuw genereren</span> <kbd>G</kbd>
+      </button>
+      <button class="btn primary" id="btnKopieer" disabled onclick="kopieerVerslag()" title="Het verslag kopiëren (C)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Kopiëren <kbd>C</kbd>
+      </button>
     </div>
 
     <div class="suggestie-paneel hidden" id="suggestiePaneel">
-      <label for="suggestieInput">Wat moet er anders? Het verslag wordt opnieuw uit het transcript geschreven met jouw aanwijzing erbij.</label>
+      <label for="suggestieInput">Een woord of zin anders? Klik in het verslag en pas het zelf aan; Kopiëren neemt dat mee. Moet er meer anders, schrijf dan hier wat: het verslag wordt opnieuw uit het transcript geschreven met jouw aanwijzing erbij.</label>
       <textarea id="suggestieInput" placeholder="Bijv: We hebben zes levensthema's benoemd met acties erbij. Werk die expliciet uit, elk met een eigen kopje, in plaats van ze samen te vatten."></textarea>
       <div class="suggestie-acties">
         <span class="telling"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span>
@@ -1113,39 +1270,27 @@
       </div>
     </div>
 
-    <details class="uitklap" id="uitklapRegen">
+    <!-- Afgeleid van het verslag zoals het er staat, niet van het transcript. -->
+    <details class="uitklap documenten hidden" id="documenten">
       <summary>
-        Opnieuw genereren met andere instellingen
+        Brief, samenvatting of huiswerk voor de cliënt
         <span class="pijl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span>
       </summary>
-      <div class="regen-panel hidden" id="regenPanel">
-        <span class="regen-panel-label">Genereer als</span>
-        <select id="regenType">
-          <option value="intakegesprek">Intakegesprek</option>
-          <option value="behandelgesprek">Behandelgesprek</option>
-        </select>
-        <select id="regenGeslacht">
-          <option value="onbekend">Geslacht: niet opgegeven</option>
-          <option value="man">Geslacht: man</option>
-          <option value="vrouw">Geslacht: vrouw</option>
-        </select>
-        <button class="btn" id="btnRegen" onclick="regenereerVerslag()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
-          Genereer opnieuw <kbd>G</kbd>
-        </button>
+      <div class="uitklap-inhoud">
+        <div class="document-knoppen">
+          <button class="btn" type="button" data-soort="brief" onclick="maakDocument('brief')">Brief aan huisarts of verwijzer</button>
+          <button class="btn" type="button" data-soort="client" onclick="maakDocument('client')">Samenvatting voor de cliënt (B1)</button>
+          <button class="btn" type="button" data-soort="huiswerk" onclick="maakDocument('huiswerk')">Alleen het huiswerk</button>
+          <span id="documentSpinner" class="spinner hidden"></span>
+        </div>
+        <div class="output-box formatted document-box hidden" id="documentBox" spellcheck="false" aria-label="Brief, samenvatting of huiswerk"></div>
+        <div class="document-acties hidden" id="documentActies">
+          <span class="field-note">Geschreven uit het verslag hierboven zoals het er toen stond. Je kunt het hier aanpassen; lees het na voordat je het verstuurt.</span>
+          <button class="btn primary btn-klein" type="button" onclick="kopieerDocument()">Kopiëren</button>
+        </div>
       </div>
     </details>
 
-    <div class="output-actions">
-      <button class="btn ghost links" id="btnNieuw" onclick="nieuwGesprek()" title="Alles wissen (N)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-        Nieuw gesprek <kbd>N</kbd>
-      </button>
-      <button class="btn primary" id="btnKopieer" disabled onclick="kopieerVerslag()" title="Het verslag kopiëren (C)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        Kopiëren <kbd>C</kbd>
-      </button>
-    </div>
     <div class="field-note">
       Er wordt niets bewaard: bij het herladen of sluiten van deze pagina zijn transcript,
       verslag en versies weg. Kopieer je verslag dus vóór je afsluit.
@@ -1163,7 +1308,7 @@
   </div>
 
   <!-- Privacy -->
-  <div class="card">
+  <div class="card" id="privacyKaart">
     <div class="card-label">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3.5v5c0 4.6-3.2 8.7-8 9.9-4.8-1.2-8-5.3-8-9.9v-5z"/></svg>
       Privacy &amp; verantwoordelijkheid
@@ -1187,6 +1332,8 @@
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
+<button class="bron-knop" id="bronKnop" type="button" hidden>Waar staat dit?</button>
+
 <div class="overlay" id="sneltoetsOverlay" role="dialog" aria-modal="true" aria-label="Sneltoetsen">
   <div class="overlay-kaart">
     <div class="overlay-kop">
@@ -1197,9 +1344,11 @@
       </button>
     </div>
     <div class="sneltoets-groep">Opnemen</div>
-    <div class="sneltoets-rij">Opname starten of stoppen <span class="toetsen"><kbd>Spatie</kbd><kbd>R</kbd></span></div>
-    <div class="sneltoets-rij">Opname stoppen <span class="toetsen"><kbd>Esc</kbd></span></div>
+    <div class="sneltoets-rij">Opname starten, of twee keer: stoppen <span class="toetsen"><kbd>Spatie</kbd><kbd>R</kbd></span></div>
+    <div class="sneltoets-rij">Opname stoppen (twee keer) <span class="toetsen"><kbd>Esc</kbd></span></div>
     <div class="sneltoets-rij">Audiobestand kiezen <span class="toetsen"><kbd>U</kbd></span></div>
+    <div class="sneltoets-rij">Naar het transcriptveld — plakken of bijschaven <span class="toetsen"><kbd>P</kbd></span></div>
+    <div class="sneltoets-rij">Verslag maken uit het transcriptveld <span class="toetsen"><kbd>Ctrl</kbd><kbd>Enter</kbd></span></div>
     <div class="sneltoets-groep">Verslag</div>
     <div class="sneltoets-rij">Verslag kopiëren <span class="toetsen"><kbd>C</kbd></span></div>
     <div class="sneltoets-rij">Transcript kopiëren <span class="toetsen"><kbd>T</kbd></span></div>
@@ -1224,8 +1373,58 @@
 const MISTRAL_TRANSCRIBE_URL = 'https://api.eu.mistral.ai/v1/audio/transcriptions';
 const MISTRAL_CHAT_URL       = 'https://api.eu.mistral.ai/v1/chat/completions';
 const TRANSCRIBE_MODEL       = 'voxtral-mini-latest';
-const CHAT_MODEL             = 'mistral-large-latest';
 const TEMPERATUUR            = 0.3;
+
+// ── Taalmodel ─────────────────────────────────────────────────
+// Op 06-10-2026 kwam Mistral Large 4 uit. In de praktijk zette het Engelse en
+// Duitse woorden in de Nederlandse tekst, en erger: het nam fouten van de
+// spraakherkenning letterlijk over en verzon er een uitleg bij, waar Large 3 ze
+// aan de samenhang herkende. Daarom blijft Large 3 de standaard, op zijn vaste
+// naam: mistral-large-latest verhuist vroeg of laat naar Large 4.
+//
+// Large 4 met nadenken (`reasoning_effort`) is te kiezen als proef. Het model
+// lijkt daarvoor gebouwd: de standaardtemperatuur op de modelkaart is 1.0, waar
+// Large 3 0.3 heeft. Een zin aan het eind van de vraag zegt nog eens dat alles
+// Nederlands moet zijn. Het denkwerk komt als aparte stukken mee en komt nooit
+// in beeld (zie alleenTekst).
+//
+// De waarde in de keuzelijst is niet altijd de modelnaam bij Mistral: voor een
+// variant als 'met nadenken' staat de echte naam in MODEL_AFWIJKINGEN.
+const MODEL_STANDAARD = 'mistral-large-2512';
+const MODEL_AFWIJKINGEN = {
+  'mistral-large-4-denken': { model: 'mistral-large-4', nadenken: 'high', temperatuur: 1.0, taalregel: true },
+};
+const TAALREGEL = '\nSchrijf uitsluitend in het Nederlands, ook geen losse woorden of '
+                + 'uitdrukkingen uit een andere taal.';
+
+// De velden voor de aanroep bij Mistral die bij een keuze in de lijst horen.
+function modelVelden(keuze) {
+  const afwijking = MODEL_AFWIJKINGEN[keuze] || {};
+  const velden = { model: afwijking.model || keuze, temperature: afwijking.temperatuur ?? TEMPERATUUR };
+  if (afwijking.nadenken) velden.reasoning_effort = afwijking.nadenken;
+  return velden;
+}
+const taalregel = keuze => MODEL_AFWIJKINGEN[keuze]?.taalregel ? TAALREGEL : '';
+
+// De tekst uit een antwoord of een stuk daarvan. Met nadenken is de inhoud een
+// lijst met 'thinking'- en 'text'-stukken; alleen die laatste horen erbij.
+function alleenTekst(inhoud) {
+  if (typeof inhoud === 'string') return inhoud;
+  if (Array.isArray(inhoud)) {
+    return inhoud.filter(d => d && d.type === 'text').map(d => d.text || '').join('');
+  }
+  return '';
+}
+
+// Herkennen en aanwijzen in plaats van schrijven: daar is geen groot model voor
+// nodig. Bij het zoeken van stukken in een transcript wees Small 4 de grenzen
+// nauwkeuriger aan dan Large 3 (moederapp, 06-10-2026). Elke vraag 'Waar staat
+// dit?' stuurt het hele transcript mee, dus het prijsverschil telt hier op.
+const BRON_MODEL = 'mistral-small-2603';
+// De veiligheidscontrole loopt wél op Large 3, los van de keuze in de lijst: een
+// gemist signaal is precies de fout waarvoor die controle bestaat, en het
+// verschil met Small is minder dan een cent per gesprek.
+const VEILIGHEID_MODEL = 'mistral-large-2512';
 
 // Vaktermen die de spraakherkenning anders vaak verkeerd verstaat. Gaat naar
 // Voxtral mee als `context_bias` (tot honderd termen).
@@ -1499,6 +1698,13 @@ const GESLACHT_TEKST = {
   man: "De cliënt is een man. Je mag 'hij', 'hem' en 'zijn' gebruiken naast 'cliënt', maar gebruik dit consistent en professioneel.",
   vrouw: "De cliënt is een vrouw. Je mag 'zij', 'haar' gebruiken naast 'cliënt', maar gebruik dit consistent en professioneel.",
 };
+
+// De app is er voor behandelaars van elk geslacht. In de supervisie en de tips,
+// die over de behandelaar gaan, koos het model zelf 'ze'. Daarom staat dit in de
+// opdracht én, als herinnering, onder aan de vraag.
+const BEHANDELAAR_NEUTRAAL = "Of de behandelaar een man of een vrouw is, weet je niet en doet "
+  + "er niet toe: verwijs naar de behandelaar met 'je' of 'de behandelaar', nooit met 'hij', "
+  + "'zij', 'hem', 'haar' of 'ze'.";
 // ── Systeemprompt samenstellen ────────────────────────────────
 // De waarneming op betrekkingsniveau zat hier vroeger als staart in deze prompt;
 // die heeft nu een eigen aanroep (zie SUPERVISIE_SYSTEEM).
@@ -1575,6 +1781,13 @@ function bouwGebruikerPrompt(transcript, gesprekType, geslacht, customPrompt, vo
 // positie te kiezen: in een gesprek wisselt iemand van positie, en een verdeling
 // laat dat zien. De volgorde hieronder is die van de roos, met de klok mee vanaf
 // boven; de pagina rekent de hoeken eruit.
+//
+// Op 06-10-2026 (moederapp) ingekort tot het onuitgesprokene en de roos. De
+// betrekking, de suggestie en de richting naar de voorkeurspositie zijn eruit;
+// wat vooruitkijkt staat nu achter een knop, als eigen aanroep (zie tipsSysteem).
+// Er kwam een stuk doelgerichtheid bij: opbouwende feedback op hoe doelmatig het
+// gesprek was, ook als het goed ging. Het behandeldoel kun je uit het dossier
+// plakken in een eigen veld; dat gaat alleen naar de supervisie.
 const LEARY_POSITIES = ['leidend', 'helpend', 'meewerkend', 'volgend',
                         'teruggetrokken', 'opstandig', 'aanvallend', 'concurrerend'];
 const LEARY_KLEUR = { behandelaar: 'var(--leary-behandelaar)', 'cliënt': 'var(--leary-client)',
@@ -1584,19 +1797,17 @@ const LEARY_KLEUR = { behandelaar: 'var(--leary-behandelaar)', 'cliënt': 'var(-
 // het model wie wat zei uit de inhoud afleiden.
 const SPREKERLABEL = /^Spreker (\d+|\?):/m;
 
-const SUPERVISIE_SYSTEEM = `Je kijkt als supervisor mee met een psycholoog. Je krijgt het transcript van een gesprek dat die behandelaar heeft gevoerd. Het verslag voor het dossier wordt elders gemaakt; wat jij schrijft is alleen voor de behandelaar zelf, ter voorbereiding op het volgende gesprek of op supervisie. De cliënt leest het niet. Je spreekt de behandelaar aan met 'je'.
+const SUPERVISIE_SYSTEEM = `Je kijkt als supervisor mee met een psycholoog. Je krijgt het transcript van een gesprek dat die behandelaar heeft gevoerd. Het verslag voor het dossier wordt elders gemaakt; wat jij schrijft is alleen voor de behandelaar zelf, ter voorbereiding op het volgende gesprek of op supervisie. De cliënt leest het niet. Je spreekt de behandelaar aan met 'je'. ${BEHANDELAAR_NEUTRAAL}
 
-Een supervisor kijkt niet naar wát er besproken is — dat weet de behandelaar zelf — maar naar wat er tussen de mensen in het gesprek gebeurt, en naar wat er níet gezegd wordt. De behandelaar is daarbij geen toeschouwer maar een van de twee partijen: hoe de cliënt zich opstelt, is mede een antwoord op hoe de behandelaar zich opstelt, en andersom.
+Een supervisor vat niet samen wát er besproken is — dat weet de behandelaar zelf — maar kijkt naar wat er tussen de mensen in het gesprek gebeurt, waar het gesprek naartoe gaat, en wat er níet gezegd wordt. De behandelaar is daarbij geen toeschouwer maar een van de twee partijen: hoe de cliënt zich opstelt, is mede een antwoord op hoe de behandelaar zich opstelt, en andersom.
 
-Je schrijft drie korte stukken:
-
-Betrekking. Elk gesprek heeft een inhoud en een betrekking: hoe de gesprekspartners zich, los van het onderwerp, tot elkaar verhouden. Beschrijf wat je daarvan in dit gesprek ziet gebeuren, en waar dat zichtbaar wordt. Twee à drie zinnen.
+Je schrijft twee korte stukken, en daarna plaats je de gesprekspartners op de roos van Leary.
 
 Onuitgesproken. Wat komt er in dit gesprek niet op tafel, terwijl het er wel lijkt te liggen? Denk aan iets wat wordt aangeraakt en weer losgelaten, een vraag die niet beantwoord of niet gesteld wordt, een gevoel dat in de woorden doorklinkt zonder benoemd te worden, een wending waarmee het gesprek ergens omheen gaat. Dit is een interpretatie, en daarom gelden twee eisen: maak haar vast aan een moment dat in het transcript aan te wijzen is, en schrijf haar als vraag of vermoeden, niet als vaststelling. Liever één onderbouwd vermoeden dan drie losse. Is er niets wat je aan een moment kunt vastmaken, zeg dat dan in één zin. Twee à drie zinnen.
 
-Suggestie. Eén suggestie voor het volgende gesprek, die rechtstreeks volgt uit wat je hierboven zag. Geen los advies dat er niet uit voortkomt. Eén à twee zinnen.
+Doelgerichtheid. De behandelaar wil het liefst doelmatig werken: een gesprek dat bijdraagt aan het doel waarvoor de cliënt komt. Kijk hoe dit gesprek zich daartoe verhield. Niet elk zijpad is een gebrek aan richting: een onderwerp dat dringend speelt verdient ruimte, en een omweg die bij het doel uitkomt is geen omweg. Een gesprek dat van onderwerp naar onderwerp gaat zonder dat iemand de draad terugbrengt, is wel minder doelmatig. Dit stuk is opbouwende feedback. Benoem wat goed ging, vastgemaakt aan een moment, bijvoorbeeld waar de behandelaar een onderwerp aan het doel verbond of het gesprek terugbracht. Kan het doelmatiger, zeg dan waar en hoe, ook weer bij een moment. Verliep het gesprek doelmatig, dan hoeft er geen verbeterpunt bij. Wat het doel is, staat onder het transcript. Drie à vier zinnen.
 
-Daarnaast plaats je iedere gesprekspartner op de roos van Leary. De roos heeft twee assen: boven–onder (invloed nemen of invloed laten) en samen–tegen (toenadering of afstand). Dat geeft acht posities, met de klok mee vanaf boven: leidend (boven, samen), helpend (samen, boven), meewerkend (samen, onder), volgend (onder, samen), teruggetrokken (onder, tegen), opstandig (tegen, onder), aanvallend (tegen, boven) en concurrerend (boven, tegen). Gedrag lokt gedrag uit: boven roept onder op en onder roept boven op, samen roept samen op en tegen roept tegen op.
+Dan de roos van Leary. De roos heeft twee assen: boven–onder (invloed nemen of invloed laten) en samen–tegen (toenadering of afstand). Dat geeft acht posities, met de klok mee vanaf boven: leidend (boven, samen), helpend (samen, boven), meewerkend (samen, onder), volgend (onder, samen), teruggetrokken (onder, tegen), opstandig (tegen, onder), aanvallend (tegen, boven) en concurrerend (boven, tegen). Gedrag lokt gedrag uit: boven roept onder op en onder roept boven op, samen roept samen op en tegen roept tegen op.
 
 De roos gaat hier uitsluitend over de interactie in dit gesprek: hoe iemand zich opstelt tegenover de ander in de kamer, hier en nu. Wat iemand vertelt over anderen telt niet mee. Een cliënt die vertelt over een conflict met iemand buiten het gesprek, en dat met de behandelaar openhartig onderzoekt, staat tegenover de behandelaar aan de samen-kant, niet aan de tegen-kant: het conflict is inhoud, het openhartig vertellen is betrekking. Kijk dus naar wat iemand met de ander doet — vragen stellen, onderbreken, instemmen, afwijzen, het initiatief nemen of laten, ingaan op wat de ander zegt of er langs gaan — en niet naar waar het verhaal over gaat.
 
@@ -1604,35 +1815,51 @@ Een positie op de roos is altijd een antwoord op de ander. Wat een uitspraak bet
 
 Zoek daarom per gesprekspartner eerst twee à drie momenten, voordat je punten geeft. Een moment is een paar: wat de ander deed, en hoe deze persoon daarop reageerde — bijvoorbeeld "de ander stelt een verdiepende vraag" en "gaat erlangs door over iets anders te beginnen". Kies momenten die kenmerkend zijn voor het gesprek, niet de opvallendste zinnen. Een uitspraak over iemand buiten het gesprek is nooit een moment.
 
-Verdeel daarna per gesprekspartner tien punten over de acht posities, op grond van die momenten. Een positie krijgt alleen punten als er een moment bij hoort dat haar laat zien; alle andere posities krijgen nul. Het is gewoon dat punten op twee of drie posities terechtkomen. Sluit af met één zin toelichting per persoon die samenvat hoe die zich tegenover de ander opstelde — gedrag in het gesprek, niet een karaktertrek en niet de inhoud van wat er verteld werd.
+Verdeel daarna per gesprekspartner tien punten over de acht posities, op grond van die momenten. Een positie krijgt alleen punten als er een moment bij hoort dat haar laat zien; alle andere posities krijgen nul. Het is gewoon dat punten op twee of drie posities terechtkomen.
 
-Voor alles geldt: baseer je op wat er in het transcript daadwerkelijk gebeurt, niet op een aanname over wat iemand voelt of bedoelt. Geen diagnose, geen samenvatting van de inhoud en geen compliment. Het transcript komt uit automatische spraakherkenning; zinnen lopen soms niet af en woorden kunnen verkeerd verstaan zijn. Bouw geen waarneming op één woord dat verminkt kan zijn.
-
-Tot slot kijk je vanuit de roos vooruit. In een behandelgesprek is 'helpend' (samen, boven) de voorkeurspositie van de behandelaar en 'meewerkend' (samen, onder) die van de cliënt; die twee roepen elkaar op. Schrijf twee korte stukken:
-- Voor de behandelaar: hoe je vanuit waar je in dit gesprek stond meer naar helpend kunt bewegen. Stond je daar al vooral, zeg dat dan in één zin en noem wat je vasthoudt.
-- Voor de cliënt: welke interventies van de behandelaar de cliënt kunnen uitnodigen om meer meewerkend te worden. Denk vanuit de wisselwerking: welk gedrag van de behandelaar roept meewerken op, en welk gedrag in dit gesprek riep juist iets anders op?
-Beide stukken bouwen voort op de momenten die je hierboven vond, en noemen er waar het kan één bij naam. Concreet genoeg om in het volgende gesprek te doen, niet algemeen advies dat bij elk gesprek past. Herhaal de suggestie uit het eerste deel niet. Elk twee à drie zinnen.
+Voor alles geldt: baseer je op wat er in het transcript daadwerkelijk gebeurt, niet op een aanname over wat iemand voelt of bedoelt. Geen diagnose en geen samenvatting van de inhoud. Wat goed ging benoem je als waarneming bij een moment, niet als algemene lof. Het transcript komt uit automatische spraakherkenning; zinnen lopen soms niet af en woorden kunnen verkeerd verstaan zijn. Bouw geen waarneming op één woord dat verminkt kan zijn.
 
 Je antwoord is uitsluitend een JSON-object, zonder tekst eromheen, in deze vorm:
 {
-  "betrekking": "...",
   "onuitgesproken": "...",
-  "suggestie": "...",
+  "doelgerichtheid": "...",
   "leary": [
     {"spreker": "Spreker 1", "rol": "behandelaar",
      "momenten": [
        {"ander": "wat de ander deed", "reactie": "hoe deze persoon reageerde", "positie": "een van de acht posities"}
      ],
-     "punten": {"leidend": 0, "helpend": 0, "meewerkend": 0, "volgend": 0, "teruggetrokken": 0, "opstandig": 0, "aanvallend": 0, "concurrerend": 0},
-     "toelichting": "..."}
-  ],
-  "richting": {"behandelaar": "...", "client": "..."}
+     "punten": {"leidend": 0, "helpend": 0, "meewerkend": 0, "volgend": 0, "teruggetrokken": 0, "opstandig": 0, "aanvallend": 0, "concurrerend": 0}}
+  ]
 }
-Schrijf de velden in deze volgorde: per persoon eerst de momenten, dan de punten, dan de toelichting; 'richting' komt na de roos. Is 'leary' leeg, laat 'richting' dan ook leeg.
+Schrijf per persoon eerst de momenten en dan de punten.
 'spreker' is het label uit het transcript ('Spreker 1', 'Spreker 2', ...); staan er geen labels in, dan 'Behandelaar' en 'Cliënt'. 'rol' is 'behandelaar', 'cliënt' of 'anders'. Zijn de gesprekspartners in het transcript niet van elkaar te onderscheiden, laat 'leary' dan leeg.
 `;
 
-function bouwSupervisieVraag(transcript, geslacht, gesprekType) {
+// Wat de supervisie moet weten over het doel van het gesprek. Bij een intake is
+// er nog geen behandeldoel: dan is het doel van het gesprek zelf de maat.
+function doelTekst(gesprekType, behandeldoel) {
+  if (gesprekType === 'intakegesprek') {
+    let tekst = "Bij een intake is er nog geen behandeldoel. Het doel van het gesprek is "
+      + "de hulpvraag helder krijgen en de klachten en hun context in kaart "
+      + "brengen. Doelgericht betekent hier dat het gesprek daar uitkomt, niet dat "
+      + "de behandelaar het verhaal van de cliënt inperkt: luisteren en de cliënt "
+      + "laten vertellen hoort bij een goede intake.";
+    if (behandeldoel) {
+      tekst += "\nDe behandelaar gaf wel een doel op; gebruik dat als richting:\n"
+        + `<<<\n${behandeldoel}\n>>>`;
+    }
+    return tekst;
+  }
+  if (behandeldoel) {
+    return "Het behandeldoel, zoals de behandelaar het uit het dossier overnam, staat "
+      + `hieronder tussen <<< en >>>.\n<<<\n${behandeldoel}\n>>>`;
+  }
+  return "Er is geen behandeldoel opgegeven. Leid uit het gesprek af waar het naartoe "
+    + "moest, bijvoorbeeld uit een agenda aan het begin of een terugblik op eerdere "
+    + "afspraken, en zeg erbij als dat niet duidelijk werd.";
+}
+
+function bouwSupervisieVraag(transcript, geslacht, gesprekType, behandeldoel = '') {
   const sprekers = SPREKERLABEL.test(transcript)
     ? "Het transcript is door de spraakherkenning per spreker ingedeeld. Welk label bij "
       + "de behandelaar hoort, zegt het label niet: dat blijkt uit de inhoud. De indeling "
@@ -1643,18 +1870,23 @@ function bouwSupervisieVraag(transcript, geslacht, gesprekType) {
   return "Het transcript van het gesprek staat hieronder tussen <<< en >>>.\n\n"
     + `TRANSCRIPT:\n<<<\n${transcript}\n>>>\n\n`
     + `Het gesprek hierboven is een ${gesprekType}. ${sprekers}\n`
-    + `${geslachtInstructie}\n`
+    + `${geslachtInstructie} ${BEHANDELAAR_NEUTRAAL}\n\n`
+    + `${doelTekst(gesprekType, behandeldoel.trim())}\n\n`
     + "Geef je antwoord als JSON-object, zoals in de opdracht beschreven.";
+}
+
+// Een JSON-object uit een modelantwoord, ook als het in een codeblok staat.
+function jsonObject(tekst) {
+  const data = JSON.parse(tekst.trim().replace(/^```(?:json)?\s*|\s*```$/g, ''));
+  if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('geen JSON-object');
+  return data;
 }
 
 // Het JSON-antwoord van het model, gecontroleerd en gelijkgetrokken. Een
 // ontbrekend veld wordt leeg, onbekende posities vallen weg en punten worden
 // niet-negatieve getallen.
 function leesSupervisie(tekst) {
-  tekst = tekst.trim().replace(/^```(?:json)?\s*|\s*```$/g, '');
-  const data = JSON.parse(tekst);
-  if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('geen JSON-object');
-
+  const data = jsonObject(tekst);
   const tekstveld = w => typeof w === 'string' ? w.trim() : '';
 
   const personen = [];
@@ -1690,20 +1922,210 @@ function leesSupervisie(tekst) {
       spreker: tekstveld(p.spreker) || 'Onbekend',
       rol: (rol === 'behandelaar' || rol === 'cliënt') ? rol : 'anders',
       punten, momenten,
-      toelichting: tekstveld(p.toelichting),
     });
   }
-  const richting = (data.richting && typeof data.richting === 'object') ? data.richting : {};
   return {
-    betrekking: tekstveld(data.betrekking),
     onuitgesproken: tekstveld(data.onuitgesproken),
-    suggestie: tekstveld(data.suggestie),
+    doelgerichtheid: tekstveld(data.doelgerichtheid),
     leary: personen,
-    richting: {
-      behandelaar: personen.length ? tekstveld(richting.behandelaar) : '',
-      client: personen.length ? tekstveld(richting.client || richting['cliënt']) : '',
-    },
   };
+}
+
+// ── Tips: wat je in het volgende gesprek anders kunt doen ─────
+// Op verzoek, met een knop onder de supervisie: alleen wie de supervisie gelezen
+// heeft en verder wil, vraagt erom. Het model krijgt het transcript en wat de
+// supervisie zag (het onuitgesprokene, de doelgerichtheid en de momenten op de
+// roos), zodat de tips daarop voortbouwen in plaats van opnieuw te beginnen.
+//
+// De voorkeursposities verschillen per gesprekstype. In een behandelgesprek is de
+// behandelaar helpend en de cliënt meewerkend. In een intake luistert de
+// behandelaar vooral en laat de cliënt het verhaal vertellen: dan staat de
+// behandelaar meewerkend tot volgend (onder, samen) en neemt de cliënt de leiding
+// (leidend: boven, samen).
+const VOORKEURSPOSITIES = {
+  behandelgesprek: {
+    tekst: "In een behandelgesprek is 'helpend' (samen, boven) de voorkeurspositie van de "
+      + "behandelaar en 'meewerkend' (samen, onder) die van de cliënt; die twee roepen "
+      + "elkaar op: de behandelaar geeft richting en structuur, de cliënt gaat daarin mee.",
+    behandelaar: 'helpend', client: 'meewerkend' },
+  intakegesprek: {
+    tekst: "In een intakegesprek ligt het anders dan in een behandelgesprek. De behandelaar "
+      + "stelt zich vooral luisterend op en laat de cliënt het verhaal vertellen: de "
+      + "voorkeurspositie van de behandelaar is 'meewerkend' tot 'volgend' (onder, samen), "
+      + "en die van de cliënt 'leidend' (boven, samen), want de cliënt bepaalt hier wat er "
+      + "op tafel komt. Ook die twee roepen elkaar op: wie ruimte laat, nodigt de ander "
+      + "uit die te nemen.",
+    behandelaar: 'meewerkend en volgend', client: 'leidend' },
+};
+
+function tipsSysteem(gesprekType) {
+  const v = VOORKEURSPOSITIES[gesprekType] || VOORKEURSPOSITIES.behandelgesprek;
+  return `Je bent supervisor van een psycholoog. Je hebt het transcript van een gesprek van die behandelaar gelezen en er al naar gekeken: wat er mogelijk onuitgesproken bleef, hoe doelgericht het gesprek was, en waar de gesprekspartners stonden op de roos van Leary, met de momenten waarop dat rust. Wat de supervisie over doelgerichtheid zei, heeft de behandelaar al gelezen; herhaal dat niet, maar bouw er waar het past op voort. De behandelaar heeft dat gelezen en vraagt nu om tips: wat kan ik in een volgend gesprek anders doen? Je spreekt de behandelaar aan met 'je'. ${BEHANDELAAR_NEUTRAAL} De cliënt leest dit niet.
+
+De roos van Leary heeft twee assen: boven–onder (invloed nemen of invloed laten) en samen–tegen (toenadering of afstand). Gedrag lokt gedrag uit: boven roept onder op en onder roept boven op, samen roept samen op en tegen roept tegen op. Wie de ander naar een andere positie wil uitnodigen, begint dus bij de eigen positie.
+
+${v.tekst}
+
+Schrijf drie korte stukken:
+- Jij: hoe je vanuit waar je in dit gesprek stond meer naar ${v.behandelaar} kunt bewegen. Stond je daar al vooral, zeg dat dan in één zin en noem wat je vasthoudt.
+- De cliënt uitnodigen: welk gedrag van jou de cliënt kan uitnodigen om meer ${v.client} te worden, en welk gedrag in dit gesprek juist iets anders opriep.
+- Het onuitgesprokene: hoe je wat er mogelijk onuitgesproken bleef in een volgend gesprek ter sprake kunt brengen, zonder het de cliënt op te leggen. Zag de supervisie daar niets, laat dit stuk dan leeg.
+
+Een tip is pas bruikbaar als hij bij dít gesprek hoort. Bouw daarom voort op de momenten die de supervisie vond en noem er waar het kan één bij naam; algemeen advies dat bij elk gesprek past, laat je weg. Maak het concreet genoeg om in het volgende gesprek te doen, bijvoorbeeld met een zin die je zou kunnen zeggen. Baseer je op wat er in het transcript gebeurt, niet op een aanname over wat iemand voelt. Geen compliment, geen diagnose. Elk stuk twee à drie zinnen.
+
+Je antwoord is uitsluitend een JSON-object, zonder tekst eromheen, in deze vorm:
+{"jij": "...", "client": "...", "onuitgesproken": "..."}
+`;
+}
+
+// Het gebruikersbericht voor de tips: het transcript, en daarna wat de
+// supervisie zag, in woorden in plaats van als JSON.
+function bouwTipsVraag(transcript, supervisie, geslacht, gesprekType) {
+  const regels = [];
+  if (supervisie.onuitgesproken) regels.push(`Onuitgesproken:\n${supervisie.onuitgesproken}`);
+  if (supervisie.doelgerichtheid) regels.push(`Doelgerichtheid:\n${supervisie.doelgerichtheid}`);
+  for (const p of supervisie.leary || []) {
+    const verdeling = LEARY_POSITIES.filter(n => p.punten[n] > 0).map(n => `${n} ${p.punten[n]}`).join(', ');
+    const momenten = (p.momenten || []).map(m =>
+      `\n- ${m.ander ? m.ander + ' → ' : ''}${m.reactie} (${m.positie})`).join('');
+    regels.push(`Roos van Leary, ${p.spreker} (${p.rol}): ${verdeling || 'geen punten'}.${momenten}`);
+  }
+  const gezien = regels.join('\n\n') || 'De supervisie vond niets om op voort te bouwen.';
+  return "Het transcript van het gesprek staat hieronder tussen <<< en >>>.\n\n"
+    + `TRANSCRIPT:\n<<<\n${transcript}\n>>>\n\n`
+    + `Wat de supervisie in dit gesprek zag:\n\n${gezien}\n\n`
+    + `Het gesprek is een ${gesprekType}. `
+    + `${GESLACHT_TEKST[geslacht] || GESLACHT_TEKST.onbekend} ${BEHANDELAAR_NEUTRAAL}\n`
+    + "Geef je antwoord als JSON-object, zoals in de opdracht beschreven.";
+}
+
+function leesTips(tekst) {
+  const data = jsonObject(tekst);
+  const veld = (...namen) => namen.map(n => data[n]).find(w => typeof w === 'string' && w.trim())?.trim() || '';
+  return { jij: veld('jij'), client: veld('client', 'cliënt'), onuitgesproken: veld('onuitgesproken') };
+}
+
+// ── Veiligheidssignalen ───────────────────────────────────────
+// Een behandelverslag schrijft geen secties voor, dus ook geen plek voor
+// veiligheid: of een terloopse opmerking over doodsgedachten in het verslag
+// komt, beslist het model. Dat is het ene soort gegeven dat een behandelaar niet
+// mag missen. Een eigen aanroep kijkt daarom alleen daarnaar, naast het verslag
+// en zonder het te sturen. Niets gevonden betekent niets in beeld; het wordt geen
+// nakijklijst.
+const VEILIGHEID_SYSTEEM = `Je leest het transcript van een gesprek dat een psycholoog met een cliënt heeft gevoerd. Het verslag voor het dossier wordt elders geschreven. Jij kijkt alleen of er in het gesprek iets ter sprake kwam dat de veiligheid raakt, zodat de behandelaar het niet over het hoofd ziet: zoiets moet in het dossier en vraagt soms om handelen, ook als het maar één keer terloops viel.
+
+Het gaat om:
+- gedachten aan de dood of aan zelfdoding, ook zonder plan, ook afgezwakt ("ik zou het nooit doen") of als de wens er niet meer te zijn;
+- zelfbeschadiging;
+- agressie of geweldsgedachten richting anderen;
+- huiselijk geweld, mishandeling of misbruik, als slachtoffer of als pleger, nu of vroeger;
+- zorgen over de veiligheid van kinderen of andere kwetsbare mensen in de omgeving;
+- ernstige verwaarlozing, of niet meer voor zichzelf kunnen zorgen;
+- gevaarlijk gedrag door psychose, dissociatie of middelengebruik.
+
+Vroeg de behandelaar ernaar en werd het ontkend, noem het dan ook: dat het is uitgevraagd en wat het antwoord was, hoort in het dossier.
+
+Noem alleen wat er in het gesprek werkelijk gezegd is. Een somber of zwaar gesprek is op zichzelf geen signaal, en een onderwerp dat ernaartoe zou kunnen leiden ook niet. De meeste gesprekken hebben niets van dit alles, en dan is een lege lijst het goede antwoord. Maar twijfel je bij een uitspraak die letterlijk zo gelezen kan worden, neem haar dan op: de behandelaar beoordeelt haar, en een gemiste uitspraak ziet niemand meer terug.
+
+Het transcript is opgedeeld in genummerde fragmenten ([1], [2], ...). Het komt uit automatische spraakherkenning, dus er staan fouten in. Of de cliënt een man of een vrouw is weet je niet: schrijf 'cliënt', zonder 'hij', 'zij' of 'haar'.
+
+Je antwoord is uitsluitend een JSON-object, zonder tekst eromheen, in deze vorm:
+{"signalen": [{"soort": "korte aanduiding, bijvoorbeeld Doodsgedachten", "wat": "één of twee zakelijke zinnen: wat er gezegd is en, als dat besproken is, hoe het werd ingeschat", "fragmenten": [12, 13]}]}
+'fragmenten' zijn de nummers van de fragmenten waar het staat. Is er niets, geef dan {"signalen": []}.
+`;
+
+// ── Waar staat dit? ───────────────────────────────────────────
+// De behandelaar selecteert een zin in het verslag en wil zien waarop die rust.
+// Op verzoek, per zin: geen controleslag over het hele verslag.
+const BRON_SYSTEEM = `Je krijgt het transcript van een gesprek tussen een psycholoog en een cliënt, opgedeeld in genummerde fragmenten, en een passage uit het verslag dat ervan gemaakt is. De behandelaar wil die passage controleren en vraagt: waar in het gesprek staat dit?
+
+Zoek de fragmenten waarop de passage rust. Het verslag parafraseert, dus zoek op betekenis en niet op dezelfde woorden. Geef de fragmenten die de inhoud dragen, niet elk fragment waarin het onderwerp langskomt; meestal zijn dat er één tot vier.
+
+Zeg daarnaast of het transcript de passage draagt:
+- "ja": wat de passage beweert, staat in de gevonden fragmenten;
+- "deels": een deel staat er, maar de passage zegt meer of iets anders: een getal, een tijd, een verband ('waardoor', 'maar'), een richting ('minder', 'verbeterd') of een detail dat er niet staat;
+- "nee": je vindt het niet.
+Bij "deels" en "nee" zeg je in één zin wat er niet of anders staat. Bij "ja" laat je de toelichting leeg.
+
+Het transcript komt uit automatische spraakherkenning, dus er staan fouten in.
+
+Je antwoord is uitsluitend een JSON-object, zonder tekst eromheen, in deze vorm:
+{"fragmenten": [3, 4], "dekking": "ja", "toelichting": ""}
+`;
+
+function bouwFragmentVraag(fragmenten, slot) {
+  return "Het transcript staat hieronder tussen <<< en >>>, in genummerde fragmenten.\n\n"
+    + `<<<\n${fragmenten.map((f, i) => `[${i + 1}] ${f}`).join('\n')}\n>>>\n\n${slot}`;
+}
+
+// Fragmentnummers uit het antwoord: gehele getallen binnen het bereik, oplopend
+// en zonder dubbele.
+function leesNummers(waarde, aantal) {
+  if (!Array.isArray(waarde)) return [];
+  return [...new Set(waarde.filter(n => typeof n === 'number' && Number.isFinite(n))
+                           .map(n => Math.trunc(n)).filter(n => n >= 1 && n <= aantal))]
+    .sort((a, b) => a - b);
+}
+
+function leesVeiligheid(tekst, aantal) {
+  const data = jsonObject(tekst);
+  const uit = [];
+  for (const s of (Array.isArray(data.signalen) ? data.signalen : [])) {
+    if (!s || typeof s !== 'object') continue;
+    const wat = typeof s.wat === 'string' ? s.wat.trim() : '';
+    if (!wat) continue;
+    const soort = typeof s.soort === 'string' ? s.soort.trim() : '';
+    uit.push({ soort: soort || 'Veiligheid', wat, fragmenten: leesNummers(s.fragmenten, aantal) });
+  }
+  return uit;
+}
+
+function leesBron(tekst, aantal) {
+  const data = jsonObject(tekst);
+  const dekking = ['ja', 'deels', 'nee'].includes(data.dekking) ? data.dekking : '';
+  const toelichting = typeof data.toelichting === 'string' ? data.toelichting.trim() : '';
+  return { fragmenten: leesNummers(data.fragmenten, aantal), dekking,
+           toelichting: dekking === 'ja' ? '' : toelichting };
+}
+
+// ── Brief, samenvatting en huiswerk voor de cliënt ────────────
+// Afgeleid van het verslag, niet van het transcript: alles wat erin staat, heeft
+// de behandelaar dan al gelezen en zo nodig verbeterd, en er kan geen nieuw feit
+// bij komen dat het verslag niet heeft. Het taalmodel is dat uit de
+// instellingen: dit is schrijfwerk, en met alleen het verslag als invoer kost het
+// een fractie van een cent.
+const DOCUMENT_SYSTEEM = {
+  brief: `Je schrijft voor een psycholoog een brief aan de huisarts of verwijzer van een cliënt. Je krijgt het verslag dat de psycholoog van een gesprek voor het dossier heeft gemaakt; het gesprek zelf ken je niet.
+
+Een huisarts wil in een paar minuten weten: waarom is cliënt hier, wat is er gezien, en wat gaat er gebeuren. Schrijf daarom kort en zakelijk, als collega aan collega, in een paar alinea's lopende tekst zonder kopjes.
+
+Alles wat je schrijft staat in het verslag. Staat er geen diagnose, conclusie of behandelplan in, dan schrijf je die ook niet; schrijf dan wat er wél is, bijvoorbeeld dat de intake nog loopt of dat het beleid nog wordt bepaald. Dat geldt ook voor de reden waarom iemand in behandeling is: wat er in één gesprek besproken werd, is nog niet de reden van aanmelding, en een klacht krijgt in de brief geen naam die het verslag haar niet geeft. Een brief die iets vaststelt wat het verslag niet vaststelt, is erger dan een kortere brief. Laat weg wat de huisarts niet nodig heeft, zeker gevoelige details over anderen dan de cliënt.
+
+Begin met "Geachte collega," en eindig met "Met vriendelijke groet," zonder naam eronder: die zet de behandelaar er zelf onder. Geen adressen, data die niet in het verslag staan, of invulplekken tussen vierkante haken.`,
+  client: `Je schrijft voor een psycholoog een korte samenvatting van een gesprek, voor de cliënt zelf. Je krijgt het verslag dat de psycholoog voor het dossier heeft gemaakt; het gesprek zelf ken je niet.
+
+De cliënt leest dit thuis terug, om te onthouden wat er besproken is en wat er is afgesproken. Schrijf in eenvoudige, vriendelijke en nuchtere taal (taalniveau B1): korte zinnen, gewone woorden, geen vaktermen. Is een vakterm nodig omdat hij in het gesprek gebruikt is, leg hem dan in een paar woorden uit. Het verslag spreekt over 'cliënt'; jij schrijft áán de cliënt: 'je slaapt nog steeds slecht', niet 'cliënt slaapt'. Schrijf vanuit de behandelaar, met 'we' voor wat jullie samen deden.
+
+Schrijf eerst wat er besproken is en wat het opleverde, en daarna onder het kopje "Afspraken" wat er is afgesproken: huiswerk, oefeningen en de volgende afspraak, voor zover het verslag die noemt. Klinische duidingen en inschattingen uit het verslag, over risico, diagnose of hoe de behandelaar de cliënt ziet, horen niet in een tekst voor de cliënt, tenzij uit het verslag blijkt dat ze in het gesprek met de cliënt zelf besproken zijn.
+
+Alles wat je schrijft staat in het verslag; voeg geen adviezen, tips of bemoediging toe die er niet in staan. Gebruik Markdown: ## voor een kopje, - voor een opsomming. Geen aanhef met naam, geen ondertekening, geen invulplekken tussen vierkante haken.`,
+  // Alleen het huiswerk: de cliënt houdt dit bij de hand tot het volgende
+  // gesprek. De datum van dat gesprek staat er bewust niet in; die krijgt de
+  // cliënt via het agendasysteem.
+  huiswerk: `Je zet voor een psycholoog de huiswerkafspraken uit een gesprek op een rij, voor de cliënt zelf. Je krijgt het verslag dat de psycholoog voor het dossier heeft gemaakt; het gesprek zelf ken je niet.
+
+De cliënt houdt dit bij de hand tot het volgende gesprek, om te weten wat hij of zij in de tussentijd gaat doen: een opdracht, een oefening, iets bijhouden, iets uitproberen of iets voorbereiden. Neem alleen op wat de cliënt zelf gaat doen. De datum of het tijdstip van een volgende afspraak hoort er niet in: die krijgt de cliënt via de agenda. Wat er in het gesprek besproken is, vat je ook niet samen; alleen wat er gedaan moet worden.
+
+Schrijf in eenvoudige, vriendelijke en nuchtere taal (taalniveau B1), áán de cliënt: 'je houdt bij hoe je slaapt', niet 'cliënt houdt bij'. Per afspraak één punt in een opsomming (- voor elk punt), met wat erbij gezegd is over hoe vaak, wanneer of hoe, voor zover het verslag dat noemt. Voeg geen uitleg, tips of bemoediging toe die niet in het verslag staan.
+
+Staan er in het verslag geen huiswerkafspraken, schrijf dan alleen: "Er zijn in dit gesprek geen huiswerkafspraken gemaakt." Geen kopje, geen aanhef, geen ondertekening, geen invulplekken tussen vierkante haken.`,
+};
+
+function bouwDocumentVraag(verslag, gesprekType, geslacht) {
+  return "Het verslag staat hieronder tussen <<< en >>>.\n\n"
+    + `<<<\n${verslag}\n>>>\n\n`
+    + `Het gesprek was een ${gesprekType}. `
+    + (GESLACHT_TEKST[geslacht] || GESLACHT_TEKST.onbekend);
 }
 
 // ── Herziening op aanwijzing ──────────────────────────────────
@@ -1906,6 +2328,15 @@ let huidigGesprekType = '';
 // Versiegeschiedenis: alleen in het geheugen van dit tabblad. Bij 'Nieuw gesprek'
 // of een herlaadbeurt is hij weg, net als de opname zelf.
 let versies = [], huidigeVersie = -1;
+// Hoe lang de opname duurde waar het transcript uit komt, in seconden. Staat bij
+// het verslag, voor de tijdregistratie.
+let gesprekSeconden = 0;
+// Het transcript waaruit het getoonde verslag geschreven is. Wijkt het transcript
+// in het veld daarvan af (bijgeschaafd of geplakt), dan is er een nieuw verslag te maken.
+let verslagBron = '';
+// Zolang het verslag geschreven wordt, is het transcript al naslag en valt er in
+// het verslag nog niets te selecteren.
+let verslagBezig = false;
 let opnameBron = 'mic';
 let schermStream = null, micStream = null, audioContext = null;
 
@@ -1917,14 +2348,24 @@ const niveauMeters = $('niveauMeters'), niveauMic = $('niveauMic'), niveauScherm
 const niveauSchermRij = $('niveauSchermRij'), niveauWaarschuwing = $('niveauWaarschuwing');
 const transcriptBox = $('transcriptBox'), outputBox = $('outputBox'), tipBox = $('tipBox');
 const tipCard = $('tipCard'), titelRegel = $('titelRegel');
-const btnKopieer = $('btnKopieer'), btnRegen = $('btnRegen');
-const regenPanel = $('regenPanel'), regenType = $('regenType'), regenGeslacht = $('regenGeslacht');
+const btnKopieer = $('btnKopieer'), btnRegen = $('btnRegen'), regenLabel = $('regenLabel');
+const btnMaakVerslag = $('btnMaakVerslag');
 const errorMsg = $('errorMsg'), errorTekst = $('errorTekst'), statusDot = $('statusDot'), statusText = $('statusText');
 const btnErrorRetry = $('btnErrorRetry');
 const transcriptSpinner = $('transcriptSpinner'), verslagSpinner = $('verslagSpinner'), tipSpinner = $('tipSpinner');
 const verslagBadge = $('verslagBadge'), micSelect = $('micSelect'), micNote = $('micNote');
-const gesprekTypeSelect = $('gesprekType'), geslachtSelect = $('geslacht');
+const gesprekTypeSelect = $('gesprekType'), taalModel = $('taalModel');
+// De drie rondjes voor het geslacht gedragen zich naar de rest van de code als
+// één keuzelijst: een waarde, en een change-gebeurtenis.
+const geslachtRondjes = [...document.querySelectorAll('input[name="geslacht"]')];
+const geslachtSelect = {
+  get value() { return geslachtRondjes.find(r => r.checked)?.value || 'onbekend'; },
+  set value(v) { const r = geslachtRondjes.find(r => r.value === v); if (r) r.checked = true; },
+  addEventListener(type, fn) { geslachtRondjes.forEach(r => r.addEventListener(type, fn)); }
+};
+geslachtSelect.addEventListener('change', () => updateGeslachtBadge());
 const customPromptInput = $('customPrompt'), voorinformatieInput = $('voorinformatie'), schermInfo = $('schermInfo');
+const behandeldoelInput = $('behandeldoel');
 const versieBalk = $('versieBalk'), versieLabel = $('versieLabel'), versieSuggestie = $('versieSuggestie');
 const btnVorigeVersie = $('btnVorigeVersie'), btnVolgendeVersie = $('btnVolgendeVersie');
 const suggestiePaneel = $('suggestiePaneel'), suggestieInput = $('suggestieInput'), btnHerzie = $('btnHerzie');
@@ -1934,13 +2375,13 @@ const outputFormat = $('outputFormat'), formatNote = $('formatNote');
 const bronMic = $('bronMic'), bronScherm = $('bronScherm');
 const audioUpload = $('audioUpload'), uploadFilename = $('uploadFilename');
 const bezigBalk = $('bezigBalk'), toasts = $('toasts'), sneltoetsOverlay = $('sneltoetsOverlay');
-const golfCanvas = $('golfCanvas'), golfCtx = golfCanvas.getContext('2d');
+const golfWrap = $('golfWrap'), golfCanvas = $('golfCanvas'), golfCtx = golfCanvas.getContext('2d');
 const transcriptTelling = $('transcriptTelling'), verslagTelling = $('verslagTelling');
 const btnTranscriptUit = $('btnTranscriptUit'), btnNieuw = $('btnNieuw');
-const uitklapRegen = $('uitklapRegen'), uitklapOpties = $('uitklapOpties'), uitklapVoorbereiding = $('uitklapVoorbereiding');
+const transcriptKaart = $('transcriptKaart');
+const uitklapOpties = $('uitklapOpties'), uitklapVoorbereiding = $('uitklapVoorbereiding');
 const btnThema = $('btnThema');
 const opnameAlarmEl = $('opnameAlarm'), alarmReden = $('alarmReden'), alarmTijd = $('alarmTijd');
-const btnAlarmTest = $('btnAlarmTest');
 const vangnetEl = $('vangnet'), vangnetTitel = $('vangnetTitel'), vangnetLijst = $('vangnetLijst');
 const onderbrokenEl = $('onderbroken'), onderbrokenTekst = $('onderbrokenTekst');
 const apiKeyInput = $('apiKey'), btnSaveKey = $('btnSaveKey'), btnClearKey = $('btnClearKey');
@@ -2093,10 +2534,10 @@ async function foutUitAntwoord(resp) {
 }
 
 // ── Instellingen onthouden ────────────────────────────────────
-// Alleen de keuzes, nooit de inhoud: voorinformatie, extra instructie,
-// transcript en verslag bevatten cliëntgegevens en blijven in het geheugen.
+// Alleen de keuzes, nooit de inhoud: voorinformatie, behandeldoel, extra
+// instructie, transcript en verslag bevatten cliëntgegevens en blijven in het geheugen.
 const INSTEL_SLEUTEL = 'sessienotitie.instellingen';
-const KEUZES = { gesprekType: gesprekTypeSelect, outputFormat: outputFormat };
+const KEUZES = { gesprekType: gesprekTypeSelect, outputFormat: outputFormat, taalModel };
 const VINKJES = { optEmoji, optFeedback, optTitel };
 // Versie 2: emoji bij kopjes en titel verzinnen staan standaard uit. Een eerder
 // bewaard vinkje komt nog uit de tijd dat ze standaard aanstonden, en wordt
@@ -2106,7 +2547,7 @@ const INSTEL_VERSIE = 2;
 function bewaarInstellingen() {
   try {
     const data = { versie: INSTEL_VERSIE, bron: opnameBron, mic: micSelect.value,
-                   opties: uitklapOpties.open, voorbereiding: uitklapVoorbereiding.open };
+                   opties: uitklapOpties.open };
     for (const [k, el] of Object.entries(KEUZES)) data[k] = el.value;
     for (const [k, el] of Object.entries(VINKJES)) data[k] = el.checked;
     localStorage.setItem(INSTEL_SLEUTEL, JSON.stringify(data));
@@ -2124,15 +2565,26 @@ function laadInstellingen() {
     if (typeof data[k] === 'boolean') el.checked = data[k];
   }
   if (typeof data.opties === 'boolean') uitklapOpties.open = data.opties;
-  if (typeof data.voorbereiding === 'boolean') uitklapVoorbereiding.open = data.voorbereiding;
   if (data.bron && $('bron' + data.bron.charAt(0).toUpperCase() + data.bron.slice(1))) kiesBron(data.bron);
   return data;
 }
 
 [...Object.values(KEUZES), ...Object.values(VINKJES)].forEach(el => el.addEventListener('change', bewaarInstellingen));
-[uitklapOpties, uitklapVoorbereiding].forEach(el => el.addEventListener('toggle', bewaarInstellingen));
+uitklapOpties.addEventListener('toggle', bewaarInstellingen);
 micSelect.addEventListener('change', bewaarInstellingen);
+// Alles wat het verslag verandert: wijkt het af van het getoonde verslag, dan zegt
+// de knop 'Opnieuw genereren' dat.
+[gesprekTypeSelect, geslachtSelect, taalModel, optEmoji, optFeedback, optTitel]
+  .forEach(el => el.addEventListener('change', () => werkRegenKnopBij()));
 
+// ── Taalmodel ─────────────────────────────────────────────────
+const modelNote = $('modelNote');
+function werkModelNoteBij() {
+  modelNote.textContent = MODEL_AFWIJKINGEN[taalModel.value]?.nadenken
+    ? 'Een proef. Denkt eerst na en schrijft dan; dat duurt duidelijk langer, en het verslag verschijnt pas daarna.'
+    : '';
+}
+taalModel.addEventListener('change', werkModelNoteBij);
 // ── Uitvoerformaat ────────────────────────────────────────────
 const FORMAT_NOTES = {
   plat: 'Wordt als platte tekst naar het klembord gekopieerd.',
@@ -2161,6 +2613,30 @@ function kiesBron(bron) {
   micSelect.closest('.field').style.opacity = bron === 'mic' ? '1' : '0.4';
   bewaarInstellingen();
 }
+
+// ── Samenvatting in dichtgeklapte koppen ─────────────────────
+// Dichtgeklapt moet je zonder openen kunnen zien waarmee het verslag gemaakt wordt.
+const instellingenSamenvatting = $('instellingenSamenvatting');
+const voorbereidingSamenvatting = $('voorbereidingSamenvatting');
+const optieTekst = sel => sel.selectedOptions[0]?.textContent.trim() || '';
+function werkSamenvattingenBij() {
+  instellingenSamenvatting.textContent = [
+    optieTekst(taalModel).replace(/^Mistral\s+/, ''),
+    optieTekst(outputFormat).toLowerCase()
+  ].filter(Boolean).join(' · ');
+  const ingevuld = [[voorinformatieInput, 'voorinformatie'], [behandeldoelInput, 'behandeldoel'],
+                    [customPromptInput, 'instructie']]
+    .filter(([el]) => el.value.trim()).map(([, naam]) => naam);
+  voorbereidingSamenvatting.textContent = [
+    optieTekst(gesprekTypeSelect),
+    geslachtSelect.value !== 'onbekend' ? geslachtSelect.value : '',
+    ingevuld.join(', ')
+  ].filter(Boolean).join(' · ');
+}
+[taalModel, outputFormat, gesprekTypeSelect, geslachtSelect]
+  .forEach(el => el.addEventListener('change', werkSamenvattingenBij));
+[voorinformatieInput, behandeldoelInput, customPromptInput]
+  .forEach(el => el.addEventListener('input', werkSamenvattingenBij));
 
 // ── Geslacht badge ────────────────────────────────────────────
 function updateGeslachtBadge() {
@@ -2278,6 +2754,10 @@ function startMeters() {
   if (!meterBronnen.length) return;
   niveauMeters.classList.remove('hidden');
   niveauWaarschuwing.classList.add('hidden');
+  // Buiten een opname is het golfbeeld een lege lijn; het verschijnt pas nu, en
+  // pas zichtbaar heeft het een breedte om op te meten.
+  golfWrap.classList.remove('hidden');
+  maatGolf();
   const tik = () => {
     const stil = [];
     let piek = 0;
@@ -2316,6 +2796,7 @@ function stopMeters() {
   meterFrame = null;
   meterBronnen = [];
   niveauMeters.classList.add('hidden');
+  golfWrap.classList.add('hidden');
   niveauSchermRij.classList.add('hidden');
   niveauWaarschuwing.classList.add('hidden');
   [niveauMic, niveauScherm].forEach(b => { b.style.width = '0%'; b.classList.remove('stil'); });
@@ -2326,6 +2807,28 @@ function stopMeters() {
 
 // ── Opname ────────────────────────────────────────────────────
 btnRecord.addEventListener('click', () => isRecording ? stopRecording() : startRecording());
+
+// Met het toetsenbord vraagt stoppen een tweede druk binnen drie seconden. Stoppen
+// is definitief (de transcriptie begint meteen), en een map op het toetsenbord of
+// een elleboog op de spatiebalk maakte zo van een gesprek een half verslag. De
+// opnameknop zelf blijft één klik: daar druk je niet per ongeluk op.
+const recordHint = $('recordHint'), RECORD_HINT = recordHint.innerHTML;
+let stopToetsTot = 0, stopToetsTimer = null;
+function stopMetToets(toets) {
+  if (Date.now() < stopToetsTot) { stopRecording(); return; }
+  stopToetsTot = Date.now() + 3000;
+  recordHint.innerHTML = 'Nog eens <kbd>' + toets + '</kbd> om te stoppen';
+  recordHint.classList.add('bevestig');
+  toast('Nog eens ' + toets + ' om de opname te stoppen');
+  clearTimeout(stopToetsTimer);
+  stopToetsTimer = setTimeout(herstelStopToets, 3000);
+}
+function herstelStopToets() {
+  clearTimeout(stopToetsTimer);
+  stopToetsTot = 0;
+  recordHint.innerHTML = RECORD_HINT;
+  recordHint.classList.remove('bevestig');
+}
 
 // Bij een online gesprek gebruikt het gespreksprogramma (Teams, Meet) dezelfde
 // microfoon. Vragen we die op met de verwerking uít, dan moet de browser het
@@ -2464,6 +2967,7 @@ function ruimOpnameOp() {
 }
 
 function stopRecording() {
+  herstelStopToets();
   if (mediaRecorder?.state !== 'inactive') mediaRecorder.stop();
   ruimOpnameOp();
   opnameUIStop('Opname gestopt — bezig met verwerken...');
@@ -2747,9 +3251,6 @@ function alarmUit() {
   document.title = isRecording ? '● ' + formatTime(secondsElapsed).replace(/^00:/, '') + ' — Sessienotitie' : 'Sessienotitie';
 }
 
-// Vóór een sessie even horen of het alarm hoorbaar is, en waar het klinkt.
-function testAlarm() { speelAlarmToon(); }
-
 // ── Vangnet ───────────────────────────────────────────────────
 // Een opname gaat naar IndexedDB vóór de transcriptiepoging, zodat een crash
 // van browser of computer het gesprek niet kost. Dat is gespreksaudio van
@@ -2954,15 +3455,18 @@ audioUpload.addEventListener('change', async (e) => {
 
 // ── Transcriptie ──────────────────────────────────────────────
 // `vangnetId`: de reservekopie in IndexedDB, die weg mag zodra er een verslag is.
-async function transcribeer(blob, bestandsnaam = 'opname.webm', vangnetId = null) {
+// `audioSeconden`: de duur van een eigen opname; bij een geüpload bestand geeft
+// Voxtral die zelf terug.
+async function transcribeer(blob, bestandsnaam = 'opname.webm', vangnetId = null, audioSeconden = 0) {
   vangnetWordtHuidig(vangnetId);
   if (sleutelOntbreekt()) { recordStatus.textContent = 'Klaar voor nieuw gesprek'; return; }
   setStep(2);
   setStatus('busy', 'Transcriptie bezig');
   transcriptSpinner.classList.remove('hidden');
-  transcriptBox.textContent = 'Audio wordt getranscribeerd...';
-  transcriptBox.classList.remove('filled');
-  transcriptTelling.textContent = '';
+  let hint = 'Audio wordt getranscribeerd';
+  if (audioSeconden >= 60) hint += ` — ${Math.round(audioSeconden / 60)} min audio`;
+  zetTranscript('', { bewerkbaar: false, hint: hint + '...' });
+  gesprekSeconden = 0;
   try {
     const form = new FormData();
     form.append('file', blob, bestandsnaam);
@@ -2978,33 +3482,141 @@ async function transcribeer(blob, bestandsnaam = 'opname.webm', vangnetId = null
       body: form,
     });
     if (!resp.ok) throw await foutUitAntwoord(resp);
-    huidigTranscript = bouwTranscript(await resp.json());
-    if (!huidigTranscript.trim()) throw new Error('Leeg transcript ontvangen');
-    transcriptBox.textContent = huidigTranscript;
-    transcriptBox.classList.add('filled');
-    transcriptTelling.textContent = telZin(woorden(huidigTranscript));
+    const data = await resp.json();
+    const nieuw = bouwTranscript(data);
+    if (!nieuw.trim()) throw new Error('Leeg transcript ontvangen');
+    wisBron();
+    zetTranscript(nieuw);
     transcriptSpinner.classList.add('hidden');
-    await maakVerslag(huidigTranscript, gesprekTypeSelect.value, geslachtSelect.value,
-                      customPromptInput.value.trim(), voorinformatieInput.value.trim());
+    gesprekSeconden = data.usage?.prompt_audio_seconds || audioSeconden || 0;
+    await maakVerslagMetInstellingen();
   } catch (err) {
     transcriptSpinner.classList.add('hidden');
-    showError('Transcriptie mislukt: ' + err.message, () => transcribeer(blob, bestandsnaam, vangnetId));
+    // Het veld weer vrijgeven: een mislukte uitwerking is nog te redden door het
+    // transcript ergens anders vandaan te halen en hier te plakken.
+    if (!huidigTranscript) zetTranscript('');
+    showError('Transcriptie mislukt: ' + err.message, () => transcribeer(blob, bestandsnaam, vangnetId, audioSeconden));
     setStatus('err', 'Transcriptie fout');
     recordStatus.textContent = 'Klaar voor nieuw gesprek';
-    // Ook zonder verslag het regen-paneel tonen mits er een transcript is
-    toonRegenPaneel(gesprekTypeSelect.value, geslachtSelect.value);
+    werkRegenKnopBij();
   }
 }
 
 // Een opname (net gestopt, of uit het vangnet) naar transcriptie en verslag.
 function verwerkOpname(blob, bestandsnaam, audioSeconden, vangnetId) {
-  return transcribeer(blob, bestandsnaam, vangnetId);
+  return transcribeer(blob, bestandsnaam, vangnetId, audioSeconden);
 }
 
-// ── Transcript: uitklappen en kopiëren ────────────────────────
+// ── Transcript: invoeren ──────────────────────────────────────
+// Het transcriptveld is ook een invoerveld. Wie een gesprek al ergens anders heeft
+// laten uitwerken plakt het transcript er rechtstreeks in en slaat de opname over;
+// wie wél heeft opgenomen kan de uitwerking hier nog bijschaven voordat het verslag
+// eruit geschreven wordt. huidigTranscript volgt altijd wat er in het veld staat.
+const TRANSCRIPT_HINT = transcriptBox.dataset.leeg;
+
+function zetTranscript(tekst, { bewerkbaar = true, hint = '' } = {}) {
+  transcriptBox.textContent = tekst || '';
+  transcriptBox.dataset.leeg = hint || TRANSCRIPT_HINT;
+  transcriptBox.contentEditable = bewerkbaar ? 'true' : 'false';
+  leesTranscript();
+}
+
+function leesTranscript() {
+  // Bewerken laat de browser hier en daar een harde spatie achter; die hoort niet
+  // in het transcript dat naar het taalmodel gaat.
+  const tekst = transcriptBox.innerText.replace(/\u00a0/g, ' ');
+  const wasLeeg = !huidigTranscript;
+  huidigTranscript = tekst.trim() ? tekst : '';
+  // Staat er voor het eerst een transcript, dan is de voorbereiding voorbij: die
+  // klapt dicht zodat transcript en verslag bovenaan komen. Niet als je er nog
+  // in aan het typen bent.
+  if (wasLeeg && huidigTranscript && !uitklapVoorbereiding.contains(document.activeElement))
+    uitklapVoorbereiding.open = false;
+  // Een leeg veld hoort niet meer bij een opname: een transcript dat je daarna
+  // plakt heeft geen opnameduur.
+  if (!huidigTranscript) gesprekSeconden = 0;
+  // Een leeggemaakt bewerkbaar veld houdt in de browser een <br> over; die moet
+  // weg, anders blijft de uitnodiging om te plakken verborgen.
+  if (!huidigTranscript && transcriptBox.innerHTML) transcriptBox.innerHTML = '';
+  transcriptBox.classList.toggle('leeg', !huidigTranscript);
+  transcriptBox.classList.toggle('filled', !!huidigTranscript);
+  transcriptTelling.textContent = huidigTranscript ? telZin(woorden(huidigTranscript)) : '';
+  if (huidigTranscript && !verslagBezig && !verslagMarkdown) setStep(2);
+  werkVerslagKnopBij();
+}
+
+// De knop verschijnt alleen als er iets te doen valt: een transcript waar nog geen
+// verslag uit geschreven is, of een transcript dat sinds het verslag veranderd is.
+function werkVerslagKnopBij() {
+  werkTranscriptKaartBij();
+  const tedoen = !!huidigTranscript && huidigTranscript !== verslagBron
+                 && !verslagBezig && transcriptBox.isContentEditable;
+  btnMaakVerslag.classList.toggle('hidden', !tedoen);
+  btnMaakVerslag.textContent = verslagMarkdown ? 'Verslag opnieuw maken' : 'Verslag maken';
+  werkRegenKnopBij();
+}
+
+transcriptBox.addEventListener('input', leesTranscript);
+transcriptBox.addEventListener('paste', e => { plakAlsTekst(e, transcriptBox); leesTranscript(); });
+
+// Een geplakt of bijgeschaafd transcript uitwerken tot een verslag, met de
+// instellingen die er op dat moment staan.
+async function maakVerslagUitTranscript() {
+  if (!huidigTranscript.trim()) { toast('Er staat nog geen transcript.', 'fout'); return; }
+  if (isRecording) { toast('Stop eerst de lopende opname.', 'fout'); return; }
+  if (verslagBezig) return;
+  hideError();
+  transcriptBox.blur();
+  await maakVerslagMetInstellingen();
+}
+
+// De cursor achteraan zetten, zodat plakken of typen bij een bestaand transcript
+// erachter komt en niet ervoor.
+function focusTranscript() {
+  if (!transcriptBox.isContentEditable) { toast('Wacht tot de opname is uitgewerkt.', 'fout'); return; }
+  if (transcriptIsNaslag() && !transcriptKaart.classList.contains('getoond')) transcriptUitklappen();
+  transcriptBox.focus();
+  const bereik = document.createRange();
+  bereik.selectNodeContents(transcriptBox);
+  bereik.collapse(false);
+  const sel = window.getSelection();
+  sel.removeAllRanges(); sel.addRange(bereik);
+  transcriptBox.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+
+// ── Transcript: werkblad of naslag ────────────────────────────
+// Zonder verslag staat het transcript bovenaan, en met Uitklappen groter. Is er
+// een verslag (of wordt het geschreven), dan is het naslag: onderaan en
+// ingeklapt, met Tonen om het terug te halen.
+const transcriptIsNaslag = () => transcriptKaart.classList.contains('achtergrond');
+function werkTranscriptKaartBij() {
+  const naslag = verslagBezig || !!verslagMarkdown;
+  if (naslag !== transcriptIsNaslag()) {
+    transcriptKaart.classList.toggle('achtergrond', naslag);
+    transcriptKaart.classList.remove('getoond');
+    transcriptBox.classList.remove('uit');
+  }
+  werkTranscriptUitKnopBij();
+}
+function werkTranscriptUitKnopBij() {
+  if (transcriptIsNaslag()) {
+    const getoond = transcriptKaart.classList.contains('getoond');
+    btnTranscriptUit.textContent = getoond ? 'Verbergen' : 'Tonen';
+    btnTranscriptUit.title = getoond ? 'Transcript verbergen' : 'Transcript tonen';
+  } else {
+    const uit = transcriptBox.classList.contains('uit');
+    btnTranscriptUit.textContent = uit ? 'Inklappen' : 'Uitklappen';
+    btnTranscriptUit.title = uit ? 'Kleiner tonen' : 'Volledig tonen';
+  }
+}
 function transcriptUitklappen() {
-  const uit = transcriptBox.classList.toggle('uit');
-  btnTranscriptUit.textContent = uit ? 'Inklappen' : 'Uitklappen';
+  if (transcriptIsNaslag()) {
+    const getoond = transcriptKaart.classList.toggle('getoond');
+    transcriptBox.classList.toggle('uit', getoond);
+  } else {
+    transcriptBox.classList.toggle('uit');
+  }
+  werkTranscriptUitKnopBij();
 }
 async function kopieerTranscript() {
   if (!huidigTranscript) { toast('Er is nog geen transcript.', 'fout'); return; }
@@ -3014,24 +3626,53 @@ async function kopieerTranscript() {
   } catch { toast('Kopiëren mislukt — selecteer de tekst handmatig.', 'fout'); }
 }
 
-// ── Regen-paneel tonen ────────────────────────────────────────
-function toonRegenPaneel(gesprekType, geslacht) {
-  if (!huidigTranscript) return;
-  regenType.value = gesprekType;
-  regenGeslacht.value = geslacht;
-  regenPanel.classList.remove('hidden');
-  uitklapRegen.classList.remove('hidden');
-  btnRegen.disabled = false;
+// ── Instellingen voor het verslag ─────────────────────────────
+// De instellingen zoals ze nu staan (voorbereiding en zijbalk) zijn de enige:
+// maken, opnieuw genereren en herzien gebruiken ze allemaal.
+function instellingenNu() {
+  return {
+    gesprekType: gesprekTypeSelect.value, geslacht: geslachtSelect.value, model: taalModel.value,
+    emoji: optEmoji.checked, feedback: optFeedback.checked, titel: optTitel.checked
+  };
+}
+
+function maakVerslagMetInstellingen(suggestie = '', vorigVerslag = '') {
+  const s = instellingenNu();
+  return maakVerslag(huidigTranscript, s.gesprekType, s.geslacht,
+                     customPromptInput.value.trim(), voorinformatieInput.value.trim(),
+                     suggestie, vorigVerslag);
+}
+
+// ── Knop 'Opnieuw genereren' ──────────────────────────────────
+// Zichtbaar zodra er een verslag staat bij het transcript zoals het nu is. Is het
+// transcript sindsdien veranderd, dan staat 'Verslag opnieuw maken' al bij het
+// transcript en is een tweede knop voor hetzelfde overbodig. Wijken de
+// instellingen af van waarmee het getoonde verslag gemaakt is, dan zegt de knop dat.
+const INSTELLING_NAMEN = { gesprekType: 'type gesprek', geslacht: 'geslacht', model: 'taalmodel',
+                           emoji: 'emoji', feedback: 'supervisie', titel: 'titel' };
+function werkRegenKnopBij() {
+  const v = versies[huidigeVersie];
+  btnRegen.classList.toggle('hidden', !v || !huidigTranscript || huidigTranscript !== verslagBron || verslagBezig);
+  btnRegen.disabled = verslagBezig;
+  const nu = instellingenNu();
+  const anders = v?.instellingen
+    ? Object.keys(INSTELLING_NAMEN).filter(k => v.instellingen[k] !== nu[k]) : [];
+  btnRegen.classList.toggle('gewijzigd', anders.length > 0);
+  regenLabel.textContent = anders.length ? 'Opnieuw genereren met nieuwe instellingen' : 'Opnieuw genereren';
+  btnRegen.title = anders.length
+    ? 'Gewijzigd: ' + anders.map(k => INSTELLING_NAMEN[k]).join(', ') + ' (G)'
+    : 'Opnieuw schrijven met de huidige instellingen (G)';
 }
 
 // ── Versiegeschiedenis ────────────────────────────────────────
-function bewaarVersie(suggestie) {
+function bewaarVersie(suggestie, instellingen) {
   // Een nieuwe versie komt altijd achteraan, ook als je eerst bent teruggebladerd:
   // teruggaan is bedoeld om te vergelijken, niet om werk weg te gooien.
   versies.push({
     verslagMarkdown, finalVerslag, huidigeTitel,
     supervisie: huidigeSupervisie,
     gesprekType: huidigGesprekType,
+    instellingen,
     suggestie: suggestie || ''
   });
   huidigeVersie = versies.length - 1;
@@ -3045,7 +3686,9 @@ function werkVersieBalkBij() {
   btnVorigeVersie.disabled = huidigeVersie <= 0;
   btnVolgendeVersie.disabled = huidigeVersie >= versies.length - 1;
   const s = versies[huidigeVersie].suggestie;
-  versieSuggestie.textContent = s ? `herzien op: "${s.length > 90 ? s.slice(0, 90) + '…' : s}"` : 'eerste versie';
+  // In de kop is weinig ruimte: de volledige aanwijzing staat in de tooltip.
+  versieSuggestie.textContent = s ? `herzien op: "${s}"` : 'eerste versie';
+  versieSuggestie.title = s || '';
 }
 
 function stapVersie(richting) {
@@ -3062,11 +3705,13 @@ function stapVersie(richting) {
   zetSectieKnoppen();
   outputBox.classList.remove('placeholder');
   outputBox.classList.add('formatted');
-  verslagTelling.textContent = telZin(woorden(finalVerslag));
+  outputBox.contentEditable = 'true';
+  verslagTelling.textContent = verslagTellingTekst();
   titelRegel.textContent = huidigeTitel;
   titelRegel.classList.toggle('show', !!huidigeTitel);
   renderSupervisie();
   werkVersieBalkBij();
+  werkRegenKnopBij();
   autoKopieerVerslag();
 }
 
@@ -3077,10 +3722,9 @@ async function herzieVerslag() {
   if (!huidigTranscript) { showError('Geen transcript beschikbaar.'); return; }
   hideError();
   // De versie waar je nu naar kijkt is het vertrekpunt, niet per se de laatste.
+  // Eigen bewerkingen in het verslag horen bij die versie en gaan dus mee.
   const basis = versies[huidigeVersie]?.verslagMarkdown || verslagMarkdown;
-  await maakVerslag(huidigTranscript, regenType.value, regenGeslacht.value,
-                    customPromptInput.value.trim(), voorinformatieInput.value.trim(),
-                    suggestie, basis);
+  await maakVerslagMetInstellingen(suggestie, basis);
   suggestieInput.value = '';
 }
 
@@ -3088,9 +3732,15 @@ async function herzieVerslag() {
 async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '', voorinformatie = '',
                            suggestie = '', vorigVerslag = '') {
   if (sleutelOntbreekt()) return;
+  // Vastleggen waarmee dit verslag gemaakt wordt, vóór iemand tijdens het schrijven
+  // de instellingen verandert.
+  const instellingen = { ...instellingenNu(), gesprekType, geslacht };
+  verslagBezig = true; werkVerslagKnopBij();
   setStep(3);
   setStatus('busy', suggestie ? 'Verslag wordt herzien' : 'Verslag wordt geschreven');
   verslagSpinner.classList.remove('hidden');
+  outputBox.contentEditable = 'false';
+  outputBox.blur();
   outputBox.classList.remove('placeholder', 'formatted');
   outputBox.textContent = 'Het taalmodel is bezig met het uitwerken van het verslag...';
   verslagTelling.textContent = '';
@@ -3099,18 +3749,20 @@ async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '',
   // herziening blijft die van de versie waar je van uitging staan. Anders een
   // nieuwe, tegelijk met het verslag.
   const basisVersie = versies[huidigeVersie];
-  if (!optFeedback.checked) huidigeSupervisie = null;
-  else if (suggestie && basisVersie?.supervisie) huidigeSupervisie = basisVersie.supervisie;
-  else huidigeSupervisie = haalSupervisie(verwijderHerhalingen(transcript), gesprekType, geslacht);
+  if (!instellingen.feedback) huidigeSupervisie = null;
+  else if (suggestie && basisVersie?.supervisie && verslagBron === transcript) huidigeSupervisie = basisVersie.supervisie;
+  else huidigeSupervisie = haalSupervisie(verwijderHerhalingen(transcript), gesprekType, geslacht,
+                                          instellingen.model, behandeldoelInput.value.trim());
   renderSupervisie();
+  haalVeiligheid(transcript);
   btnKopieer.disabled = true; btnRegen.disabled = true;
   btnHerzie.disabled = true;
 
   try {
-    const systeemPrompt   = bouwSysteemprompt(gesprekType, optEmoji.checked, optTitel.checked);
+    const systeemPrompt   = bouwSysteemprompt(gesprekType, instellingen.emoji, instellingen.titel);
     const gebruikerPrompt = bouwGebruikerPrompt(verwijderHerhalingen(transcript), gesprekType, geslacht,
                                                 customPrompt, voorinformatie, optVoorinfoInVerslag.checked,
-                                                suggestie, vorigVerslag);
+                                                suggestie, vorigVerslag) + taalregel(instellingen.model);
 
     const resp = await fetch(MISTRAL_CHAT_URL, {
       method: 'POST',
@@ -3120,9 +3772,8 @@ async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '',
         'Accept': 'text/event-stream',
       },
       body: JSON.stringify({
-        model: CHAT_MODEL,
+        ...modelVelden(instellingen.model),
         stream: true,
-        temperature: TEMPERATUUR,
         messages: [
           { role: 'system', content: systeemPrompt },
           { role: 'user',   content: gebruikerPrompt },
@@ -3136,7 +3787,8 @@ async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '',
     const reader = resp.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '', ruweTekst = '';
-    outputBox.textContent = '';
+    outputBox.textContent = MODEL_AFWIJKINGEN[instellingen.model]?.nadenken
+      ? 'Het taalmodel denkt eerst na; het verslag verschijnt zodra het gaat schrijven...' : '';
 
     while (true) {
       const { done, value } = await reader.read();
@@ -3152,8 +3804,9 @@ async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '',
         try {
           const obj = JSON.parse(regel);
           if (obj.error) throw new Error(foutTekstUit(obj.error));
-          ruweTekst += obj?.choices?.[0]?.delta?.content || '';
-          outputBox.textContent = ruweTekst;
+          // Met nadenken komt het denkwerk in eigen stukken mee; alleen de tekst telt.
+          ruweTekst += alleenTekst(obj?.choices?.[0]?.delta?.content);
+          if (ruweTekst) outputBox.textContent = ruweTekst;
         } catch (e) {
           if (e instanceof SyntaxError) continue;   // onvolledige JSON, overslaan
           throw e;
@@ -3166,11 +3819,14 @@ async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '',
     verslagSpinner.classList.add('hidden');
     huidigGesprekType = gesprekType;
     verwerkOutput(ruweTekst);
-    bewaarVersie(suggestie);
+    bewaarVersie(suggestie, instellingen);
     ruimVangnetOp();
+    verslagBron = transcript;
+    verslagBezig = false; werkVerslagKnopBij();
 
-    toonRegenPaneel(gesprekType, geslacht);
     suggestiePaneel.classList.remove('hidden');
+    documentenEl.classList.remove('hidden');
+    wisDocument();
 
     btnKopieer.disabled = false;
     btnHerzie.disabled = false;
@@ -3185,14 +3841,14 @@ async function maakVerslag(transcript, gesprekType, geslacht, customPrompt = '',
     recordStatus.textContent = 'Verslag voltooid';
   } catch (err) {
     verslagSpinner.classList.add('hidden');
+    verslagBezig = false; werkVerslagKnopBij();
     showError('Verslag genereren mislukt: ' + err.message, () =>
       maakVerslag(transcript, gesprekType, geslacht, customPrompt, voorinformatie, suggestie, vorigVerslag));
     setStatus('err', 'Taalmodel fout');
-    toonRegenPaneel(gesprekType, geslacht);
-    uitklapRegen.open = true;
     // Bij een mislukte herziening blijft de vorige versie gewoon staan.
     btnHerzie.disabled = versies.length === 0;
     if (versies.length) stapVersie(0);
+    werkRegenKnopBij();
   }
 }
 
@@ -3233,7 +3889,8 @@ function verwerkOutput(ruweTekst) {
   zetSectieKnoppen();
   outputBox.classList.remove('placeholder');
   outputBox.classList.add('formatted');
-  verslagTelling.textContent = telZin(woorden(finalVerslag));
+  outputBox.contentEditable = 'true';
+  verslagTelling.textContent = verslagTellingTekst();
 
   if (huidigeTitel) {
     titelRegel.textContent = huidigeTitel;
@@ -3241,46 +3898,58 @@ function verwerkOutput(ruweTekst) {
   }
 }
 
-// ── Supervisie ────────────────────────────────────────────────
-// Een eigen, niet-gestreamde aanroep naar Mistral, tegelijk met het verslag.
-// Geeft meteen de houder terug; die wordt gevuld zodra het antwoord er is, en
-// alleen opnieuw getekend als hij dan nog in beeld is.
-function haalSupervisie(transcript, gesprekType, geslacht) {
-  const houder = { status: 'bezig', data: null, fout: '' };
-  fetch(MISTRAL_CHAT_URL, {
+// ── Losse aanroepen naast het verslag ───────────────────────
+// Supervisie, tips, veiligheid, 'Waar staat dit?' en de documenten voor de
+// cliënt: elk één niet-gestreamde aanroep. Geeft de tekst van het antwoord terug,
+// zonder denkwerk; standaard als JSON, met alsJson=false als gewone tekst.
+async function mistralAanroep(systeem, vraag, keuze, alsJson = true) {
+  const resp = await fetch(MISTRAL_CHAT_URL, {
     method: 'POST',
     headers: {
       'Authorization': 'Bearer ' + getApiKey(),
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: CHAT_MODEL,
-      temperature: TEMPERATUUR,
-      response_format: { type: 'json_object' },
+      ...modelVelden(keuze),
+      ...(alsJson ? { response_format: { type: 'json_object' } } : {}),
       messages: [
-        { role: 'system', content: SUPERVISIE_SYSTEEM },
-        { role: 'user',   content: bouwSupervisieVraag(transcript, geslacht, gesprekType) },
+        { role: 'system', content: systeem },
+        { role: 'user',   content: vraag + taalregel(keuze) },
       ],
     }),
-  })
-    .then(async resp => {
-      if (!resp.ok) throw await foutUitAntwoord(resp);
-      const antwoord = await resp.json();
-      const inhoud = antwoord?.choices?.[0]?.message?.content;
-      if (!inhoud) throw new Error('Leeg antwoord van het taalmodel ontvangen.');
-      Object.assign(houder, { status: 'klaar', data: leesSupervisie(inhoud) });
-    })
-    .catch(err => Object.assign(houder, { status: 'fout', fout: err.message }))
+  });
+  if (!resp.ok) throw await foutUitAntwoord(resp);
+  const antwoord = await resp.json();
+  const inhoud = alleenTekst(antwoord?.choices?.[0]?.message?.content);
+  if (!inhoud.trim()) throw new Error('Leeg antwoord van het taalmodel ontvangen.');
+  return inhoud;
+}
+
+// ── Supervisie ────────────────────────────────────────────────
+// Een eigen aanroep, tegelijk met het verslag. Geeft meteen de houder terug; die
+// wordt gevuld zodra het antwoord er is, en alleen opnieuw getekend als hij dan
+// nog in beeld is. De houder onthoudt ook waarmee hij gemaakt is: de tips bouwen
+// daarop voort.
+function haalSupervisie(transcript, gesprekType, geslacht, model, behandeldoel = '') {
+  const houder = { status: 'bezig', data: null, fout: '', tips: null,
+                   vraag: { transcript, gesprekType, geslacht, model } };
+  mistralAanroep(SUPERVISIE_SYSTEEM, bouwSupervisieVraag(transcript, geslacht, gesprekType, behandeldoel), model)
+    .then(inhoud => Object.assign(houder, { status: 'klaar', data: leesSupervisie(inhoud) }))
+    .catch(err => Object.assign(houder, { status: 'fout', fout: foutBijLezen(err) }))
     .finally(() => { if (huidigeSupervisie === houder) renderSupervisie(); });
   return houder;
 }
+
+// Een JSON-antwoord dat niet te lezen is, geeft een SyntaxError met een
+// technische melding; die zegt de gebruiker niets.
+const foutBijLezen = err => err instanceof SyntaxError ? 'Het taalmodel gaf een onleesbaar antwoord.' : err.message;
 
 // De tekst komt rechtstreeks uit het taalmodel en gaat daarom via inlineHtml, dat
 // eerst alles escapet en daarna alleen de nadruk (*...*, **...**) omzet.
 function renderSupervisie() {
   const s = huidigeSupervisie;
   tipCard.classList.toggle('show', !!s);
-  tipSpinner.classList.toggle('hidden', s?.status !== 'bezig');
+  tipSpinner.classList.toggle('hidden', s?.status !== 'bezig' && s?.tips?.status !== 'bezig');
   tipBox.replaceChildren();
   if (!s) return;
   const melding = tekst => {
@@ -3297,7 +3966,7 @@ function renderSupervisie() {
     tipBox.appendChild(h);
   };
   // Een witregel in de modeltekst wordt een nieuwe alinea; een eventueel label
-  // ('Voor de behandelaar:') komt vet vooraan in de eerste.
+  // ('Jij, naar helpend:') komt vet vooraan in de eerste.
   const alineas = (tekst, label = '') => {
     tekst.split(/\n\s*\n/).forEach(stuk => {
       const regel = stuk.replace(/^\s*[-*+]\s+/gm, '').replace(/\s*\n\s*/g, ' ').trim();
@@ -3309,22 +3978,57 @@ function renderSupervisie() {
     });
   };
   const d = s.data;
-  for (const [titel, tekst] of [['Betrekking', d.betrekking], ['Onuitgesproken', d.onuitgesproken],
-                                ['Suggestie', d.suggestie]]) {
-    if (!tekst) continue;
-    kop(titel);
-    alineas(tekst);
+  if (d.onuitgesproken) {
+    kop('Onuitgesproken');
+    alineas(d.onuitgesproken);
+  }
+  if (d.doelgerichtheid) {
+    kop('Doelgerichtheid');
+    alineas(d.doelgerichtheid);
   }
   if (d.leary?.length) {
     kop('Roos van Leary');
     tipBox.appendChild(tekenLeary(d.leary));
   }
-  const r = d.richting || {};
-  if (r.behandelaar || r.client) {
-    kop('Naar helpend en meewerkend');
-    if (r.behandelaar) alineas(r.behandelaar, 'Jij, naar helpend:');
-    if (r.client) alineas(r.client, 'Cliënt, naar meewerkend:');
+  if (!d.onuitgesproken && !d.doelgerichtheid && !d.leary?.length) return;
+
+  // Tips voor een volgend gesprek: alleen op verzoek, na het lezen.
+  const t = s.tips;
+  if (!t || t.status === 'fout') {
+    const rij = document.createElement('div');
+    rij.className = 'tips-rij';
+    if (t) {
+      const p = document.createElement('p');
+      p.className = 'wacht';
+      p.textContent = 'Tips mislukt: ' + t.fout;
+      rij.appendChild(p);
+    }
+    const knop = document.createElement('button');
+    knop.className = 'btn';
+    knop.textContent = t ? 'Opnieuw proberen' : 'Tips voor het gesprek';
+    knop.title = 'Wat je in een volgend gesprek anders kunt doen, voortbouwend op wat hierboven staat';
+    knop.onclick = () => haalTips(s);
+    rij.appendChild(knop);
+    tipBox.appendChild(rij);
+    return;
   }
+  kop('Tips voor het gesprek');
+  if (t.status === 'bezig') { melding('De supervisor denkt na over tips…'); return; }
+  const v = VOORKEURSPOSITIES[s.vraag.gesprekType] || VOORKEURSPOSITIES.behandelgesprek;
+  if (t.data.jij) alineas(t.data.jij, `Jij, naar ${v.behandelaar}:`);
+  if (t.data.client) alineas(t.data.client, `De cliënt uitnodigen tot ${v.client}:`);
+  if (t.data.onuitgesproken) alineas(t.data.onuitgesproken, 'Het onuitgesprokene:');
+}
+
+function haalTips(houder) {
+  if (sleutelOntbreekt()) return;
+  houder.tips = { status: 'bezig', data: null, fout: '' };
+  renderSupervisie();
+  const { transcript, gesprekType, geslacht, model } = houder.vraag;
+  mistralAanroep(tipsSysteem(gesprekType), bouwTipsVraag(transcript, houder.data, geslacht, gesprekType), model)
+    .then(inhoud => Object.assign(houder.tips, { status: 'klaar', data: leesTips(inhoud) }))
+    .catch(err => Object.assign(houder.tips, { status: 'fout', fout: foutBijLezen(err) }))
+    .finally(() => { if (huidigeSupervisie === houder) renderSupervisie(); });
 }
 
 // De roos: boven–onder verticaal, tegen–samen horizontaal (samen rechts), acht
@@ -3400,7 +4104,6 @@ function tekenLeary(personen) {
     const naam = document.createElement('strong');
     naam.textContent = p.spreker;
     tekst.append(naam);
-    if (p.toelichting) tekst.insertAdjacentHTML('beforeend', ' — ' + inlineHtml(p.toelichting));
     // De momenten waarop de punten rusten: ingeklapt, om na te lopen waar een
     // plaatsing vandaan komt.
     if (p.momenten?.length) {
@@ -3471,9 +4174,9 @@ async function autoKopieerVerslag() {
 // ── Opnieuw genereren ─────────────────────────────────────────
 async function regenereerVerslag() {
   if (!huidigTranscript) { showError('Geen transcript beschikbaar.'); return; }
+  if (verslagBezig) return;
   hideError();
-  await maakVerslag(huidigTranscript, regenType.value, regenGeslacht.value,
-                    customPromptInput.value.trim(), voorinformatieInput.value.trim());
+  await maakVerslagMetInstellingen();
 }
 
 // ── Kopiëren per sectie ───────────────────────────────────────
@@ -3506,23 +4209,34 @@ function zetSectieKnoppen() {
     knop.className = 'sectie-kopieer';
     knop.textContent = 'Kopiëren';
     knop.title = 'De inhoud van deze sectie kopiëren, zonder de kopregel';
-    knop.addEventListener('click', () => kopieerSectie(sectie, knop));
+    // Het verslag is bewerkbaar: de knop hoort niet bij de tekst, en kopieert de
+    // sectie zoals die er bij het klikken staat.
+    knop.contentEditable = 'false';
+    knop.addEventListener('click', () => {
+      const nr = [...outputBox.querySelectorAll('h2')].indexOf(kop);
+      const actueel = verslagSecties(verslagMarkdown)[nr];
+      if (actueel) kopieerSectie(actueel, knop);
+    });
     kop.appendChild(knop);
   });
 }
 
-async function kopieerSectie(sectie, knop) {
+// Een stuk Markdown naar het klembord, in het gekozen uitvoerformaat.
+async function kopieerMarkdown(md) {
   const fmt = outputFormat.value;
+  if (fmt === 'html' && navigator.clipboard.write && window.ClipboardItem) {
+    await navigator.clipboard.write([new ClipboardItem({
+      'text/html':  new Blob([convertMarkdownToHtml(md)], { type: 'text/html' }),
+      'text/plain': new Blob([convertMarkdown(md)], { type: 'text/plain' })
+    })]);
+  } else {
+    await navigator.clipboard.writeText(fmt === 'markdown' ? md : convertMarkdown(md));
+  }
+}
+
+async function kopieerSectie(sectie, knop) {
   try {
-    if (fmt === 'html' && navigator.clipboard.write && window.ClipboardItem) {
-      await navigator.clipboard.write([new ClipboardItem({
-        'text/html':  new Blob([convertMarkdownToHtml(sectie.markdown)], { type: 'text/html' }),
-        'text/plain': new Blob([convertMarkdown(sectie.markdown)], { type: 'text/plain' })
-      })]);
-    } else {
-      await navigator.clipboard.writeText(fmt === 'markdown' ? sectie.markdown
-                                                             : convertMarkdown(sectie.markdown));
-    }
+    await kopieerMarkdown(sectie.markdown);
     // De knop blijft gemarkeerd staan, zodat je in een lange intake ziet welke
     // velden je al in het dossier hebt staan.
     knop.classList.add('gedaan');
@@ -3573,12 +4287,17 @@ function resetAll() {
   vangnetHuidig = null;
   vangnetLeeg();
   finalVerslag = ''; verslagMarkdown = ''; huidigeSupervisie = null; huidigeTitel = ''; huidigTranscript = '';
-  transcriptBox.textContent = 'Het transcript verschijnt hier zodra de opname is uitgewerkt.';
-  transcriptBox.classList.remove('filled', 'uit');
-  btnTranscriptUit.textContent = 'Uitklappen';
-  transcriptTelling.textContent = ''; verslagTelling.textContent = '';
+  verslagBron = ''; verslagBezig = false;
+  transcriptBox.classList.remove('uit');
+  zetTranscript('');
+  verslagTelling.textContent = '';
   outputBox.innerHTML = 'Het verslag verschijnt hier zodra het taalmodel het heeft uitgewerkt.';
+  outputBox.contentEditable = 'false';
   outputBox.classList.remove('formatted'); outputBox.classList.add('placeholder');
+  gesprekSeconden = 0;
+  veiligheid = null; renderVeiligheid();
+  wisBron();
+  wisDocument(); documentenEl.classList.add('hidden'); documentenEl.open = false;
   titelRegel.classList.remove('show'); titelRegel.textContent = '';
   renderSupervisie();
   uploadFilename.textContent = '';
@@ -3586,8 +4305,6 @@ function resetAll() {
   recordTimer.textContent = '00:00:00'; recordTimer.classList.remove('active');
   recordStatus.textContent = 'Klaar om op te nemen';
   hideError();
-  regenPanel.classList.add('hidden'); btnRegen.disabled = false;
-  uitklapRegen.classList.add('hidden'); uitklapRegen.open = false;
   versies = []; huidigeVersie = -1;
   versieBalk.classList.add('hidden');
   huidigGesprekType = '';
@@ -3595,10 +4312,350 @@ function resetAll() {
   geslachtSelect.value = 'onbekend';
   customPromptInput.value = '';
   voorinformatieInput.value = '';
+  behandeldoelInput.value = '';
   optVoorinfoInVerslag.checked = false;
   updateGeslachtBadge();
+  uitklapVoorbereiding.open = true;
+  werkSamenvattingenBij();
+  werkTranscriptKaartBij();
+  werkRegenKnopBij();
   setStep(0); setStatus('', 'Gereed');
   golfHistorie = golfHistorie.map(() => 0); tekenGolf();
+}
+
+// Opmaak uit het bronprogramma hoort niet in een bewerkbaar veld: alleen de
+// tekst wordt geplakt.
+function plakAlsTekst(e, veld) {
+  e.preventDefault();
+  const tekst = (e.clipboardData || window.clipboardData)?.getData('text/plain') || '';
+  if (!tekst) return;
+  // execCommand is verouderd, maar nog altijd het enige dat de plakactie in de
+  // ongedaan-maken-geschiedenis van het veld houdt.
+  let gelukt = false;
+  try { gelukt = document.execCommand('insertText', false, tekst); } catch { gelukt = false; }
+  if (!gelukt) {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount) {
+      const bereik = sel.getRangeAt(0);
+      bereik.deleteContents();
+      const knoop = document.createTextNode(tekst);
+      bereik.insertNode(knoop);
+      bereik.setStartAfter(knoop); bereik.collapse(true);
+      sel.removeAllRanges(); sel.addRange(bereik);
+    } else {
+      veld.textContent += tekst;
+    }
+  }
+  // Zonder execCommand komt er geen input-gebeurtenis; die verwacht het veld wel.
+  if (!gelukt) veld.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+// ── Het verslag zelf bijschaven ───────────────────────────────
+// Het verslag is bewerkbaar zoals het er staat, met de opmaak erbij. Na elke
+// wijziging wordt de tekst teruggelezen naar Markdown; die blijft de bron voor
+// kopiëren (alle drie de formaten), de sectieknoppen en herzien. De bewerking
+// hoort bij de versie waarin je hem maakte, en herzien gaat van die versie uit,
+// zodat je correcties niet terugvallen op wat het model eerst schreef.
+// Opmaak toevoegen kan niet (geen werkbalk); Enter geeft een nieuwe alinea of een
+// nieuw punt, en wat je plakt komt binnen als platte tekst.
+const BLOK_TAGS = new Set(['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'LI', 'HR', 'BLOCKQUOTE']);
+
+function htmlNaarMarkdown(wortel) {
+  const omhul = (t, teken) => {
+    const [, voor, kern, na] = t.match(/^(\s*)([\s\S]*?)(\s*)$/);
+    return kern ? voor + teken + kern + teken + na : t;
+  };
+  const inline = knoop => {
+    let uit = '';
+    for (const k of knoop.childNodes) {
+      if (k.nodeType === Node.TEXT_NODE) {
+        // Zonder pre-wrap is een regeleinde in de bron gewoon een spatie.
+        uit += k.textContent.replace(/\u00a0/g, ' ').replace(/[ \t]*\n[ \t]*/g, ' ');
+        continue;
+      }
+      if (k.nodeType !== Node.ELEMENT_NODE || k.classList.contains('sectie-kopieer')) continue;
+      if (k.tagName === 'BR') { uit += '\n'; continue; }
+      const binnen = inline(k);
+      if (k.tagName === 'STRONG' || k.tagName === 'B') uit += omhul(binnen, '**');
+      else if (k.tagName === 'EM' || k.tagName === 'I') uit += omhul(binnen, '*');
+      else uit += binnen;
+    }
+    return uit;
+  };
+  const regels = t => t.split('\n').map(r => r.replace(/\s+/g, ' ').trim()).filter(Boolean);
+  const blokken = [];
+  const blok = k => {
+    if (k.nodeType === Node.TEXT_NODE) {
+      const t = regels(inline({ childNodes: [k] })).join(' ');
+      if (t) blokken.push(t);
+      return;
+    }
+    if (k.nodeType !== Node.ELEMENT_NODE || k.classList.contains('sectie-kopieer')) return;
+    const tag = k.tagName;
+    if (/^H[1-6]$/.test(tag)) {
+      const t = regels(inline(k)).join(' ');
+      if (t) blokken.push((tag === 'H1' || tag === 'H2' ? '## ' : '### ') + t);
+      return;
+    }
+    if (tag === 'UL' || tag === 'OL') {
+      const punten = [...k.children].map(li => regels(inline(li)).join(' ')).filter(Boolean);
+      if (punten.length) blokken.push(punten.map((t, i) => (tag === 'OL' ? (i + 1) + '. ' : '- ') + t).join('\n'));
+      return;
+    }
+    if (tag === 'HR') return;
+    // Een blok met blokken erin (de browser nest soms bij Enter): die apart.
+    if ([...k.children].some(c => BLOK_TAGS.has(c.tagName))) { k.childNodes.forEach(blok); return; }
+    const t = regels(inline(k)).join('\n');
+    if (t) blokken.push(tag === 'LI' ? '- ' + t.replace(/\n/g, ' ') : t);
+  };
+  wortel.childNodes.forEach(blok);
+  return blokken.join('\n\n');
+}
+
+function verslagTellingTekst() {
+  const minuten = Math.round(gesprekSeconden / 60);
+  return telZin(woorden(finalVerslag)) + (minuten >= 1 ? ` · ${minuten} min opname` : '');
+}
+
+outputBox.addEventListener('input', () => {
+  if (!outputBox.isContentEditable) return;
+  verslagMarkdown = htmlNaarMarkdown(outputBox);
+  finalVerslag = convertMarkdown(verslagMarkdown);
+  const v = versies[huidigeVersie];
+  if (v) Object.assign(v, { verslagMarkdown, finalVerslag, bewerkt: true });
+  verslagTelling.textContent = verslagTellingTekst();
+});
+outputBox.addEventListener('paste', e => { if (outputBox.isContentEditable) plakAlsTekst(e, outputBox); });
+
+// ── Fragmenten van het transcript ─────────────────────────────
+// De veiligheidscontrole en 'Waar staat dit?' wijzen een plek in het transcript
+// aan. Het transcript gaat daarvoor in genummerde fragmenten naar de server: elke
+// regel, en een lange regel in stukken van een paar zinnen. Het model noemt
+// nummers; hier weten we welk stuk tekst daarbij hoort.
+const FRAGMENT_LENGTE = 450;
+function transcriptFragmenten(tekst) {
+  const uit = [];
+  for (const regel of tekst.split(/\n+/)) {
+    const r = regel.replace(/\u00a0/g, ' ').trim();
+    if (!r) continue;
+    if (r.length <= FRAGMENT_LENGTE * 1.4) { uit.push(r); continue; }
+    let stuk = '';
+    for (const zin of r.match(/[^.!?…]+(?:[.!?…]+["'”’)]*|$)\s*/g) || [r]) {
+      if (stuk && (stuk + zin).length > FRAGMENT_LENGTE) { uit.push(stuk.trim()); stuk = ''; }
+      stuk += zin;
+    }
+    if (stuk.trim()) uit.push(stuk.trim());
+  }
+  return uit;
+}
+
+// Markeert fragmenten in het transcriptvak, zonder de tekst daarin te veranderen
+// (de markering ligt erover, via de Highlight-API). De fragmenten worden in
+// volgorde gezocht, zodat een herhaald 'Ja.' op de goede plek valt.
+function markeerFragmenten(fragmenten, nummers) {
+  const knopen = [];
+  let tekst = '';
+  const loper = document.createTreeWalker(transcriptBox, NodeFilter.SHOW_TEXT);
+  for (let k; (k = loper.nextNode());) { knopen.push([k, tekst.length]); tekst += k.textContent.replace(/\u00a0/g, ' '); }
+  const plek = pos => {
+    for (let i = knopen.length - 1; i >= 0; i--) if (knopen[i][1] <= pos) return [knopen[i][0], pos - knopen[i][1]];
+    return null;
+  };
+  const gezocht = new Set(nummers);
+  const bereiken = [];
+  let vanaf = 0;
+  fragmenten.forEach((f, i) => {
+    const begin = tekst.indexOf(f, vanaf);
+    if (begin < 0) return;
+    vanaf = begin + f.length;
+    if (!gezocht.has(i + 1)) return;
+    const a = plek(begin), b = plek(begin + f.length);
+    if (!a || !b) return;
+    const r = document.createRange();
+    try { r.setStart(...a); r.setEnd(...b); bereiken.push(r); } catch {}
+  });
+  if (!bereiken.length) return false;
+  if (window.CSS?.highlights && window.Highlight) CSS.highlights.set('bron', new Highlight(...bereiken));
+  // Laten zien: het transcript uitklappen en de eerste markering in beeld.
+  if (transcriptIsNaslag() && !transcriptKaart.classList.contains('getoond')) transcriptUitklappen();
+  else if (!transcriptIsNaslag() && !transcriptBox.classList.contains('uit')) transcriptUitklappen();
+  requestAnimationFrame(() => {
+    const r = bereiken[0].getBoundingClientRect(), vak = transcriptBox.getBoundingClientRect();
+    transcriptBox.scrollTop += r.top - vak.top - 48;
+    transcriptKaart.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  });
+  return true;
+}
+
+const bronMelding = $('bronMelding'), bronPassage = $('bronPassage'), bronUitkomst = $('bronUitkomst');
+function toonBronMelding(passage, uitkomst, soort = '') {
+  bronPassage.textContent = passage;
+  bronPassage.hidden = !passage;
+  bronUitkomst.replaceChildren(...(Array.isArray(uitkomst) ? uitkomst : [uitkomst]));
+  bronMelding.className = 'bron-melding' + (soort ? ' ' + soort : '');
+  bronMelding.hidden = false;
+}
+// Geeft true als er iets weg te halen was (voor Escape).
+function wisBron() {
+  const was = !bronMelding.hidden;
+  bronMelding.hidden = true;
+  window.CSS?.highlights?.delete('bron');
+  return was;
+}
+
+// ── Veiligheidssignalen ───────────────────────────────────────
+// Een eigen aanroep naast verslag en supervisie, per transcript: herzien of
+// opnieuw genereren uit hetzelfde transcript vraagt het niet opnieuw. Niets
+// gevonden is niets in beeld. Mislukt de controle, dan staat dat er wel: anders
+// lijkt 'niets in beeld' op 'niets gevonden'.
+const veiligheidEl = $('veiligheid');
+let veiligheid = null;   // { transcript, fragmenten, status: 'bezig'|'klaar'|'fout', signalen, fout }
+function haalVeiligheid(transcript) {
+  if (veiligheid?.transcript === transcript && veiligheid.status !== 'fout') return;
+  const houder = veiligheid = { transcript, fragmenten: transcriptFragmenten(transcript),
+                                status: 'bezig', signalen: [], fout: '' };
+  renderVeiligheid();
+  const vraag = bouwFragmentVraag(houder.fragmenten, 'Geef je antwoord als JSON-object, zoals in de opdracht beschreven.');
+  mistralAanroep(VEILIGHEID_SYSTEEM, vraag, VEILIGHEID_MODEL)
+    .then(inhoud => Object.assign(houder, { status: 'klaar',
+                                            signalen: leesVeiligheid(inhoud, houder.fragmenten.length) }))
+    .catch(err => Object.assign(houder, { status: 'fout', fout: foutBijLezen(err) }))
+    .finally(() => { if (veiligheid === houder) renderVeiligheid(); });
+}
+
+function renderVeiligheid() {
+  const v = veiligheid;
+  veiligheidEl.replaceChildren();
+  veiligheidEl.classList.remove('fout');
+  if (!v || v.status === 'bezig' || (v.status === 'klaar' && !v.signalen.length)) { veiligheidEl.hidden = true; return; }
+  veiligheidEl.hidden = false;
+  const kop = document.createElement('div');
+  kop.className = 'veiligheid-kop';
+  if (v.status === 'fout') {
+    veiligheidEl.classList.add('fout');
+    kop.textContent = 'De controle op veiligheidssignalen is mislukt (' + v.fout + '). ';
+    const opnieuw = document.createElement('button');
+    opnieuw.type = 'button'; opnieuw.className = 'btn-link'; opnieuw.textContent = 'Opnieuw proberen';
+    opnieuw.addEventListener('click', () => haalVeiligheid(v.transcript));
+    kop.append(opnieuw);
+    veiligheidEl.append(kop);
+    return;
+  }
+  kop.textContent = v.signalen.length === 1 ? 'In dit gesprek kwam iets ter sprake dat de veiligheid raakt'
+                                            : 'In dit gesprek kwamen dingen ter sprake die de veiligheid raken';
+  veiligheidEl.append(kop);
+  for (const sig of v.signalen) {
+    const rij = document.createElement('div');
+    rij.className = 'veiligheid-item';
+    const soort = document.createElement('strong');
+    soort.textContent = sig.soort;
+    rij.append(soort, ' — ' + sig.wat + ' ');
+    if (sig.fragmenten?.length) {
+      const toon = document.createElement('button');
+      toon.type = 'button'; toon.className = 'btn-link'; toon.textContent = 'Toon in transcript';
+      toon.addEventListener('click', () => {
+        if (markeerFragmenten(v.fragmenten, sig.fragmenten)) toonBronMelding('', 'Veiligheid: ' + sig.soort);
+        else toast('Niet meer terug te vinden: het transcript is sindsdien veranderd.', 'fout');
+      });
+      rij.append(toon);
+    }
+    veiligheidEl.append(rij);
+  }
+  const noot = document.createElement('div');
+  noot.className = 'veiligheid-noot';
+  noot.textContent = 'Gevonden door een aparte controle van het transcript. Kijk of het in het verslag staat zoals je het wilt vastleggen.';
+  veiligheidEl.append(noot);
+}
+
+// ── Waar staat dit? ───────────────────────────────────────────
+// Selecteer een stuk van het verslag, en een knopje bij de selectie zoekt op waar
+// het in het transcript staat. Er komt pas een aanroep als je erop klikt.
+const bronKnop = $('bronKnop');
+let bronSelectie = '', bronTimer = null;
+function werkBronKnopBij() {
+  const sel = window.getSelection();
+  const tekst = sel && !sel.isCollapsed ? sel.toString().replace(/\s+/g, ' ').trim() : '';
+  const inVerslag = tekst && outputBox.classList.contains('formatted')
+                    && outputBox.contains(sel.anchorNode) && outputBox.contains(sel.focusNode);
+  if (!inVerslag || tekst.length < 12 || !huidigTranscript || verslagBezig) { bronKnop.hidden = true; return; }
+  bronSelectie = tekst;
+  const r = sel.getRangeAt(0).getBoundingClientRect();
+  bronKnop.hidden = false;
+  bronKnop.style.top = (window.scrollY + r.bottom + 8) + 'px';
+  bronKnop.style.left = (window.scrollX + Math.max(8, Math.min(r.left, window.innerWidth - bronKnop.offsetWidth - 16))) + 'px';
+}
+document.addEventListener('selectionchange', () => { clearTimeout(bronTimer); bronTimer = setTimeout(werkBronKnopBij, 250); });
+// De selectie mag niet verdwijnen doordat je op de knop drukt.
+bronKnop.addEventListener('mousedown', e => e.preventDefault());
+bronKnop.addEventListener('click', () => zoekBron(bronSelectie));
+
+async function zoekBron(passage) {
+  bronKnop.hidden = true;
+  if (!passage || !huidigTranscript || sleutelOntbreekt()) return;
+  const fragmenten = transcriptFragmenten(huidigTranscript);
+  const kort = passage.length > 160 ? passage.slice(0, 157) + '…' : passage;
+  toast('Zoeken waar dit in het transcript staat…');
+  try {
+    const vraag = bouwFragmentVraag(fragmenten, `De passage uit het verslag:\n<<<\n${passage.slice(0, 2000)}\n>>>\n\n`
+                                                + 'Geef je antwoord als JSON-object, zoals in de opdracht beschreven.');
+    const a = leesBron(await mistralAanroep(BRON_SYSTEEM, vraag, BRON_MODEL), fragmenten.length);
+    const gevonden = a.fragmenten?.length && markeerFragmenten(fragmenten, a.fragmenten);
+    if (!gevonden) wisBron();
+    const uitleg = a.toelichting ? ' ' + a.toelichting : '';
+    if (!gevonden || a.dekking === 'nee') {
+      toonBronMelding('“' + kort + '”', 'Niet teruggevonden in het transcript.' + uitleg, 'deels');
+      if (!gevonden) bronMelding.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    } else if (a.dekking === 'deels') {
+      toonBronMelding('“' + kort + '”', 'Staat er maar deels.' + uitleg, 'deels');
+    } else {
+      toonBronMelding('“' + kort + '”', 'Gemarkeerd in het transcript.');
+    }
+  } catch (err) {
+    toast('Zoeken mislukt: ' + foutBijLezen(err), 'fout');
+  }
+}
+
+// ── Brief en samenvatting voor de cliënt ──────────────────────
+// Geschreven uit het verslag zoals het er staat (met je eigen bewerkingen), niet
+// uit het transcript. Bewerkbaar en te kopiëren zoals het verslag. Een nieuw
+// verslag maakt het weer leeg: het hoort bij het verslag waar het uit kwam.
+const documentenEl = $('documenten'), documentBox = $('documentBox'), documentActies = $('documentActies');
+const documentSpinner = $('documentSpinner');
+let documentMarkdown = '';
+function wisDocument() {
+  documentMarkdown = '';
+  documentBox.replaceChildren();
+  documentBox.contentEditable = 'false';
+  documentBox.classList.add('hidden');
+  documentActies.classList.add('hidden');
+}
+async function maakDocument(soort) {
+  if (!verslagMarkdown.trim() || verslagBezig) { toast('Er is nog geen verslag.', 'fout'); return; }
+  if (sleutelOntbreekt()) return;
+  const knoppen = documentenEl.querySelectorAll('.document-knoppen .btn');
+  knoppen.forEach(k => k.disabled = true);
+  documentSpinner.classList.remove('hidden');
+  try {
+    const vraag = bouwDocumentVraag(verslagMarkdown, huidigGesprekType || gesprekTypeSelect.value,
+                                    geslachtSelect.value);
+    documentMarkdown = (await mistralAanroep(DOCUMENT_SYSTEEM[soort], vraag, taalModel.value, false)).trim();
+    documentBox.innerHTML = convertMarkdownToHtml(documentMarkdown);
+    documentBox.contentEditable = 'true';
+    documentBox.classList.remove('hidden');
+    documentActies.classList.remove('hidden');
+  } catch (err) {
+    toast('Schrijven mislukt: ' + err.message, 'fout');
+  } finally {
+    knoppen.forEach(k => k.disabled = false);
+    documentSpinner.classList.add('hidden');
+  }
+}
+documentBox.addEventListener('input', () => { documentMarkdown = htmlNaarMarkdown(documentBox); });
+documentBox.addEventListener('paste', e => plakAlsTekst(e, documentBox));
+async function kopieerDocument() {
+  if (!documentMarkdown) return;
+  try { await kopieerMarkdown(documentMarkdown); toonKopieBevestiging('Gekopieerd'); }
+  catch { toast('Kopiëren mislukt — selecteer de tekst handmatig.', 'fout'); }
 }
 
 // ── Sneltoetsen ───────────────────────────────────────────────
@@ -3624,6 +4681,7 @@ document.addEventListener('keydown', e => {
   // Ctrl/⌘ + Enter verstuurt de herziening, ook vanuit het tekstveld zelf.
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
     if (document.activeElement === suggestieInput) { e.preventDefault(); herzieVerslag(); }
+    else if (document.activeElement === transcriptBox) { e.preventDefault(); maakVerslagUitTranscript(); }
     return;
   }
   if (e.key === 'Escape') {
@@ -3631,7 +4689,8 @@ document.addEventListener('keydown', e => {
     if (alarmActief()) { e.preventDefault(); alarmUit(); return; }
     if (overlayOpen()) { sluitOverlay(); return; }
     if (inTekstveld(document.activeElement)) { document.activeElement.blur(); return; }
-    if (isRecording) { e.preventDefault(); stopRecording(); }
+    if (wisBron()) return;
+    if (isRecording) { e.preventDefault(); stopMetToets('Esc'); }
     return;
   }
   if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -3645,7 +4704,7 @@ document.addEventListener('keydown', e => {
   switch (toets) {
     case ' ':
     case 'r':
-      e.preventDefault(); isRecording ? stopRecording() : startRecording(); break;
+      e.preventDefault(); isRecording ? stopMetToets(toets === ' ' ? 'Spatie' : 'R') : startRecording(); break;
     case 'u':
       e.preventDefault(); audioUpload.click(); break;
     case 'c':
@@ -3653,11 +4712,13 @@ document.addEventListener('keydown', e => {
     case 't':
       e.preventDefault(); kopieerTranscript(); break;
     case 'g':
-      if (!btnRegen.disabled && !regenPanel.classList.contains('hidden')) { e.preventDefault(); uitklapRegen.open = true; regenereerVerslag(); }
+      if (!btnRegen.disabled && !btnRegen.classList.contains('hidden')) { e.preventDefault(); regenereerVerslag(); }
       break;
     case 'h':
       if (!suggestiePaneel.classList.contains('hidden')) { e.preventDefault(); focusVeld(suggestieInput); }
       break;
+    case 'p':
+      e.preventDefault(); focusTranscript(); break;
     case 'v':
       e.preventDefault(); focusVeld(voorinformatieInput); break;
     case 'i':
@@ -3692,10 +4753,12 @@ window.addEventListener('beforeunload', e => {
 laadInstellingen();
 toonSleutelStatus();
 formatNote.textContent = FORMAT_NOTES[outputFormat.value];
-uitklapRegen.classList.add('hidden');
+werkModelNoteBij();
 laadMicrofoons();
 vangnetToon();
 updateGeslachtBadge();
+werkSamenvattingenBij();
+leesTranscript();
 maatGolf();
 // Webfonts verschuiven de opbouw iets; daarna nog eens opmeten.
 if (document.fonts?.ready) document.fonts.ready.then(maatGolf);

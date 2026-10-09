@@ -22,7 +22,8 @@ alarmerend, maar ook niet mooier dan het is.
   hoe je de rest inricht.
 - Dit is een **hulpmiddel**, geen kant-en-klare NEN 7510-conforme oplossing. Je blijft
   zelf verwerkingsverantwoordelijke.
-- De **supervisiefunctie** (betrekking, onuitgesprokene, roos van Leary) heeft een eigen
+- De **supervisiefunctie** (onuitgesprokene, doelgerichtheid, roos van Leary en tips op
+  verzoek) heeft een eigen
   verwerkingsdoel en bevat interpretatie, geen vaststaande feiten — zie
   [hieronder](#supervisie-een-apart-verwerkingsdoel).
 - Gebruik is **voor eigen risico en verantwoordelijkheid**.
@@ -35,8 +36,22 @@ Alles draait in je eigen browser. Wanneer je opneemt of een bestand uploadt:
 2. Het transcript komt terug en wordt — opnieuw rechtstreeks — naar het tekstmodel van
    Mistral gestuurd om het verslag te genereren.
 3. Staat het vinkje voor supervisie aan, dan gaat het transcript in een aparte, gelijktijdige
-   aanroep nogmaals naar het tekstmodel van Mistral, voor de betrekking, het onuitgesprokene
-   en de roos van Leary.
+   aanroep nogmaals naar het tekstmodel van Mistral, voor het onuitgesprokene, de
+   doelgerichtheid en de roos van Leary. Heb je een **behandeldoel** ingevuld, dan gaat dat
+   alleen met deze aanroep mee. Vraag je daarna om tips, dan gaat het transcript met de
+   uitkomst van de supervisie nog een keer naar het tekstmodel.
+4. Tegelijk met het verslag gaat het transcript nog één keer naar het tekstmodel, voor de
+   controle op veiligheidssignalen (doodsgedachten, geweld, zorgen om kinderen en
+   dergelijke). Dat gebeurt altijd, één keer per transcript.
+5. Kies je bij een stuk van het verslag **Waar staat dit?**, dan gaan dat stuk en het
+   transcript naar een kleiner tekstmodel van Mistral, om de plek in het transcript te
+   vinden.
+6. Vraag je een brief, een samenvatting of het huiswerk voor de cliënt, dan gaat alleen het
+   verslag (zoals het er dan staat, met je eigen bewerkingen) naar het tekstmodel, niet het
+   transcript.
+
+Plak je zelf een transcript in het transcriptveld, dan vervalt stap 1: er gaat geen audio
+naar Mistral, en het transcript gaat meteen naar het tekstmodel.
 
 Alle aanroepen gaan naar het **Europese endpoint** van Mistral, `api.eu.mistral.ai`.
 
@@ -49,9 +64,9 @@ transcript en verslag passeren die host niet.
 | Gegeven | Waar het staat | Hoe lang |
 |---|---|---|
 | **API-sleutel** | `localStorage` van deze browser | Tot je op **Wissen** klikt (of je browsergegevens opschoont) |
-| **Je instellingen** (gesprekstype, uitvoerformaat, microfoonkeuze, opnamebron, vinkjes, licht of donker) | `localStorage` van deze browser | Tot je je browsergegevens opschoont. Bevat geen cliëntgegevens: wat je in voorinformatie of extra instructie typt gaat hier nooit heen |
+| **Je instellingen** (gesprekstype, taalmodel, uitvoerformaat, microfoonkeuze, opnamebron, vinkjes, licht of donker) | `localStorage` van deze browser | Tot je je browsergegevens opschoont. Bevat geen cliëntgegevens: wat je in voorinformatie, behandeldoel of extra instructie typt gaat hier nooit heen |
 | **Opname (audio)** | In het werkgeheugen van het tabblad, plus een **reservekopie in IndexedDB** van deze browser (op je schijf) zodra je de opname stopt | De reservekopie verdwijnt zodra er een verslag van is, als je hem weggooit in de melding "Er staat een opname klaar", als je op **Nieuw gesprek** klikt, en anders zodra je het tabblad sluit. Alleen na een crash van browser of computer blijft hij staan tot je de pagina weer opent; dan wordt hij aangeboden om alsnog te verwerken |
-| **Transcript, verslag, tip, versiegeschiedenis** | Alleen in het werkgeheugen van het tabblad | Tot je de pagina sluit, ververst of op **Nieuw gesprek** klikt |
+| **Transcript, verslag, supervisie, documenten voor de cliënt, versiegeschiedenis** | Alleen in het werkgeheugen van het tabblad | Tot je de pagina sluit, ververst of op **Nieuw gesprek** klikt |
 | **Wat dan ook bij de maker of een host** | Nergens — er is geen server van deze applicatie | — |
 
 Er is dus geen "vorige sessie terughalen": alle gespreksinhoud is na het sluiten van het
@@ -61,7 +76,7 @@ voordat je afsluit**.
 
 ### Schermdeling neemt ook de cliënt op
 
-In de modus **Scherm + audio** wordt de audio van het gedeelde tabblad of venster (dus de
+In de modus **Scherm** wordt de audio van het gedeelde tabblad of venster (dus de
 stem van je gesprekspartner) gemengd met je eigen microfoon en als één opname naar Mistral
 gestuurd. Het videospoor wordt direct gestopt: er wordt geen beeld opgenomen of verstuurd.
 Dat je de ander opneemt, is een verwerking waarvan je hen op de hoogte moet stellen — zie
@@ -69,8 +84,8 @@ Dat je de ander opneemt, is een verwerking waarvan je hen op de hoogte moet stel
 
 ### Supervisie: een apart verwerkingsdoel
 
-De supervisiefunctie (het vinkje boven het verslag: betrekking, onuitgesprokene, roos van
-Leary) is iets anders dan het verslag zelf, en dat heeft gevolgen voor hoe je hem gebruikt:
+De supervisiefunctie (het vinkje in de instellingen: onuitgesprokene, doelgerichtheid, roos
+van Leary, en op verzoek tips voor een volgend gesprek) is iets anders dan het verslag zelf, en dat heeft gevolgen voor hoe je hem gebruikt:
 
 - **Een eigen verwerkingsdoel.** Waar het verslag bedoeld is voor het cliëntdossier, is de
   supervisie bedoeld voor jou: reflectie en voorbereiding op een volgend gesprek of op
@@ -79,7 +94,8 @@ Leary) is iets anders dan het verslag zelf, en dat heeft gevolgen voor hoe je he
   wat je met de opname doet, dekt niet vanzelfsprekend ook deze verwerking. Overweeg dit
   apart te benoemen, zeker als je de supervisie standaard laat meelopen.
 - **Ook gegevens over jou als behandelaar.** De roos van Leary plaatst niet alleen de
-  cliënt, maar ook jezelf, en de suggesties gaan over jouw eigen interactiegedrag. Zolang
+  cliënt, maar ook jezelf, en de doelgerichtheid en de tips gaan over jouw eigen
+  gespreksvoering. Zolang
   je dit alleen zelf bekijkt — zoals de app het nu toepast: los venster, nooit opgeslagen,
   nooit in het dossier — is dat vergelijkbaar met een aantekening voor jezelf. Deel je dit
   ooit met een supervisor, leidinggevende of team, dan verwerk je daarmee gegevens over je
