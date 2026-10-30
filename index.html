@@ -1384,17 +1384,20 @@ const TEMPERATUUR            = 0.3;
 // aan de samenhang herkende. Daarom blijft Large 3 de standaard, op zijn vaste
 // naam: mistral-large-latest verhuist vroeg of laat naar Large 4.
 //
-// Large 4 met nadenken (`reasoning_effort`) is te kiezen als proef. Het model
-// lijkt daarvoor gebouwd: de standaardtemperatuur op de modelkaart is 1.0, waar
-// Large 3 0.3 heeft. Een zin aan het eind van de vraag zegt nog eens dat alles
-// Nederlands moet zijn. Het denkwerk komt als aparte stukken mee en komt nooit
+// Large 4 met nadenken (`reasoning_effort`) is te kiezen als proef. Een zin aan
+// het eind van de vraag zegt nog eens dat alles Nederlands moet zijn. De
+// temperatuur is 0.3, niet de 1.0 van de modelkaart: op een echt gesprek met een
+// bekende herkenningsfout nam Large 4 die op 1.0 in 3 van 7 verslagen over, op
+// 0.3 in 0 van 5. Minder nadenken ('medium') was slechter. Een verkeerd verband
+// ('ondanks' waar het gesprek dat niet zei) bleef bij elke instelling in ongeveer
+// één op de drie verslagen staan; Large 3 deed dat niet (30-10-2026). Het denkwerk komt als aparte stukken mee en komt nooit
 // in beeld (zie alleenTekst).
 //
 // De waarde in de keuzelijst is niet altijd de modelnaam bij Mistral: voor een
 // variant als 'met nadenken' staat de echte naam in MODEL_AFWIJKINGEN.
 const MODEL_STANDAARD = 'mistral-large-2512';
 const MODEL_AFWIJKINGEN = {
-  'mistral-large-4-denken': { model: 'mistral-large-4', nadenken: 'high', temperatuur: 1.0, taalregel: true },
+  'mistral-large-4-denken': { model: 'mistral-large-4', nadenken: 'high', temperatuur: 0.3, taalregel: true },
 };
 const TAALREGEL = '\nSchrijf uitsluitend in het Nederlands, ook geen losse woorden of '
                 + 'uitdrukkingen uit een andere taal.';
