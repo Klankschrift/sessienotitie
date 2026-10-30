@@ -146,14 +146,14 @@ minimum.
 | Gesprek | Ongeveer |
 |---|---|
 | Doorsnee sessie | **10 à 15 cent** |
-| Vol uur | **ruim onder de 25 cent** |
+| Vol uur | **onder de 25 cent** |
 
 <details>
 <summary>Hoe die bedragen zijn opgebouwd</summary>
 
 - **Transcriptie (Voxtral):** ongeveer **€0,003 per minuut** audio (Mistral rekent af in
-  dollars, $0,003/min; in euro's komt dat vrijwel op hetzelfde neer). Een half uur kost dus
-  zo'n **8 cent**, een vol uur ongeveer **16 cent**.
+  dollars, $0,0035/min; in euro's is dat iets minder). Een half uur kost dus zo'n **9 cent**,
+  een vol uur ongeveer **18 cent**.
 - **Verslag:** ongeveer **3 eurocent** per gesprek.
 - **Herzien of opnieuw genereren:** kost telkens ongeveer een nieuw verslag (~3 cent). Het
   transcriberen gebeurt maar één keer, dus dat telt niet opnieuw mee.
@@ -163,7 +163,7 @@ minimum.
 - **Large 4 met nadenken** is duurder dan Large 3: het denkwerk telt mee.
 
 Onder de streep blijft een doorsnee sessie meestal rond de **10 à 15 eurocent**; ook een vol
-uur blijft ruim onder de 25 cent. Bewust koos deze app voor de **beste** modellen in plaats
+uur blijft onder de 25 cent. Bewust koos deze app voor de **beste** modellen in plaats
 van goedkopere: het kwaliteitsverschil is voor klinische verslagen veel meer waard dan de
 paar cent die je ermee zou besparen.
 
@@ -339,7 +339,7 @@ Voor wie wil weten hoe het in elkaar zit.
   via een `AudioContext` gemengd met de microfoon en het videospoor meteen gestopt.
   Echo-onderdrukking, ruisonderdrukking en automatische volumeregeling staan bewust uit.
 - Spraakherkenning met sprekerherkenning:
-  `POST https://api.eu.mistral.ai/v1/audio/transcriptions` (`voxtral-mini-latest`, met
+  `POST https://api.eu.mistral.ai/v1/audio/transcriptions` (`voxtral-mini-transcribe-3-0`, met
   `diarize=true` en `timestamp_granularities=segment`). Opeenvolgende segmenten van
   dezelfde spreker worden samengevoegd tot "Spreker 1", "Spreker 2", …; herhalingsloops in
   het transcript worden eruit gefilterd.

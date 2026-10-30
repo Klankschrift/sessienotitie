@@ -246,7 +246,7 @@ achter de toetsenbordknop rechtsboven, of achter **?**:
 - **Echo-onderdrukking, ruisonderdrukking en automatische volumeregeling staan bewust uit.**
   Die functies zijn gemaakt voor bellen en knippen bij een tweegesprek juist stukken uit de
   stem van de ander; zonder die filters wordt het transcript beter.
-- **Welke modellen de app gebruikt.** `voxtral-mini-latest` voor de transcriptie; voor
+- **Welke modellen de app gebruikt.** `voxtral-mini-transcribe-3-0` voor de transcriptie; voor
   verslag, supervisie, tips en documenten het taalmodel uit de instellingen (standaard
   Mistral Large 3, `mistral-large-2512`, op zijn vaste naam: `mistral-large-latest` verhuist
   vroeg of laat naar Large 4). De veiligheidscontrole loopt altijd op Large 3, en **Waar

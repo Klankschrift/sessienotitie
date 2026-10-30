@@ -1372,7 +1372,9 @@
 // naar Mistral, met de sleutel die de gebruiker zelf heeft ingevoerd.
 const MISTRAL_TRANSCRIBE_URL = 'https://api.eu.mistral.ai/v1/audio/transcriptions';
 const MISTRAL_CHAT_URL       = 'https://api.eu.mistral.ai/v1/chat/completions';
-const TRANSCRIBE_MODEL       = 'voxtral-mini-latest';
+// Vaste naam: voxtral-mini-latest wees op 30-10-2026 nog naar voxtral-mini-2602,
+// dat Mistral op 30-04-2027 uitzet. Transcribe 3 werkt met dezelfde velden.
+const TRANSCRIBE_MODEL       = 'voxtral-mini-transcribe-3-0';
 const TEMPERATUUR            = 0.3;
 
 // ── Taalmodel ─────────────────────────────────────────────────
