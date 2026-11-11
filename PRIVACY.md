@@ -11,7 +11,7 @@ alarmerend, maar ook niet mooier dan het is.
   en een eventuele host zien je gegevens niet.
 - Je **API-sleutel** blijft lokaal in je browser (`localStorage`) en wordt alleen
   meegestuurd naar Mistral. Daarnaast onthoudt de browser je **instellingen** (gesprekstype,
-  uitvoerformaat, microfoonkeuze, vinkjes, licht of donker) — nooit cliëntinhoud. Van het
+  uitvoerformaat, microfoonkeuze, vinkjes, vaktermen, licht of donker) — nooit cliëntinhoud. Van het
   gesprek zelf wordt **niets** bewaard: opname, transcript, verslag en versies verdwijnen
   zodra je het tabblad sluit of ververst.
 - Mistral verwerkt in de **EU** en is **ISO 27001**-gecertificeerd.
@@ -32,7 +32,8 @@ alarmerend, maar ook niet mooier dan het is.
 
 Alles draait in je eigen browser. Wanneer je opneemt of een bestand uploadt:
 
-1. De audio wordt rechtstreeks naar de transcriptie-API van Mistral gestuurd.
+1. De audio wordt rechtstreeks naar de transcriptie-API van Mistral gestuurd, samen met je
+   lijst met vaktermen. Zet daar dus geen namen van cliënten in.
 2. Het transcript komt terug en wordt — opnieuw rechtstreeks — naar het tekstmodel van
    Mistral gestuurd om het verslag te genereren.
 3. Staat het vinkje voor supervisie aan, dan gaat het transcript in een aparte, gelijktijdige
@@ -46,7 +47,8 @@ Alles draait in je eigen browser. Wanneer je opneemt of een bestand uploadt:
 5. Kies je bij een stuk van het verslag **Waar staat dit?**, dan gaan dat stuk en het
    transcript naar een kleiner tekstmodel van Mistral, om de plek in het transcript te
    vinden.
-6. Vraag je een brief, een samenvatting of het huiswerk voor de cliënt, dan gaat alleen het
+6. Vraag je een brief, een samenvatting of het huiswerk voor de cliënt, of een geheugensteun
+   voor jezelf, dan gaat alleen het
    verslag (zoals het er dan staat, met je eigen bewerkingen) naar het tekstmodel, niet het
    transcript.
 
@@ -64,9 +66,9 @@ transcript en verslag passeren die host niet.
 | Gegeven | Waar het staat | Hoe lang |
 |---|---|---|
 | **API-sleutel** | `localStorage` van deze browser | Tot je op **Wissen** klikt (of je browsergegevens opschoont) |
-| **Je instellingen** (gesprekstype, taalmodel, uitvoerformaat, microfoonkeuze, opnamebron, vinkjes, licht of donker) | `localStorage` van deze browser | Tot je je browsergegevens opschoont. Bevat geen cliëntgegevens: wat je in voorinformatie, behandeldoel of extra instructie typt gaat hier nooit heen |
-| **Opname (audio)** | In het werkgeheugen van het tabblad, plus een **reservekopie in IndexedDB** van deze browser (op je schijf) zodra je de opname stopt | De reservekopie verdwijnt zodra er een verslag van is, als je hem weggooit in de melding "Er staat een opname klaar", als je op **Nieuw gesprek** klikt, en anders zodra je het tabblad sluit. Alleen na een crash van browser of computer blijft hij staan tot je de pagina weer opent; dan wordt hij aangeboden om alsnog te verwerken |
-| **Transcript, verslag, supervisie, documenten voor de cliënt, versiegeschiedenis** | Alleen in het werkgeheugen van het tabblad | Tot je de pagina sluit, ververst of op **Nieuw gesprek** klikt |
+| **Je instellingen** (gesprekstype, taalmodel, uitvoerformaat, microfoonkeuze, opnamebron, vinkjes, vaktermen, licht of donker) en hoe snel de transcriptie gemiddeld gaat (voor de tijdsschatting) | `localStorage` van deze browser | Tot je je browsergegevens opschoont. Bevat geen cliëntgegevens: wat je in voorinformatie, behandeldoel of extra instructie typt gaat hier nooit heen |
+| **Opname (audio)**, met de tijden van gemarkeerde momenten | In het werkgeheugen van het tabblad, plus een **reservekopie in IndexedDB** van deze browser (op je schijf) zodra je de opname stopt | De reservekopie verdwijnt zodra er een verslag van is, als je hem weggooit in de melding "Er staat een opname klaar", als je op **Wissen** klikt, en anders zodra je het tabblad sluit. Alleen na een crash van browser of computer blijft hij staan tot je de pagina weer opent; dan wordt hij aangeboden om alsnog te verwerken |
+| **Transcript, verslag, supervisie, documenten voor de cliënt, versiegeschiedenis** | Alleen in het werkgeheugen van het tabblad | Tot je de pagina sluit, ververst of op **Wissen** klikt |
 | **Wat dan ook bij de maker of een host** | Nergens — er is geen server van deze applicatie | — |
 
 Er is dus geen "vorige sessie terughalen": alle gespreksinhoud is na het sluiten van het

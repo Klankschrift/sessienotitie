@@ -23,7 +23,7 @@ dan bij **[In vier stappen aan de slag](README.md#in-vier-stappen-aan-de-slag)**
 
 ### 1. Voor het gesprek — voorbereiden
 
-Bovenaan, in **Voorbereiding**, staat alles wat per gesprek verschilt:
+In **Voorbereiding**, onder de opname, staat alles wat per gesprek verschilt:
 
 | Veld | Waarvoor |
 |---|---|
@@ -36,9 +36,16 @@ Bovenaan, in **Voorbereiding**, staat alles wat per gesprek verschilt:
 Zodra er een transcript staat, klapt de voorbereiding vanzelf dicht; de kop laat dan zien
 wat er is ingevuld.
 
-Links, in het ingeklapte paneel **Instellingen**, staat wat je eenmalig kiest. Dichtgeklapt
-zie je in de kop welk model en welk formaat gekozen zijn:
+Wat je eenmalig kiest, staat in **Instellingen**: een lade die van rechts inschuift, achter
+het tandwiel rechtsboven of via **Instellingen** onder de opnameknop. Daar zie je ook welk
+taalmodel gekozen is:
 
+- **Mistral API-sleutel** — zonder sleutel staat bovenaan een kaart die je hierheen brengt.
+  Met **Wissen** onder het veld haal je de sleutel weer uit deze browser.
+- **Vaktermen voor de spraakherkenning** — woorden die vaak verkeerd worden verstaan, zoals
+  een medicijn of een vragenlijst, één per regel. Ze gaan bij elke transcriptie mee naar
+  Voxtral (een term van meer woorden als losse woorden) en worden bewaard zodra je het veld
+  verlaat. Zet er geen namen van cliënten in.
 - **Taalmodel** — standaard **Mistral Large 3**. **Large 4, met nadenken** is een proef:
   het denkt eerst na en schrijft dan, wat duidelijk langer duurt. Large 4 zonder nadenken
   zit er bewust niet in: dat nam fouten van de spraakherkenning letterlijk over en verzon er
@@ -50,8 +57,8 @@ zie je in de kop welk model en welk formaat gekozen zijn:
 - **Supervisie** — laat het model in een apart venster meedenken (zie stap 5).
 - **Titel verzinnen** — een korte omschrijving van het gespreksonderwerp boven het verslag.
 
-De keuzes blijven bewaard voor de volgende keer; wat je in de tekstvelden typt niet. De
-**microfoonkeuze** staat bij **Opname** — daar hoort hij bij.
+De keuzes en de vaktermen blijven bewaard voor de volgende keer; wat je in de
+voorbereiding typt niet. De **microfoonkeuze** staat bij **Opname** — daar hoort hij bij.
 
 ### 2. Opnemen (of uploaden)
 
@@ -77,12 +84,24 @@ Kies bij **Opname** je bron:
 Tijdens de opname zie je een **golfbeeld en niveaumeters**, zodat je ziet dát er geluid
 binnenkomt — met een waarschuwing als een bron tien seconden stil blijft.
 
+Wil je een moment later terugvinden, klik dan op **Moment markeren** (of druk op `M`). Dat
+gaat stil: geen geluid, geen melding, alleen een vinkje op de knop. Na afloop staan de
+gemarkeerde tijden bij het transcript; een klik erop markeert dat stuk van het gesprek.
+
+Elk gesprek krijgt een eigen tabblad. Staat er al een gesprek, dan begint er geen nieuwe
+opname: open een nieuw tabblad met **Nieuw gesprek** (`N`), of maak dit tabblad eerst leeg
+met **Wissen**.
+
 ### 3. Wat er daarna vanzelf gebeurt
 
-De stappen **Opname → Transcriptie → Verslag** in de kopbalk houden je op de hoogte:
+De stappen **Opname → Transcriptie → Verslag** in de kopbalk houden je op de hoogte. Zolang
+er gewacht moet worden, staat groot in beeld wat er gebeurt, hoe lang het al duurt en, bij
+de transcriptie, hoe lang nog ongeveer. Die schatting leert de app van eerdere opnames.
+De tabtitel zegt per gesprek hoe ver het is (met het begintijdstip, geen naam), handig als
+er aan het eind van de dag een paar tabbladen naast elkaar staan.
 
-1. De audio gaat naar Voxtral en het **transcript** verschijnt, met sprekers gelabeld als
-   "Spreker 1", "Spreker 2", …
+1. De audio gaat naar Voxtral en het **transcript** verschijnt, in alinea's en met sprekers
+   gelabeld als "Spreker 1", "Spreker 2", …
 2. Het **verslag** wordt meteen daarna geschreven en verschijnt al typend in beeld.
 3. Zodra het klaar is, staat het verslag **automatisch op je klembord**. Je hoeft dus niet
    eens op een knop te drukken als je het meteen wilt plakken. Het transcript schuift dan
@@ -147,6 +166,9 @@ een supervisor op het gesprek:
   en hoort luisteren daar gewoon bij.
 - De **roos van Leary** — een plaatje van hoe iedere gesprekspartner zich in dit gesprek
   tegenover de ander opstelde, met per persoon de momenten waarop dat rust.
+- De **spreektijd** — bij een opname met sprekerherkenning een balk met wie hoeveel aan het
+  woord was. Bij benadering: stiltes tellen niet mee, en door elkaar praten telt bij één
+  van beiden.
 
 Daaronder staat de knop **Tips voor het gesprek**. Die vraagt, voortbouwend op wat de
 supervisor zag, wat je in een volgend gesprek anders kunt doen: hoe je naar je
@@ -170,20 +192,25 @@ staan, zodat je in een lange intake ziet welke velden je al hebt overgenomen.
 Het **uitvoerformaat** uit Instellingen bepaalt wat er op het klembord komt; wissel je het
 achteraf, dan wordt er meteen opnieuw gekopieerd.
 
-Onder het verslag, ingeklapt, staat **Brief, samenvatting of huiswerk voor de cliënt**: een
+Onder het verslag, ingeklapt, staat **Brief, samenvatting, huiswerk of geheugensteun**: een
 brief aan de huisarts of verwijzer, een samenvatting voor de cliënt in eenvoudige taal (B1)
-met de afspraken, of alleen het huiswerk — wat de cliënt tot het volgende gesprek gaat doen,
-zonder de datum van de volgende afspraak (die komt via de agenda). Alle drie worden
-geschreven uit **het verslag zoals het er staat**, met je eigen aanpassingen, en niet uit
-het transcript: zo kan er geen feit bij komen dat het verslag niet heeft. De tekst is
-bewerkbaar en wordt gekopieerd in het gekozen uitvoerformaat. Lees hem na voordat je hem
-verstuurt.
+met de afspraken, alleen het huiswerk — wat de cliënt tot het volgende gesprek gaat doen,
+zonder de datum van de volgende afspraak (die komt via de agenda) — of een **geheugensteun
+voor de volgende keer**: voor jezelf, in een paar regels, wat je moet navragen, wat je hebt
+toegezegd en wat bleef liggen. Alle vier worden geschreven uit **het verslag zoals het er
+staat**, met je eigen aanpassingen, en niet uit het transcript: zo kan er geen feit bij
+komen dat het verslag niet heeft. De tekst is bewerkbaar en wordt gekopieerd in het
+gekozen uitvoerformaat; de knop van de soort die in beeld staat, licht op. Heb je de tekst
+zelf aangepast, dan vraagt een andere soort eerst een tweede klik, zodat je aanpassing niet
+ongemerkt verdwijnt. Lees de tekst na voordat je hem gebruikt.
 
 > **Controleer het verslag altijd** voordat je het in het dossier plakt. Transcriptie en
 > taalmodellen maken fouten; de inhoudelijke verantwoordelijkheid blijft bij jou.
 
-Met **Nieuw gesprek** maak je het scherm leeg voor de volgende sessie. Staat er nog werk,
-dan vraagt de knop eerst om een bevestiging.
+Met **Nieuw gesprek** (rechtsboven, of `N`) open je een nieuw tabblad voor de volgende
+sessie; dit tabblad blijft staan, zodat je er later nog naar terug kunt. Met **Wissen**
+maak je dit tabblad leeg. Staat er nog werk, dan vraagt de knop eerst om een bevestiging;
+zolang er nog een transcript of verslag wordt gemaakt, kan wissen niet.
 
 ### 7. Sneltoetsen
 
@@ -193,7 +220,8 @@ achter de toetsenbordknop rechtsboven, of achter **?**:
 | Toets | Wat het doet |
 |---|---|
 | `Spatie` of `R` | Opname starten, of twee keer: stoppen |
-| `Esc` | Twee keer: opname stoppen (of het overzicht sluiten, of een markering weghalen) |
+| `Esc` | Twee keer: opname stoppen (of het overzicht of de instellingen sluiten, of een markering weghalen) |
+| `M` | Moment markeren tijdens de opname |
 | `U` | Audiobestand kiezen |
 | `P` | Naar het transcriptveld — plakken of bijschaven |
 | `Ctrl`+`Enter` (in het transcriptveld) | Verslag maken uit het transcript |
@@ -204,7 +232,7 @@ achter de toetsenbordknop rechtsboven, of achter **?**:
 | `Ctrl`+`Enter` (in het herzieningsveld) | Herziening versturen |
 | `←` `→` | Vorige of volgende versie |
 | `V` / `I` | Naar voorinformatie / extra instructie |
-| `N` | Nieuw gesprek |
+| `N` | Nieuw gesprek, in een nieuw tabblad |
 | `D` | Donker of licht |
 | `?` | Dit overzicht |
 
@@ -219,7 +247,7 @@ achter de toetsenbordknop rechtsboven, of achter **?**:
   browser je eerst.
 - **De opname zelf heeft een vangnet.** Zodra je stopt, zet de pagina een reservekopie van
   de audio in de opslag van de browser (IndexedDB, op je schijf). De kopie verdwijnt zodra
-  er een verslag van is, als je hem weggooit, bij **Nieuw gesprek**, en anders zodra je het
+  er een verslag van is, als je hem weggooit, bij **Wissen**, en anders zodra je het
   tabblad sluit (de browser waarschuwt eerst). Alleen na een crash van browser of computer
   staat de opname er bij het volgende openen nog, om alsnog te verwerken of te downloaden.
 - **Een wegvallende microfoon hoor je meteen, en de opname loopt door.** Valt de verbinding
@@ -230,11 +258,11 @@ achter de toetsenbordknop rechtsboven, of achter **?**:
   **Vervolgen** onder de opnameknop. Het blijft één opname met één transcript, dus de
   sprekerlabels blijven kloppen; het ontbrekende stuk wordt gemeld met begin- en eindtijd.
 - **Je keuzes blijven wél bewaard**, in deze browser: type gesprek, taalmodel,
-  uitvoerformaat, microfoonkeuze, opnamebron, de vinkjes, of de instellingen openstaan, en
-  licht of donker. Cliëntinhoud nadrukkelijk niet — voorinformatie, behandeldoel, extra
+  uitvoerformaat, microfoonkeuze, opnamebron, de vinkjes, je vaktermen, en licht of
+  donker. Cliëntinhoud nadrukkelijk niet — voorinformatie, behandeldoel, extra
   instructie, transcript, verslag en documenten gaan nooit naar de opslag van de browser. Het geslacht van de cliënt hoort daar ook bij
   en staat na het herladen weer op "Niet opgegeven".
-- **`Nieuw gesprek` maakt niet alles leeg.** Transcript, verslag, supervisie, versies,
+- **`Wissen` maakt niet alles leeg.** Transcript, verslag, supervisie, versies,
   veiligheidsmelding, documenten, geslacht, voorinformatie, behandeldoel en extra instructie
   worden gewist; het gesprekstype, het taalmodel, de drie vinkjes en je API-sleutel blijven
   staan — meestal precies wat je wilt bij een volgende cliënt.
@@ -264,7 +292,7 @@ achter de toetsenbordknop rechtsboven, of achter **?**:
 
 | Wat je ziet | Wat je doet |
 |---|---|
-| **"Geen API-sleutel"** | Plak je sleutel in het paneel linksboven en klik op **Opslaan**. Zonder sleutel kun je niet opnemen of uploaden. |
+| **"Geen API-sleutel"** | Open **Instellingen** (het tandwiel rechtsboven), plak je sleutel en klik op **Opslaan**. Zonder sleutel kan er niets worden uitgewerkt. |
 | **Microfoonlijst zegt "Toegang geweigerd"** | Geef in je browser toestemming voor de microfoon (het slotje of camera-icoontje in de adresbalk) en **herlaad de pagina**. |
 | **"Geen audio gedeeld"** bij schermdelen | Je hebt het deelvenster bevestigd zonder **"Audio delen"** aan te vinken. Probeer opnieuw en kies een **tabblad** of **venster** — bij volledig scherm biedt de browser vaak geen audio aan. |
 | **"Mistral API-sleutel is ongeldig of ontbreekt"** | De sleutel klopt niet (meer). Maak een nieuwe aan op [console.mistral.ai/api-keys](https://console.mistral.ai/api-keys) en sla die op. |

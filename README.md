@@ -15,7 +15,7 @@ Zo houd je je aandacht bij je cliënt, en niet bij je aantekeningen.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/verslag-donker.png">
-  <img alt="Sessienotitie met links de opname en rechts een kant-en-klaar verslag van een behandelgesprek over slaapproblemen" src="docs/img/verslag-licht.png">
+  <img alt="Sessienotitie met bovenaan de afgeronde opname en de voorbereiding, en daaronder een kant-en-klaar verslag van een behandelgesprek over slaapproblemen" src="docs/img/verslag-licht.png">
 </picture>
 
 <sub>Schermafbeelding met een verzonnen oefengesprek.</sub>
@@ -71,12 +71,12 @@ kopieert.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/supervisie-donker.png">
-  <img alt="Het supervisievenster met de onderdelen Onuitgesproken en Doelgerichtheid, en een roos van Leary met de posities van behandelaar en cliënt" src="docs/img/supervisie-licht.png" width="640">
+  <img alt="Het supervisievenster met de onderdelen Onuitgesproken en Doelgerichtheid, een roos van Leary met de posities van behandelaar en cliënt, en de verdeling van de spreektijd" src="docs/img/supervisie-licht.png" width="640">
 </picture>
 
 **Meer dan een verslag.** Met één klik maak je uit het verslag een **brief aan de huisarts
-of verwijzer**, een **samenvatting voor de cliënt** in eenvoudige taal (B1), of **alleen
-het huiswerk**. Bij een intake heeft elke sectie een eigen kopieerknop, voor dossiers met
+of verwijzer**, een **samenvatting voor de cliënt** in eenvoudige taal (B1), **alleen
+het huiswerk**, of een **geheugensteun voor jezelf** voor het volgende gesprek. Bij een intake heeft elke sectie een eigen kopieerknop, voor dossiers met
 een apart veld per onderwerp.
 
 **Werkt zoals jij werkt.** In de spreekkamer met een microfoon, bij een online gesprek
@@ -294,7 +294,7 @@ ZDR staat niet standaard aan en moet worden goedgekeurd, dus vraag het op tijd a
 5. **Lees het na**, pas aan wat niet klopt, en plak het in je dossier.
 
 Transcript en verslag worden niet bewaard: **kopieer je verslag voordat je het tabblad
-sluit.** Met **Nieuw gesprek** begin je aan de volgende cliënt.
+sluit.** Met **Nieuw gesprek** open je een nieuw tabblad voor de volgende cliënt.
 
 Hoe je een gesprek voorbereidt, het verslag bijstuurt, de supervisie gebruikt en wat je doet
 als iets niet lukt, staat in de **[handleiding](HANDLEIDING.md)**:
@@ -303,7 +303,7 @@ als iets niet lukt, staat in de **[handleiding](HANDLEIDING.md)**:
   [opnemen of uploaden](HANDLEIDING.md#2-opnemen-of-uploaden)
 - [Bijsturen tot het klopt](HANDLEIDING.md#4-bijsturen)
 - [Supervisie](HANDLEIDING.md#5-supervisie) en
-  [brief, samenvatting of huiswerk](HANDLEIDING.md#6-kopiëren-en-controleren)
+  [brief, samenvatting, huiswerk of geheugensteun](HANDLEIDING.md#6-kopiëren-en-controleren)
 - [Sneltoetsen](HANDLEIDING.md#7-sneltoetsen)
 - [Goed om te weten](HANDLEIDING.md#goed-om-te-weten) en
   [problemen oplossen](HANDLEIDING.md#problemen-oplossen)
@@ -340,9 +340,11 @@ Voor wie wil weten hoe het in elkaar zit.
   Echo-onderdrukking, ruisonderdrukking en automatische volumeregeling staan bewust uit.
 - Spraakherkenning met sprekerherkenning:
   `POST https://api.eu.mistral.ai/v1/audio/transcriptions` (`voxtral-mini-transcribe-3-0`, met
-  `diarize=true` en `timestamp_granularities=segment`). Opeenvolgende segmenten van
-  dezelfde spreker worden samengevoegd tot "Spreker 1", "Spreker 2", …; herhalingsloops in
-  het transcript worden eruit gefilterd.
+  `diarize=true`, `timestamp_granularities=segment` en de vaktermen als `context_bias`).
+  De segmenten worden alinea's: een nieuwe bij elke wisseling van spreker ("Spreker 1",
+  "Spreker 2", …) en na een pauze van anderhalve seconde na een afgeronde zin;
+  herhalingsloops worden eruit gefilterd. De tijden per segment blijven in het geheugen,
+  voor gemarkeerde momenten en de spreektijd.
 - Verslag: `POST https://api.eu.mistral.ai/v1/chat/completions` (standaard
   `mistral-large-2512`, streaming via server-sent events). Supervisie, tips,
   veiligheidscontrole, **Waar staat dit?** en de documenten zijn losse, niet-gestreamde
@@ -358,12 +360,12 @@ Voor wie wil weten hoe het in elkaar zit.
   dat de bron blijft voor kopiëren, sectieknoppen en herzien.
 - Alle status — transcript, verslag, supervisie, documenten en de versiegeschiedenis — leeft
   in het geheugen van de pagina. De enige uitzondering is de reservekopie van de opname in
-  IndexedDB (`sessienotitie-vangnet`), die na een verslag, bij Nieuw gesprek of bij het
+  IndexedDB (`sessienotitie-vangnet`), die na een verslag, bij Wissen of bij het
   sluiten van het tabblad wordt verwijderd (via een briefje in `localStorage` en een Web Lock
   per tabblad, zodat het ook lukt als de browser het opruimen tijdens het sluiten niet
-  afmaakt). Naar `localStorage` gaan alleen de API-sleutel, de themakeuze en de instellingen
-  (gesprekstype, taalmodel, uitvoerformaat, microfoon, opnamebron, vinkjes) — nooit
-  cliëntinhoud.
+  afmaakt). Naar `localStorage` gaan alleen de API-sleutel, de themakeuze, de instellingen
+  (gesprekstype, taalmodel, uitvoerformaat, microfoon, opnamebron, vinkjes), de vaktermen en
+  de gemeten transcriptiesnelheid — nooit cliëntinhoud.
 - De Mistral API stuurt CORS-headers mee, waardoor de browser rechtstreeks mag aanroepen.
 - De schermafbeeldingen in deze README zijn gemaakt met een verzonnen gesprek en
   nagebootste antwoorden; er is geen echte cliënt of API-aanroep bij betrokken.
